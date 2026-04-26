@@ -4,24 +4,30 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  CheckCircle2,
-  XCircle,
-  MessageSquareQuote,
-  BookOpen,
-  Sparkles,
-  Volume2,
-  ChevronRight,
-  Heart,
-  BrainCircuit,
-  CalendarDays,
-  Home,
-  House,
-  Compass,
-  Bookmark,
-  RotateCcw,
-  Settings2,
-} from 'lucide-react';
+function EmojiIcon({ symbol, className = '' }) {
+  return (
+    <span aria-hidden="true" className={`inline-flex items-center justify-center leading-none ${className}`}>
+      {symbol}
+    </span>
+  );
+}
+
+const CheckCircle2 = ({ className }) => <EmojiIcon symbol="✅" className={className} />;
+const XCircle = ({ className }) => <EmojiIcon symbol="❌" className={className} />;
+const MessageSquareQuote = ({ className }) => <EmojiIcon symbol="💬" className={className} />;
+const BookOpen = ({ className }) => <EmojiIcon symbol="📘" className={className} />;
+const Sparkles = ({ className }) => <EmojiIcon symbol="✨" className={className} />;
+const Volume2 = ({ className }) => <EmojiIcon symbol="🔊" className={className} />;
+const ChevronRight = ({ className }) => <EmojiIcon symbol="›" className={className} />;
+const Heart = ({ className }) => <EmojiIcon symbol="💗" className={className} />;
+const BrainCircuit = ({ className }) => <EmojiIcon symbol="🧠" className={className} />;
+const CalendarDays = ({ className }) => <EmojiIcon symbol="📅" className={className} />;
+const Home = ({ className }) => <EmojiIcon symbol="🏠" className={className} />;
+const House = ({ className }) => <EmojiIcon symbol="⌂" className={className} />;
+const Compass = ({ className }) => <EmojiIcon symbol="🧭" className={className} />;
+const Bookmark = ({ className }) => <EmojiIcon symbol="🔖" className={className} />;
+const RotateCcw = ({ className }) => <EmojiIcon symbol="↺" className={className} />;
+const Settings2 = ({ className }) => <EmojiIcon symbol="⚙️" className={className} />;
 
 const STORAGE_KEY = 'yun-mandarin-lab-pilot-v4';
 
@@ -32,6 +38,18 @@ function readPilotState() {
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
+  }
+}
+
+function getSavedAudioRate() {
+  if (typeof window === 'undefined') return 0.75;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return 0.75;
+    const parsed = JSON.parse(raw);
+    return typeof parsed?.audioRate === 'number' ? parsed.audioRate : 0.75;
+  } catch {
+    return 0.75;
   }
 }
 
@@ -57,7 +75,7 @@ function AudioButton({ text, dark = false, small = false }) {
     synth.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'zh-CN';
-    utterance.rate = 0.92;
+    utterance.rate = getSavedAudioRate();
     utterance.pitch = 1;
 
     const voices = synth.getVoices();
@@ -79,13 +97,13 @@ function AudioButton({ text, dark = false, small = false }) {
       aria-label="Play audio"
       title="Play audio"
     >
-      <Volume2 className={`h-4 w-4 ${dark ? 'text-white' : 'text-neutral-700'}`} />
+      <Volume2 className={`${small ? 'h-4 w-4' : 'h-4 w-4'} ${dark ? 'text-white' : 'text-neutral-700'}`} />
     </button>
   );
 }
 
 const glossary = {
-  新来的: {
+  '新来的': {
     title: '新来的',
     pinyin: 'xīn lái de',
     translation: 'newly arrived / new here',
@@ -99,7 +117,7 @@ const glossary = {
       { zh: '大家都在帮新来的室友。', py: 'Dàjiā dōu zài bāng xīn lái de shìyǒu.', en: 'Everyone is helping the new roommate.' },
     ],
   },
-  中文: {
+  '中文': {
     title: '中文',
     pinyin: 'Zhōngwén',
     translation: 'Chinese language',
@@ -127,7 +145,7 @@ const glossary = {
       { zh: '你今天说得很流利。', py: 'Nǐ jīntiān shuō de hěn liúlì.', en: 'You spoke very fluently today.' },
     ],
   },
-  有时间: {
+  '有时间': {
     title: '有时间',
     pinyin: 'yǒu shíjiān',
     translation: 'to have time / to be available',
@@ -141,7 +159,7 @@ const glossary = {
       { zh: '老师今天有时间见你。', py: 'Lǎoshī jīntiān yǒu shíjiān jiàn nǐ.', en: 'The teacher has time to meet you today.' },
     ],
   },
-  可能: {
+  '可能': {
     title: '可能',
     pinyin: 'kěnéng',
     translation: 'maybe / possibly',
@@ -155,7 +173,7 @@ const glossary = {
       { zh: '她现在可能在路上。', py: 'Tā xiànzài kěnéng zài lùshang.', en: 'She may be on the way now.' },
     ],
   },
-  会: {
+  '会': {
     title: '会',
     pinyin: 'huì',
     translation: 'will / be likely to / know how to',
@@ -169,7 +187,7 @@ const glossary = {
       { zh: '我不会忘记。', py: 'Wǒ bú huì wàngjì.', en: 'I will not forget.' },
     ],
   },
-  晚一点: {
+  '晚一点': {
     title: '晚一点',
     pinyin: 'wǎn yìdiǎn',
     translation: 'a little later / a bit late',
@@ -183,7 +201,7 @@ const glossary = {
       { zh: '他总是晚一点来。', py: 'Tā zǒngshì wǎn yìdiǎn lái.', en: 'He always comes a little later.' },
     ],
   },
-  要不然: {
+  '要不然': {
     title: '要不然',
     pinyin: 'yàoburán',
     translation: 'otherwise / if not / how about instead',
@@ -197,7 +215,7 @@ const glossary = {
       { zh: '今天不行，要不然改到周五吧。', py: 'Jīntiān bù xíng, yàoburán gǎi dào Zhōuwǔ ba.', en: 'Today does not work. Otherwise, let’s move it to Friday.' },
     ],
   },
-  不好意思: {
+  '不好意思': {
     title: '不好意思',
     pinyin: 'bù hǎoyìsi',
     translation: 'sorry / excuse me / I feel a bit embarrassed',
@@ -211,7 +229,7 @@ const glossary = {
       { zh: '不好意思，我想问一个问题。', py: 'Bù hǎoyìsi, wǒ xiǎng wèn yí ge wèntí.', en: 'Excuse me, I want to ask a question.' },
     ],
   },
-  几位: {
+  '几位': {
     title: '几位',
     pinyin: 'jǐ wèi',
     translation: 'how many people (for guests)',
@@ -225,7 +243,7 @@ const glossary = {
       { zh: '我们先等两位朋友。', py: 'Wǒmen xiān děng liǎng wèi péngyou.', en: 'We are waiting for two friends first.' },
     ],
   },
-  位子: {
+  '位子': {
     title: '位子',
     pinyin: 'wèizi',
     translation: 'seat / spot / table',
@@ -239,7 +257,7 @@ const glossary = {
       { zh: '请给我们找两个位子。', py: 'Qǐng gěi wǒmen zhǎo liǎng ge wèizi.', en: 'Please find us two seats.' },
     ],
   },
-  靠窗: {
+  '靠窗': {
     title: '靠窗',
     pinyin: 'kào chuāng',
     translation: 'by the window / window-side',
@@ -253,7 +271,7 @@ const glossary = {
       { zh: '他们已经坐在靠窗那边了。', py: 'Tāmen yǐjīng zuò zài kàochuāng nàbiān le.', en: 'They are already sitting by the window over there.' },
     ],
   },
-  来: {
+  '来': {
     title: '来',
     pinyin: 'lái',
     translation: 'to order / let me have',
@@ -267,7 +285,7 @@ const glossary = {
       { zh: '今天我们来点儿清淡的。', py: 'Jīntiān wǒmen lái diǎnr qīngdàn de.', en: 'Today let’s order something lighter.' },
     ],
   },
-  一共: {
+  '一共': {
     title: '一共',
     pinyin: 'yígòng',
     translation: 'in total / altogether',
@@ -281,7 +299,7 @@ const glossary = {
       { zh: '你们一共要几杯？', py: 'Nǐmen yígòng yào jǐ bēi?', en: 'How many cups do you want in total?' },
     ],
   },
-  打包: {
+  '打包': {
     title: '打包',
     pinyin: 'dǎbāo',
     translation: 'to pack up / take away',
@@ -295,7 +313,7 @@ const glossary = {
       { zh: '她把剩下的饭都打包了。', py: 'Tā bǎ shèngxia de fàn dōu dǎbāo le.', en: 'She packed up all the leftover food.' },
     ],
   },
-  刷卡: {
+  '刷卡': {
     title: '刷卡',
     pinyin: 'shuākǎ',
     translation: 'to pay by card / swipe card',
@@ -1180,8 +1198,14 @@ export default function ChapterUIPrototype() {
   const [glossaryShowEnglish, setGlossaryShowEnglish] = useState(true);
   const [quickExamplesShowPinyin, setQuickExamplesShowPinyin] = useState(persisted?.quickExamplesShowPinyin ?? true);
   const [quickExamplesShowEnglish, setQuickExamplesShowEnglish] = useState(persisted?.quickExamplesShowEnglish ?? true);
+  const [audioRate, setAudioRate] = useState(persisted?.audioRate ?? 0.75);
+  const [fontScale, setFontScale] = useState(persisted?.fontScale || 'md');
 
   const makeNodeKey = (chapterIndex, nodeIndex) => `${chapterIndex}-${nodeIndex}`;
+
+  const chineseHeadingClass = fontScale === 'sm' ? 'text-xl' : fontScale === 'lg' ? 'text-3xl' : 'text-2xl';
+  const chineseOptionClass = fontScale === 'sm' ? 'text-base' : fontScale === 'lg' ? 'text-xl' : 'text-lg';
+  const glossaryTitleClass = fontScale === 'sm' ? 'text-xl' : fontScale === 'lg' ? 'text-3xl' : 'text-2xl';
 
   const currentChapter = chapters[currentChapterIndex];
   const currentNode = currentChapter.nodes[currentNodeIndex];
@@ -1243,6 +1267,8 @@ export default function ChapterUIPrototype() {
         activeNoteId,
         quickExamplesShowPinyin,
         quickExamplesShowEnglish,
+        audioRate,
+        fontScale,
         nodeSelections,
       })
     );
@@ -1259,6 +1285,8 @@ export default function ChapterUIPrototype() {
     activeNoteId,
     quickExamplesShowPinyin,
     quickExamplesShowEnglish,
+    audioRate,
+    fontScale,
     nodeSelections,
   ]);
 
@@ -1342,6 +1370,8 @@ export default function ChapterUIPrototype() {
     setGlossaryShowEnglish(true);
     setQuickExamplesShowPinyin(true);
     setQuickExamplesShowEnglish(true);
+    setAudioRate(0.75);
+    setFontScale('md');
   };
 
   const renderMainView = () => {
@@ -1421,10 +1451,10 @@ export default function ChapterUIPrototype() {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="flex items-start justify-between gap-2">
-                          <div className="font-semibold">{item.expression}</div>
-                          <AudioButton text={item.expression} small />
-                        </div>
-                        {item.pinyin && <div className="mt-1 text-sm text-neutral-500">{item.pinyin}</div>}
+                        <div className="font-semibold">{item.expression}</div>
+                        <AudioButton text={item.expression} small />
+                      </div>
+                      {item.pinyin && <div className="mt-1 text-sm text-neutral-500">{item.pinyin}</div>}
                         {item.english && <div className="mt-1 text-sm text-neutral-700">{item.english}</div>}
                       </div>
                       <Badge variant="outline" className="rounded-full">{item.type}</Badge>
@@ -1459,10 +1489,10 @@ export default function ChapterUIPrototype() {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="flex items-start justify-between gap-2">
-                          <div className="font-semibold">{item.expression}</div>
-                          <AudioButton text={item.expression} small />
-                        </div>
-                        {item.pinyin && <div className="mt-1 text-sm text-neutral-500">{item.pinyin}</div>}
+                        <div className="font-semibold">{item.expression}</div>
+                        <AudioButton text={item.expression} small />
+                      </div>
+                      {item.pinyin && <div className="mt-1 text-sm text-neutral-500">{item.pinyin}</div>}
                         {item.english && <div className="mt-1 text-sm text-neutral-700">{item.english}</div>}
                       </div>
                       <div className="flex items-center gap-2">
@@ -1509,10 +1539,10 @@ export default function ChapterUIPrototype() {
                     {item.correction && (
                       <div className="mt-3 rounded-xl bg-neutral-100 p-3 text-sm">
                         <div className="flex items-center justify-between gap-2 font-medium">
-                          <span>Better version</span>
-                          <AudioButton text={item.correction} small />
-                        </div>
-                        <div className="mt-1">{item.correction}</div>
+                        <span>Better version</span>
+                        <AudioButton text={item.correction} small />
+                      </div>
+                      <div className="mt-1">{item.correction}</div>
                       </div>
                     )}
                   </div>
@@ -1545,6 +1575,42 @@ export default function ChapterUIPrototype() {
                 <div className="mt-3 flex gap-2">
                   <Button variant={quickExamplesShowPinyin ? 'default' : 'outline'} className="rounded-2xl" onClick={() => setQuickExamplesShowPinyin((v) => !v)}>Quick Pinyin</Button>
                   <Button variant={quickExamplesShowEnglish ? 'default' : 'outline'} className="rounded-2xl" onClick={() => setQuickExamplesShowEnglish((v) => !v)}>Quick English</Button>
+                </div>
+              </div>
+              <div className="rounded-2xl bg-neutral-100 p-4">
+                <div className="font-medium">Audio speed</div>
+                <p className="mt-1 text-sm text-neutral-600">Choose the playback speed for all Chinese audio in the app.</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {[0.5, 0.75, 1].map((rate) => (
+                    <Button
+                      key={rate}
+                      variant={audioRate === rate ? 'default' : 'outline'}
+                      className="rounded-2xl"
+                      onClick={() => setAudioRate(rate)}
+                    >
+                      {rate.toFixed(2).replace(/\.00$/, '.0')}x
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-neutral-100 p-4">
+                <div className="font-medium">Font size</div>
+                <p className="mt-1 text-sm text-neutral-600">Adjust the Chinese text size for easier reading.</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {[
+                    { label: 'Small', value: 'sm' },
+                    { label: 'Medium', value: 'md' },
+                    { label: 'Large', value: 'lg' },
+                  ].map((item) => (
+                    <Button
+                      key={item.value}
+                      variant={fontScale === item.value ? 'default' : 'outline'}
+                      className="rounded-2xl"
+                      onClick={() => setFontScale(item.value)}
+                    >
+                      {item.label}
+                    </Button>
+                  ))}
                 </div>
               </div>
               <div className="rounded-2xl border border-dashed border-rose-300 p-4">
@@ -1605,7 +1671,7 @@ export default function ChapterUIPrototype() {
                 <AudioButton text={currentNode.npcLineZh} />
               </div>
               <div className="space-y-2">
-                <div className="text-2xl font-semibold tracking-tight">
+                <div className={`${chineseHeadingClass} font-semibold tracking-tight`}>
                   <AnnotatedText text={currentNode.npcLineZh} glossaryKeys={currentNode.npcGlossary} onOpen={setSelectedGlossaryKey} />
                 </div>
                 {showPinyin && <p className="text-sm text-neutral-500">{currentNode.npcLinePy}</p>}
@@ -1644,16 +1710,16 @@ export default function ChapterUIPrototype() {
                           <div className="flex items-center gap-1">
                             <AudioButton text={option.zh} dark={active} small />
                             <SaveButton
-                              saved={optionSaved}
-                              dark={active}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleCollected(optionCollectionItem);
-                              }}
-                            />
+                            saved={optionSaved}
+                            dark={active}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleCollected(optionCollectionItem);
+                            }}
+                          />
                           </div>
                         </div>
-                        <div className="text-lg font-semibold">
+                        <div className={`${chineseOptionClass} font-semibold`}>
                           <AnnotatedText text={option.zh} glossaryKeys={option.glossary} onOpen={setSelectedGlossaryKey} />
                         </div>
                         {showPinyin && <div className={`mt-1 text-sm ${active ? 'text-white/75' : 'text-neutral-500'}`}>{option.py}</div>}
@@ -2008,7 +2074,7 @@ export default function ChapterUIPrototype() {
                     <RatingBadge rating={selectedOption.rating} />
                   </div>
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-xl font-semibold">{selectedOption.zh}</h3>
+                    <h3 className={`${fontScale === 'sm' ? 'text-lg' : fontScale === 'lg' ? 'text-2xl' : 'text-xl'} font-semibold`}>{selectedOption.zh}</h3>
                     <AudioButton text={selectedOption.zh} />
                   </div>
                   {showPinyin && <p className="mt-1 text-sm text-neutral-500">{selectedOption.py}</p>}
@@ -2030,10 +2096,10 @@ export default function ChapterUIPrototype() {
                     {selectedOption.rating === 'Natural'
                       ? 'Good. The conversation moves forward smoothly.'
                       : selectedOption.rating === 'Stiff'
-                        ? 'The conversation continues, but you sound flatter or less warm.'
-                        : selectedOption.rating === 'Awkward'
-                          ? 'The other person may mentally repair your Chinese before reacting.'
-                          : 'This creates confusion and weakens the interaction.'}
+                      ? 'The conversation continues, but you sound flatter or less warm.'
+                      : selectedOption.rating === 'Awkward'
+                      ? 'The other person may mentally repair your Chinese before reacting.'
+                      : 'This creates confusion and weakens the interaction.'}
                   </p>
                 </div>
               </div>
@@ -2041,10 +2107,10 @@ export default function ChapterUIPrototype() {
               {selectedOption.correction && (
                 <div className="mt-4 rounded-2xl border border-dashed border-neutral-300 p-4">
                   <div className="mb-2 flex items-center justify-between gap-2 text-sm font-medium">
-                    <span>Better version</span>
-                    <AudioButton text={selectedOption.correction} small />
-                  </div>
-                  <p className="text-base font-medium">{selectedOption.correction}</p>
+                  <span>Better version</span>
+                  <AudioButton text={selectedOption.correction} small />
+                </div>
+                <p className="text-base font-medium">{selectedOption.correction}</p>
                 </div>
               )}
 
@@ -2058,7 +2124,7 @@ export default function ChapterUIPrototype() {
                   </Button>
                 </div>
                 <Button className="rounded-2xl px-6" onClick={handleContinue}>
-                  {isLastNode ? (isLastChapter ? 'Finish prototype' : 'Go to next chapter') : 'Continue'}
+                  {isLastNode ? (isLastChapter ? 'Finish prototype' : 'Next chapter') : 'Back to lesson'}
                 </Button>
               </div>
             </motion.div>
@@ -2090,7 +2156,7 @@ export default function ChapterUIPrototype() {
                   </div>
                   <div className="mt-3 flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-2xl font-semibold">{selectedGlossary.title}</h3>
+                      <h3 className={`${glossaryTitleClass} font-semibold`}>{selectedGlossary.title}</h3>
                       <AudioButton text={selectedGlossary.title} />
                     </div>
                     {glossaryTermItem && (
@@ -2139,10 +2205,10 @@ export default function ChapterUIPrototype() {
                       <div key={example.zh} className="rounded-2xl border border-neutral-200 p-4">
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-center gap-1">
-                            <div className="font-semibold">{example.zh}</div>
-                            <AudioButton text={example.zh} small />
-                          </div>
-                          <SaveButton saved={glossaryExampleSaved} onClick={() => toggleCollected(glossaryExampleItem)} />
+                          <div className={`${fontScale === 'sm' ? 'text-sm' : fontScale === 'lg' ? 'text-lg' : 'text-base'} font-semibold`}>{example.zh}</div>
+                          <AudioButton text={example.zh} small />
+                        </div>
+                        <SaveButton saved={glossaryExampleSaved} onClick={() => toggleCollected(glossaryExampleItem)} />
                         </div>
                         {glossaryShowPinyin && <div className="mt-1 text-sm text-neutral-500">{example.py}</div>}
                         {glossaryShowEnglish && <div className="mt-2 text-sm text-neutral-700">{example.en}</div>}
