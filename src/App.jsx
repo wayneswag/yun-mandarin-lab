@@ -1080,6 +1080,107 @@ const chapters = [
   },
 ];
 
+function normalizeAudioKey(text = '') {
+  return text
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'item';
+}
+
+function buildAudioManifest(chaptersData, glossaryData) {
+  const manifest = [];
+
+  chaptersData.forEach((chapter) => {
+    chapter.nodes.forEach((node) => {
+      manifest.push({
+        id: `${chapter.id}.node${node.id}.npc`,
+        text: node.npcLineZh,
+        type: 'npc',
+        chapter: chapter.id,
+        node: node.id,
+        version: 1,
+      });
+
+      node.options.forEach((option) => {
+        const role = option.rating.toLowerCase();
+        manifest.push({
+          id: `${chapter.id}.node${node.id}.option.${role}`,
+          text: option.zh,
+          type: 'option',
+          role,
+          chapter: chapter.id,
+          node: node.id,
+          version: 1,
+        });
+
+        if (option.correction) {
+          manifest.push({
+            id: `${chapter.id}.node${node.id}.correction.${role}`,
+            text: option.correction,
+            type: 'correction',
+            role,
+            chapter: chapter.id,
+            node: node.id,
+            version: 1,
+          });
+        }
+      });
+    });
+
+    chapter.grammarNotes.forEach((note) => {
+      note.examples.forEach((example, index) => {
+        manifest.push({
+          id: `${chapter.id}.grammar.${note.id}.ex${index + 1}`,
+          text: example.zh,
+          type: 'grammar-example',
+          chapter: chapter.id,
+          grammarNote: note.id,
+          version: 1,
+        });
+      });
+    });
+  });
+
+  Object.values(glossaryData).forEach((entry) => {
+    const glossaryId = normalizeAudioKey(entry.pinyin || entry.title);
+
+    manifest.push({
+      id: `glossary.${glossaryId}.term`,
+      text: entry.title,
+      type: 'glossary-term',
+      glossary: glossaryId,
+      version: 1,
+    });
+
+    entry.examples.forEach((example, index) => {
+      manifest.push({
+        id: `glossary.${glossaryId}.ex${index + 1}`,
+        text: example.zh,
+        type: 'glossary-example',
+        glossary: glossaryId,
+        version: 1,
+      });
+    });
+  });
+
+  const deduped = [];
+  const seen = new Set();
+
+  manifest.forEach((item) => {
+    const key = `${item.id}::${item.text}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    deduped.push(item);
+  });
+
+  return deduped;
+}
+
+export const AUDIO_MANIFEST = buildAudioManifest(chapters, glossary);
+export const AUDIO_TEXT_BY_ID = Object.fromEntries(AUDIO_MANIFEST.map((item) => [item.id, item.text]));
+
 function RatingBadge({ rating }) {
   const map = {
     Natural: 'bg-emerald-100 text-emerald-800 border-emerald-200',
