@@ -53,12 +53,13 @@ function getSavedAudioRate() {
   }
 }
 
-function createCollectionItem({ expression, pinyin = '', english = '', type = 'expression', source = '', chapter = '', mission = '' }) {
+function createCollectionItem({ expression, pinyin = '', english = '', audioId = '', type = 'expression', source = '', chapter = '', mission = '' }) {
   return {
     id: `${type}::${expression}::${source}`,
     expression,
     pinyin,
     english,
+    audioId,
     type,
     source,
     chapter,
@@ -67,25 +68,42 @@ function createCollectionItem({ expression, pinyin = '', english = '', type = 'e
   };
 }
 
-function AudioButton({ text, dark = false, small = false }) {
-  const speak = (e) => {
+function AudioButton({ audioId = '', text, dark = false, small = false }) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const speak = async (e) => {
     e.stopPropagation();
-    if (typeof window === 'undefined' || !window.speechSynthesis || !text) return;
-    const synth = window.speechSynthesis;
-    synth.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'zh-CN';
-    utterance.rate = getSavedAudioRate();
-    utterance.pitch = 1;
+    const finalText = text || AUDIO_TEXT_BY_ID[audioId] || '';
+    if (!finalText || isLoading) return;
 
-    const voices = synth.getVoices();
-    const zhVoice =
-      voices.find((v) => v.lang && v.lang.toLowerCase().startsWith('zh')) ||
-      voices.find((v) => v.name && v.name.toLowerCase().includes('chinese')) ||
-      null;
+    try {
+      setIsLoading(true);
+      const remoteUrl = await resolveAudioUrl(audioId, finalText).catch(() => null);
+      if (remoteUrl) {
+        const audio = new Audio(remoteUrl);
+        await audio.play();
+        return;
+      }
 
-    if (zhVoice) utterance.voice = zhVoice;
-    synth.speak(utterance);
+      if (typeof window === 'undefined' || !window.speechSynthesis) return;
+      const synth = window.speechSynthesis;
+      synth.cancel();
+      const utterance = new SpeechSynthesisUtterance(finalText);
+      utterance.lang = 'zh-CN';
+      utterance.rate = getSavedAudioRate();
+      utterance.pitch = 1;
+
+      const voices = synth.getVoices();
+      const zhVoice =
+        voices.find((v) => v.lang && v.lang.toLowerCase().startsWith('zh')) ||
+        voices.find((v) => v.name && v.name.toLowerCase().includes('chinese')) ||
+        null;
+
+      if (zhVoice) utterance.voice = zhVoice;
+      synth.speak(utterance);
+    } finally {
+      setTimeout(() => setIsLoading(false), 150);
+    }
   };
 
   return (
@@ -97,7 +115,7 @@ function AudioButton({ text, dark = false, small = false }) {
       aria-label="Play audio"
       title="Play audio"
     >
-      <Volume2 className={`${small ? 'h-4 w-4' : 'h-4 w-4'} ${dark ? 'text-white' : 'text-neutral-700'}`} />
+      <Volume2 className={`${small ? 'h-4 w-4' : 'h-4 w-4'} ${dark ? 'text-white' : 'text-neutral-700'} ${isLoading ? 'opacity-50' : ''}`} />
     </button>
   );
 }
@@ -1181,6 +1199,31 @@ function buildAudioManifest(chaptersData, glossaryData) {
 export const AUDIO_MANIFEST = buildAudioManifest(chapters, glossary);
 export const AUDIO_TEXT_BY_ID = Object.fromEntries(AUDIO_MANIFEST.map((item) => [item.id, item.text]));
 
+const audioUrlCache = new Map();
+const audioUrlInflight = new Map();
+
+async function resolveAudioUrl(audioId, text) {
+  if (!audioId) return null;
+  if (audioUrlCache.has(audioId)) return audioUrlCache.get(audioId);
+  if (audioUrlInflight.has(audioId)) return audioUrlInflight.get(audioId);
+
+  const requestText = text || AUDIO_TEXT_BY_ID[audioId] || '';
+  const request = fetch(`/api/audio?id=${encodeURIComponent(audioId)}&text=${encodeURIComponent(requestText)}`)
+    .then(async (res) => {
+      if (!res.ok) throw new Error('audio_fetch_failed');
+      const data = await res.json();
+      if (!data?.url) throw new Error('audio_url_missing');
+      audioUrlCache.set(audioId, data.url);
+      return data.url;
+    })
+    .finally(() => {
+      audioUrlInflight.delete(audioId);
+    });
+
+  audioUrlInflight.set(audioId, request);
+  return request;
+}
+
 function RatingBadge({ rating }) {
   const map = {
     Natural: 'bg-emerald-100 text-emerald-800 border-emerald-200',
@@ -1417,12 +1460,15 @@ export default function ChapterUIPrototype() {
     setTrust((prev) => Math.max(0, Math.min(100, prev + selectedOption.relationship)));
     setMastery((prev) => Math.max(0, Math.min(100, prev + selectedOption.score * 8)));
 
+    const selectedRole = selectedOption.rating.toLowerCase();
     const logItem = {
       chapter: currentChapter.shortTitle,
       mission: currentNode.mission,
       selected: selectedOption.zh,
+      selectedAudioId: `${currentChapter.id}.node${currentNode.id}.option.${selectedRole}`,
       rating: selectedOption.rating,
       correction: selectedOption.correction,
+      correctionAudioId: selectedOption.correction ? `${currentChapter.id}.node${currentNode.id}.correction.${selectedRole}` : '',
       timestamp: Date.now(),
     };
     setPracticeLog((prev) => [...prev, logItem]);
@@ -1553,7 +1599,7 @@ export default function ChapterUIPrototype() {
                       <div>
                         <div className="flex items-start justify-between gap-2">
                         <div className="font-semibold">{item.expression}</div>
-                        <AudioButton text={item.expression} small />
+                        <AudioButton audioId={item.audioId} text={item.expression} small />
                       </div>
                       {item.pinyin && <div className="mt-1 text-sm text-neutral-500">{item.pinyin}</div>}
                         {item.english && <div className="mt-1 text-sm text-neutral-700">{item.english}</div>}
@@ -1591,7 +1637,7 @@ export default function ChapterUIPrototype() {
                       <div>
                         <div className="flex items-start justify-between gap-2">
                         <div className="font-semibold">{item.expression}</div>
-                        <AudioButton text={item.expression} small />
+                        <AudioButton audioId={item.audioId} text={item.expression} small />
                       </div>
                       {item.pinyin && <div className="mt-1 text-sm text-neutral-500">{item.pinyin}</div>}
                         {item.english && <div className="mt-1 text-sm text-neutral-700">{item.english}</div>}
@@ -1634,14 +1680,14 @@ export default function ChapterUIPrototype() {
                     </div>
                     <div className="mt-3 flex items-start justify-between gap-2">
                       <div className="font-semibold">{item.selected}</div>
-                      <AudioButton text={item.selected} small />
+                      <AudioButton audioId={item.selectedAudioId} text={item.selected} small />
                     </div>
                     <div className="mt-2 text-sm text-neutral-600">{item.mission}</div>
                     {item.correction && (
                       <div className="mt-3 rounded-xl bg-neutral-100 p-3 text-sm">
                         <div className="flex items-center justify-between gap-2 font-medium">
                         <span>Better version</span>
-                        <AudioButton text={item.correction} small />
+                        <AudioButton audioId={item.correctionAudioId} text={item.correction} small />
                       </div>
                       <div className="mt-1">{item.correction}</div>
                       </div>
@@ -1769,7 +1815,7 @@ export default function ChapterUIPrototype() {
             <motion.div layout className="mt-4 rounded-3xl bg-neutral-100 p-5">
               <div className="mb-3 flex items-center gap-2 text-sm text-neutral-500">
                 <MessageSquareQuote className="h-4 w-4" /> {currentNode.npc}
-                <AudioButton text={currentNode.npcLineZh} />
+                <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.npc`} text={currentNode.npcLineZh} />
               </div>
               <div className="space-y-2">
                 <div className={`${chineseHeadingClass} font-semibold tracking-tight`}>
@@ -1787,6 +1833,7 @@ export default function ChapterUIPrototype() {
                   expression: option.zh,
                   pinyin: option.py,
                   english: option.en,
+                  audioId: `${currentChapter.id}.node${currentNode.id}.option.${option.rating.toLowerCase()}`,
                   type: 'option',
                   source: `${currentChapter.shortTitle} · Option`,
                   chapter: currentChapter.shortTitle,
@@ -1809,7 +1856,7 @@ export default function ChapterUIPrototype() {
                         <div className="mb-1 flex items-center justify-between gap-2 text-sm font-medium opacity-80">
                           <span>Option {option.displayId}</span>
                           <div className="flex items-center gap-1">
-                            <AudioButton text={option.zh} dark={active} small />
+                            <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.option.${option.rating.toLowerCase()}`} text={option.zh} dark={active} small />
                             <SaveButton
                             saved={optionSaved}
                             dark={active}
@@ -1984,11 +2031,12 @@ export default function ChapterUIPrototype() {
                 </div>
               </div>
               <div className="space-y-2">
-                {activeNote.examples.map((example) => {
+                {activeNote.examples.map((example, index) => {
                   const quickExampleItem = createCollectionItem({
                     expression: example.zh,
                     pinyin: example.py,
                     english: example.en,
+                    audioId: `${currentChapter.id}.grammar.${activeNote.id}.ex${index + 1}`,
                     type: 'quick-example',
                     source: `${activeNote.title} · Quick example`,
                     chapter: currentChapter.shortTitle,
@@ -1999,7 +2047,7 @@ export default function ChapterUIPrototype() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="font-medium">{example.zh}</div>
                         <div className="flex items-center gap-1">
-                          <AudioButton text={example.zh} small />
+                          <AudioButton audioId={`${currentChapter.id}.grammar.${activeNote.id}.ex${index + 1}`} text={example.zh} small />
                           <SaveButton saved={quickSaved} onClick={() => toggleCollected(quickExampleItem)} />
                         </div>
                       </div>
@@ -2041,6 +2089,7 @@ export default function ChapterUIPrototype() {
         expression: selectedGlossary.title,
         pinyin: selectedGlossary.pinyin,
         english: selectedGlossary.translation,
+        audioId: `glossary.${normalizeAudioKey(selectedGlossary.pinyin || selectedGlossary.title)}.term`,
         type: 'glossary-term',
         source: 'Glossary term',
         chapter: currentChapter.shortTitle,
@@ -2176,7 +2225,7 @@ export default function ChapterUIPrototype() {
                   </div>
                   <div className="flex items-start justify-between gap-2">
                     <h3 className={`${fontScale === 'sm' ? 'text-lg' : fontScale === 'lg' ? 'text-2xl' : 'text-xl'} font-semibold`}>{selectedOption.zh}</h3>
-                    <AudioButton text={selectedOption.zh} />
+                    <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.option.${selectedOption.rating.toLowerCase()}`} text={selectedOption.zh} />
                   </div>
                   {showPinyin && <p className="mt-1 text-sm text-neutral-500">{selectedOption.py}</p>}
                   {showEnglish && <p className="mt-1 text-sm text-neutral-700">{selectedOption.en}</p>}
@@ -2209,7 +2258,7 @@ export default function ChapterUIPrototype() {
                 <div className="mt-4 rounded-2xl border border-dashed border-neutral-300 p-4">
                   <div className="mb-2 flex items-center justify-between gap-2 text-sm font-medium">
                   <span>Better version</span>
-                  <AudioButton text={selectedOption.correction} small />
+                  <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.correction.${selectedOption.rating.toLowerCase()}`} text={selectedOption.correction} small />
                 </div>
                 <p className="text-base font-medium">{selectedOption.correction}</p>
                 </div>
@@ -2258,7 +2307,7 @@ export default function ChapterUIPrototype() {
                   <div className="mt-3 flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <h3 className={`${glossaryTitleClass} font-semibold`}>{selectedGlossary.title}</h3>
-                      <AudioButton text={selectedGlossary.title} />
+                      <AudioButton audioId={`glossary.${normalizeAudioKey(selectedGlossary.pinyin || selectedGlossary.title)}.term`} text={selectedGlossary.title} />
                     </div>
                     {glossaryTermItem && (
                       <SaveButton saved={glossaryTermSaved} onClick={() => toggleCollected(glossaryTermItem)} />
@@ -2292,11 +2341,12 @@ export default function ChapterUIPrototype() {
               <div className="mt-5">
                 <div className="mb-2 text-sm font-medium">Practical examples</div>
                 <div className="grid gap-3 md:grid-cols-2">
-                  {selectedGlossary.examples.map((example) => {
+                  {selectedGlossary.examples.map((example, index) => {
                     const glossaryExampleItem = createCollectionItem({
                       expression: example.zh,
                       pinyin: example.py,
                       english: example.en,
+                      audioId: `glossary.${normalizeAudioKey(selectedGlossary.pinyin || selectedGlossary.title)}.ex${index + 1}`,
                       type: 'glossary-example',
                       source: `${selectedGlossary.title} · Glossary example`,
                       chapter: currentChapter.shortTitle,
@@ -2307,7 +2357,7 @@ export default function ChapterUIPrototype() {
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-center gap-1">
                           <div className={`${fontScale === 'sm' ? 'text-sm' : fontScale === 'lg' ? 'text-lg' : 'text-base'} font-semibold`}>{example.zh}</div>
-                          <AudioButton text={example.zh} small />
+                          <AudioButton audioId={`glossary.${normalizeAudioKey(selectedGlossary.pinyin || selectedGlossary.title)}.ex${index + 1}`} text={example.zh} small />
                         </div>
                         <SaveButton saved={glossaryExampleSaved} onClick={() => toggleCollected(glossaryExampleItem)} />
                         </div>
