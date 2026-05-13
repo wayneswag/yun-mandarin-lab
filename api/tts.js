@@ -2,7 +2,7 @@ import { list, put } from '@vercel/blob';
 import OpenAI from 'openai';
 import { createHash } from 'node:crypto';
 
-const MODEL = 'gpt-4o-mini-tts';
+const MODEL = 'tts-1';
 const DEFAULT_VOICE = 'coral';
 const DEFAULT_INSTRUCTIONS = 'Speak natural Mandarin Chinese clearly, at a slightly slow teaching pace. Keep the pronunciation accurate and suitable for language learners.';
 const MAX_TEXT_LENGTH = 1200;
@@ -30,9 +30,9 @@ async function readJsonBody(req) {
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));
 }
 
-function getAudioPathname({ text, voice, instructions }) {
+function getAudioPathname({ text, voice }) {
   const hash = createHash('sha256')
-    .update(JSON.stringify({ model: MODEL, voice, instructions, text }))
+    .update(JSON.stringify({ model: MODEL, voice, text }))
     .digest('hex')
     .slice(0, 32);
 
@@ -75,7 +75,7 @@ export default async function handler(req, res) {
     const body = await readJsonBody(req);
     const text = String(body.text || '').trim();
     const voice = String(body.voice || DEFAULT_VOICE).trim();
-    const instructions = String(body.instructions || DEFAULT_INSTRUCTIONS).trim();
+    
 
     if (!text) {
       sendJson(res, 400, { error: 'Missing text.' });
@@ -87,7 +87,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    const pathname = getAudioPathname({ text, voice, instructions });
+    const pathname = getAudioPathname({ text, voice });
     const existingBlob = await findExistingBlob(pathname);
 
     if (existingBlob) {
@@ -103,7 +103,7 @@ export default async function handler(req, res) {
       model: MODEL,
       voice,
       input: text,
-      instructions,
+    
       response_format: 'mp3',
     });
 
