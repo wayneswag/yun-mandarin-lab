@@ -73,37 +73,30 @@ function AudioButton({ audioId = '', text, dark = false, small = false }) {
 
   const speak = async (e) => {
     e.stopPropagation();
+
     const finalText = text || AUDIO_TEXT_BY_ID[audioId] || '';
     if (!finalText || isLoading) return;
 
     try {
       setIsLoading(true);
-      const remoteUrl = await resolveAudioUrl(audioId, finalText).catch(() => null);
-      if (remoteUrl) {
-       const audio = new Audio(remoteUrl);
-       audio.playbackRate = getSavedAudioRate();
-       await audio.play();
-       return;
+
+      const remoteUrl = await resolveAudioUrl(audioId, finalText);
+
+      if (!remoteUrl) {
+        alert('No TTS audio URL returned.');
+        return;
       }
 
-      if (typeof window === 'undefined' || !window.speechSynthesis) return;
-      const synth = window.speechSynthesis;
-      synth.cancel();
-      const utterance = new SpeechSynthesisUtterance(finalText);
-      utterance.lang = 'zh-CN';
-      utterance.rate = getSavedAudioRate();
-      utterance.pitch = 1;
+      console.log('TTS audio URL:', remoteUrl);
 
-      const voices = synth.getVoices();
-      const zhVoice =
-        voices.find((v) => v.lang && v.lang.toLowerCase().startsWith('zh')) ||
-        voices.find((v) => v.name && v.name.toLowerCase().includes('chinese')) ||
-        null;
-
-      if (zhVoice) utterance.voice = zhVoice;
-      synth.speak(utterance);
+      const audio = new Audio(remoteUrl);
+      audio.playbackRate = getSavedAudioRate();
+      await audio.play();
+    } catch (error) {
+      console.error('TTS audio failed:', error);
+      alert(error?.message || 'TTS audio failed. Check Vercel logs.');
     } finally {
-      setTimeout(() => setIsLoading(false), 150);
+      setTimeout(() => setIsLoading(false), 300);
     }
   };
 
