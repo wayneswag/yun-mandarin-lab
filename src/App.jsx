@@ -1212,7 +1212,7 @@ async function resolveAudioUrl(audioId, text) {
     },
     body: JSON.stringify({
       text: requestText,
-      voice: 'coral',
+      voice: 'nova',
     }),
   })
     .then(async (res) => {
