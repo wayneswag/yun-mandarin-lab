@@ -80,9 +80,10 @@ function AudioButton({ audioId = '', text, dark = false, small = false }) {
       setIsLoading(true);
       const remoteUrl = await resolveAudioUrl(audioId, finalText).catch(() => null);
       if (remoteUrl) {
-        const audio = new Audio(remoteUrl);
-        await audio.play();
-        return;
+       const audio = new Audio(remoteUrl);
+       audio.playbackRate = getSavedAudioRate();
+       await audio.play();
+       return;
       }
 
       if (typeof window === 'undefined' || !window.speechSynthesis) return;
@@ -1203,24 +1204,42 @@ const audioUrlCache = new Map();
 const audioUrlInflight = new Map();
 
 async function resolveAudioUrl(audioId, text) {
-  if (!audioId) return null;
-  if (audioUrlCache.has(audioId)) return audioUrlCache.get(audioId);
-  if (audioUrlInflight.has(audioId)) return audioUrlInflight.get(audioId);
-
   const requestText = text || AUDIO_TEXT_BY_ID[audioId] || '';
-  const request = fetch(`/api/audio?id=${encodeURIComponent(audioId)}&text=${encodeURIComponent(requestText)}`)
+  if (!requestText) return null;
+
+  const cacheKey = audioId || requestText;
+
+  if (audioUrlCache.has(cacheKey)) return audioUrlCache.get(cacheKey);
+  if (audioUrlInflight.has(cacheKey)) return audioUrlInflight.get(cacheKey);
+
+  const request = fetch('/api/tts', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      text: requestText,
+      voice: 'coral',
+    }),
+  })
     .then(async (res) => {
-      if (!res.ok) throw new Error('audio_fetch_failed');
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        console.error('TTS API error:', data);
+        throw new Error(data?.error || 'tts_fetch_failed');
+      }
+
       if (!data?.url) throw new Error('audio_url_missing');
-      audioUrlCache.set(audioId, data.url);
+
+      audioUrlCache.set(cacheKey, data.url);
       return data.url;
     })
     .finally(() => {
-      audioUrlInflight.delete(audioId);
+      audioUrlInflight.delete(cacheKey);
     });
 
-  audioUrlInflight.set(audioId, request);
+  audioUrlInflight.set(cacheKey, request);
   return request;
 }
 
