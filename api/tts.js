@@ -3,9 +3,17 @@ import OpenAI from 'openai';
 import { createHash } from 'node:crypto';
 
 const MODEL = 'tts-1';
-const DEFAULT_VOICE = 'coral';
-const DEFAULT_INSTRUCTIONS = 'Speak natural Mandarin Chinese clearly, at a slightly slow teaching pace. Keep the pronunciation accurate and suitable for language learners.';
+const DEFAULT_VOICE = 'alloy';
 const MAX_TEXT_LENGTH = 1200;
+
+const ALLOWED_VOICES = new Set([
+  'nova',
+  'shimmer',
+  'echo',
+  'onyx',
+  'fable',
+  'alloy',
+]);
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -28,6 +36,11 @@ async function readJsonBody(req) {
   if (!chunks.length) return {};
 
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+}
+
+function normalizeVoice(voice) {
+  const cleanVoice = String(voice || DEFAULT_VOICE).trim().toLowerCase();
+  return ALLOWED_VOICES.has(cleanVoice) ? cleanVoice : DEFAULT_VOICE;
 }
 
 function getAudioPathname({ text, voice }) {
@@ -57,25 +70,31 @@ export default async function handler(req, res) {
   }
 
   if (req.method !== 'POST') {
-    sendJson(res, 405, { error: 'Use POST /api/tts with JSON: { "text": "你好" }' });
+    sendJson(res, 405, {
+      error: 'Use POST /api/tts with JSON: { "text": "你好" }',
+    });
     return;
   }
 
   try {
     if (!process.env.OPENAI_API_KEY) {
-      sendJson(res, 500, { error: 'Missing OPENAI_API_KEY in Vercel Environment Variables.' });
+      sendJson(res, 500, {
+        error: 'Missing OPENAI_API_KEY in Vercel Environment Variables.',
+      });
       return;
     }
 
     if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      sendJson(res, 500, { error: 'Missing BLOB_READ_WRITE_TOKEN. Make sure your Vercel Blob store is connected to this project.' });
+      sendJson(res, 500, {
+        error:
+          'Missing BLOB_READ_WRITE_TOKEN. Make sure your Vercel Blob store is connected to this project.',
+      });
       return;
     }
 
     const body = await readJsonBody(req);
     const text = String(body.text || '').trim();
-    const voice = String(body.voice || DEFAULT_VOICE).trim();
-    
+    const voice = normalizeVoice(body.voice);
 
     if (!text) {
       sendJson(res, 400, { error: 'Missing text.' });
@@ -83,7 +102,9 @@ export default async function handler(req, res) {
     }
 
     if (text.length > MAX_TEXT_LENGTH) {
-      sendJson(res, 400, { error: `Text is too long. Maximum length is ${MAX_TEXT_LENGTH} characters.` });
+      sendJson(res, 400, {
+        error: `Text is too long. Maximum length is ${MAX_TEXT_LENGTH} characters.`,
+      });
       return;
     }
 
@@ -94,6 +115,8 @@ export default async function handler(req, res) {
       sendJson(res, 200, {
         url: existingBlob.url,
         pathname: existingBlob.pathname,
+        voice,
+        model: MODEL,
         cached: true,
       });
       return;
@@ -103,7 +126,6 @@ export default async function handler(req, res) {
       model: MODEL,
       voice,
       input: text,
-    
       response_format: 'mp3',
     });
 
@@ -121,10 +143,13 @@ export default async function handler(req, res) {
     sendJson(res, 200, {
       url: uploadedBlob.url,
       pathname: uploadedBlob.pathname,
+      voice,
+      model: MODEL,
       cached: false,
     });
   } catch (error) {
     console.error('TTS API error:', error);
+
     sendJson(res, 500, {
       error: 'TTS generation failed.',
       detail: error?.message || String(error),
