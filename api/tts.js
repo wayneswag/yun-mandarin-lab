@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 import { createHash } from 'node:crypto';
 
 const MODEL = 'tts-1';
-const DEFAULT_VOICE = 'alloy';
+const DEFAULT_VOICE = 'nova';
 const MAX_TEXT_LENGTH = 1200;
 
 const ALLOWED_VOICES = new Set([
