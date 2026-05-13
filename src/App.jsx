@@ -1220,7 +1220,7 @@ async function resolveAudioUrl(audioId, text) {
 
       if (!res.ok) {
         console.error('TTS API error:', data);
-        throw new Error(data?.error || 'tts_fetch_failed');
+        throw new Error(data?.detail || data?.error || 'tts_fetch_failed');
       }
 
       if (!data?.url) throw new Error('audio_url_missing');
