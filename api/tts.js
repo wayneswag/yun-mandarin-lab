@@ -9,6 +9,7 @@ const MAX_TEXT_LENGTH = 1200;
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL || 'https://api.gptsapi.net/v1',
 });
 
 function sendJson(res, statusCode, data) {
