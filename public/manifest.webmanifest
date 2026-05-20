@@ -1,0 +1,19 @@
+{
+  "name": "Yun Mandarin Lab",
+  "short_name": "Mandarin Lab",
+  "description": "A scenario-based Chinese learning app by Yun Mandarin Lab.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#111111",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
