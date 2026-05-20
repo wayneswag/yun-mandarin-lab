@@ -2251,7 +2251,8 @@ export default function ChapterUIPrototype() {
        <div className="hidden lg:block">
         {renderRightPanel()}
       </div>
-
+   </div>
+      
       <AnimatePresence>
         {showFeedback && selectedOption && currentView === 'story' && (
           <motion.div
