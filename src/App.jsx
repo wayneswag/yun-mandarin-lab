@@ -1332,6 +1332,19 @@ function AppSectionButton({ active, icon: Icon, title, subtitle, onClick }) {
     </button>
   );
 }
+function MobileTabButton({ active, icon: Icon, label, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-xs transition ${
+        active ? 'bg-neutral-900 text-white' : 'text-neutral-500 hover:bg-neutral-100'
+      }`}
+    >
+      <Icon className="h-5 w-5" />
+      <span className="text-[11px] font-medium">{label}</span>
+    </button>
+  );
+}
 
 export default function ChapterUIPrototype() {
   const persisted = useMemo(() => readPilotState(), []);
@@ -2110,17 +2123,44 @@ export default function ChapterUIPrototype() {
   const glossaryTermSaved = glossaryTermItem ? isCollected(glossaryTermItem.id) : false;
 
   return (
-    <div className="min-h-screen bg-neutral-50 p-6 text-neutral-900">
-      <div className="mx-auto mb-6 grid max-w-7xl gap-3 md:grid-cols-5">
+    <div className="min-h-screen bg-neutral-50 px-3 pb-24 pt-4 text-neutral-900 md:p-6">
+      <div className="mx-auto mb-6 hidden max-w-7xl gap-3 md:grid md:grid-cols-5">
         <AppSectionButton active={currentView === 'home'} icon={House} title="Home" subtitle="Continue and overview" onClick={() => setCurrentView('home')} />
         <AppSectionButton active={currentView === 'story'} icon={Compass} title="Story" subtitle="Situation practice" onClick={() => setCurrentView('story')} />
         <AppSectionButton active={currentView === 'favorites'} icon={Bookmark} title="Collection" subtitle="Saved expressions" onClick={() => setCurrentView('favorites')} />
         <AppSectionButton active={currentView === 'review'} icon={RotateCcw} title="Review" subtitle="Fix weak spots" onClick={() => setCurrentView('review')} />
         <AppSectionButton active={currentView === 'settings'} icon={Settings2} title="Settings" subtitle="Pilot controls" onClick={() => setCurrentView('settings')} />
       </div>
+      <div className="mx-auto mb-4 max-w-7xl md:hidden">
+  <div className="rounded-3xl bg-neutral-900 p-4 text-white shadow-sm">
+    <div className="text-xs uppercase tracking-[0.25em] text-white/60">Yun Mandarin Lab</div>
+    <div className="mt-1 text-xl font-semibold">{currentChapter.shortTitle}</div>
+    <div className="mt-1 text-sm text-white/70">{currentChapter.subtitle}</div>
+  </div>
+</div>
 
-      <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[280px_minmax(0,1fr)_320px]">
-        <Card className="rounded-3xl border-0 shadow-sm">
+<div className="mx-auto mb-4 max-w-7xl md:hidden">
+  <select
+    value={currentChapterIndex}
+    onChange={(e) => {
+      const nextIndex = Number(e.target.value);
+      setCurrentChapterIndex(nextIndex);
+      setCurrentNodeIndex(0);
+      setSelectedOptionId(null);
+      setShowFeedback(false);
+      setActiveNoteId(chapters[nextIndex].grammarNotes[0].id);
+    }}
+    className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm font-medium shadow-sm"
+  >
+    {chapters.map((chapter, index) => (
+      <option key={chapter.id} value={index}>
+        {chapter.label}: {chapter.shortTitle}
+      </option>
+    ))}
+  </select>
+</div>
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 md:gap-6 lg:grid-cols-[260px_minmax(0,1fr)_320px]">
+        <Card className="hidden rounded-3xl border-0 shadow-sm lg:block">
           <CardHeader>
             <div className="flex items-center justify-between">
               <Badge className="rounded-full bg-neutral-900 text-white">Yun Mandarin Lab</Badge>
@@ -2207,7 +2247,8 @@ export default function ChapterUIPrototype() {
         </Card>
 
         {renderMainView()}
-
+        
+       <div className="hidden lg:block">
         {renderRightPanel()}
       </div>
 
