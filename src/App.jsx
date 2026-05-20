@@ -1205,14 +1205,14 @@ async function resolveAudioUrl(audioId, text) {
   if (audioUrlCache.has(cacheKey)) return audioUrlCache.get(cacheKey);
   if (audioUrlInflight.has(cacheKey)) return audioUrlInflight.get(cacheKey);
 
-  const request = fetch('/api/tts', {
+  const request = fetch('/api/tts-aliyun', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       text: requestText,
-      voice: 'nova',
+      voice: 'zhida',
     }),
   })
     .then(async (res) => {
