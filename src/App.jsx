@@ -2133,64 +2133,60 @@ export default function ChapterUIPrototype() {
         <AppSectionButton active={currentView === 'review'} icon={RotateCcw} title="Review" subtitle="Fix weak spots" onClick={() => setCurrentView('review')} />
         <AppSectionButton active={currentView === 'settings'} icon={Settings2} title="Settings" subtitle="Pilot controls" onClick={() => setCurrentView('settings')} />
       </div>
- <div className="mx-auto mb-4 max-w-7xl md:hidden">
-  <div className="relative overflow-hidden rounded-[34px] bg-[#201a16] p-5 text-white shadow-[0_20px_50px_rgba(32,26,22,0.22)]">
-    <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-[#d6a856]/25 blur-2xl" />
-    <div className="absolute -bottom-16 left-8 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
 
-    <div className="relative">
-      <div className="flex items-center justify-between gap-3">
-        <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">
-          Yun Mandarin Lab
-        </div>
-        <div className="rounded-full bg-[#d6a856] px-3 py-1 text-xs font-semibold text-[#201a16]">
-          {currentChapter.level}
+      <div className="mx-auto mb-4 max-w-7xl md:hidden">
+        <div className="relative overflow-hidden rounded-[34px] bg-[#201a16] p-5 text-white shadow-[0_20px_50px_rgba(32,26,22,0.22)]">
+          <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-[#d6a856]/25 blur-2xl" />
+          <div className="absolute -bottom-16 left-8 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
+
+          <div className="relative">
+            <div className="flex items-center justify-between gap-3">
+              <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">
+                Yun Mandarin Lab
+              </div>
+              <div className="rounded-full bg-[#d6a856] px-3 py-1 text-xs font-semibold text-[#201a16]">
+                {currentChapter.level}
+              </div>
+            </div>
+
+            <div className="mt-6 text-sm text-white/60">{currentChapter.label}</div>
+            <div className="mt-1 text-2xl font-bold tracking-tight">{currentChapter.shortTitle}</div>
+            <div className="mt-2 max-w-xs text-sm leading-5 text-white/75">{currentChapter.subtitle}</div>
+
+            <div className="mt-5">
+              <div className="mb-2 flex items-center justify-between text-xs text-white/55">
+                <span>Chapter progress</span>
+                <span>{currentNodeIndex + 1}/{currentChapter.nodes.length}</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-white/15">
+                <div className="h-full rounded-full bg-[#d6a856]" style={{ width: `${chapterProgress}%` }} />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="mt-6 text-sm text-white/60">{currentChapter.label}</div>
-      <div className="mt-1 text-2xl font-bold tracking-tight">{currentChapter.shortTitle}</div>
-      <div className="mt-2 max-w-xs text-sm leading-5 text-white/75">{currentChapter.subtitle}</div>
-
-      <div className="mt-5">
-        <div className="mb-2 flex items-center justify-between text-xs text-white/55">
-          <span>Chapter progress</span>
-          <span>{currentNodeIndex + 1}/{currentChapter.nodes.length}</span>
-        </div>
-        <div className="h-2 overflow-hidden rounded-full bg-white/15">
-          <div className="h-full rounded-full bg-[#d6a856]" style={{ width: `${chapterProgress}%` }} />
-        </div>
+      <div className="mx-auto mb-4 max-w-7xl md:hidden">
+        <select
+          value={currentChapterIndex}
+          onChange={(e) => {
+            const nextIndex = Number(e.target.value);
+            setCurrentChapterIndex(nextIndex);
+            setCurrentNodeIndex(0);
+            setSelectedOptionId(null);
+            setShowFeedback(false);
+            setActiveNoteId(chapters[nextIndex].grammarNotes[0].id);
+          }}
+          className="w-full appearance-none rounded-[24px] border border-[#e6dccf] bg-white/90 px-4 py-4 text-sm font-semibold text-[#2b241f] shadow-[0_10px_30px_rgba(60,45,30,0.08)] outline-none"
+        >
+          {chapters.map((chapter, index) => (
+            <option key={chapter.id} value={index}>
+              {chapter.label}: {chapter.shortTitle}
+            </option>
+          ))}
+        </select>
       </div>
-    </div>
-  </div>
-</div>
-    <div className="text-xs uppercase tracking-[0.25em] text-white/60">Yun Mandarin Lab</div>
-    <div className="mt-1 text-xl font-semibold">{currentChapter.shortTitle}</div>
-    <div className="mt-1 text-sm text-white/70">{currentChapter.subtitle}</div>
-  </div>
-</div>
-
-<div> className="mx-auto mb-4 max-w-7xl md:hidden">
-  <select
-    value={currentChapterIndex}
-    onChange={(e) => {
-      const nextIndex = Number(e.target.value);
-      setCurrentChapterIndex(nextIndex);
-      setCurrentNodeIndex(0);
-      setSelectedOptionId(null);
-      setShowFeedback(false);
-      setActiveNoteId(chapters[nextIndex].grammarNotes[0].id);
-    }}
-    className="w-full appearance-none rounded-[24px] border border-[#e6dccf] bg-white/90 px-4 py-4 text-sm font-semibold text-[#2b241f] shadow-[0_10px_30px_rgba(60,45,30,0.08)] outline-none"
-  >
-    {chapters.map((chapter, index) => (
-      <option key={chapter.id} value={index}>
-        {chapter.label}: {chapter.shortTitle}
-      </option>
-    ))}
-  </select>
-</div>
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 md:gap-6 lg:grid-cols-[260px_minmax(0,1fr)_320px]">
+            <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 md:gap-6 lg:grid-cols-[260px_minmax(0,1fr)_320px]">
         <Card className="hidden rounded-3xl border-0 shadow-sm lg:block">
           <CardHeader>
             <div className="flex items-center justify-between">
