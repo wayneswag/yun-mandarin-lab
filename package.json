@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@alicloud/pop-core": "latest",
     "@vercel/blob": "latest",
     "openai": "latest",
     "framer-motion": "^11.11.17",
