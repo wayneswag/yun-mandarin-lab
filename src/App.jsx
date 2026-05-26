@@ -1336,8 +1336,10 @@ function MobileTabButton({ active, icon: Icon, label, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`flex flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-xs transition ${
-        active ? 'bg-neutral-900 text-white' : 'text-neutral-500 hover:bg-neutral-100'
+      className={`flex flex-1 flex-col items-center justify-center gap-1 rounded-[22px] px-2 py-2.5 text-xs transition active:scale-95 ${
+        active
+          ? 'bg-[#201a16] text-white shadow-[0_10px_24px_rgba(32,26,22,0.25)]'
+          : 'text-[#7a6d61] hover:bg-[#f3eadf]'
       }`}
     >
       <Icon className="h-5 w-5" />
@@ -1550,7 +1552,7 @@ export default function ChapterUIPrototype() {
     if (currentView === 'home') {
       return (
         <div className="space-y-6">
-          <Card className="overflow-hidden rounded-3xl border-0 shadow-sm">
+          <Card className="hidden overflow-hidden rounded-3xl border-0 shadow-sm md:block">
             <div className="h-56 bg-[radial-gradient(circle_at_top_left,_#dbeafe,_#e5e7eb_55%,_#fafafa)] p-6">
               <div className="flex h-full flex-col justify-between">
                 <div className="flex items-center justify-between">
@@ -1798,7 +1800,7 @@ export default function ChapterUIPrototype() {
 
     return (
       <div className="space-y-6">
-        <Card className="overflow-hidden rounded-3xl border-0 shadow-sm">
+        <Card className="hidden overflow-hidden rounded-3xl border-0 shadow-sm md:block">
           <div className="h-56 bg-[radial-gradient(circle_at_top_left,_#dbeafe,_#e5e7eb_55%,_#fafafa)] p-6">
             <div className="flex h-full flex-col justify-between">
               <div className="flex items-center justify-between">
@@ -1870,10 +1872,10 @@ export default function ChapterUIPrototype() {
                   <button
                     key={option.id}
                     onClick={() => handleSelectOption(option.id)}
-                    className={`rounded-3xl border p-4 text-left transition ${
+                    className={`rounded-[28px] border p-5 text-left transition active:scale-[0.99] ${
                       active
-                        ? 'border-neutral-900 bg-neutral-900 text-white shadow-md'
-                        : 'border-neutral-200 bg-white hover:border-neutral-400 hover:shadow-sm'
+                        ? 'border-[#201a16] bg-[#201a16] text-white shadow-[0_16px_35px_rgba(32,26,22,0.18)]'
+                        : 'border-[#eadfce] bg-white/95 shadow-[0_10px_28px_rgba(60,45,30,0.08)] hover:border-[#d6a856]'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -2123,7 +2125,7 @@ export default function ChapterUIPrototype() {
   const glossaryTermSaved = glossaryTermItem ? isCollected(glossaryTermItem.id) : false;
 
   return (
-    <div className="min-h-screen bg-neutral-50 px-3 pb-24 pt-4 text-neutral-900 md:p-6">
+    <div className="min-h-screen bg-[#f7f2ea] bg-[radial-gradient(circle_at_top_left,_#fff7e6_0,_#f7f2ea_36%,_#efe7db_100%)] px-3 pb-28 pt-4 text-[#201a16] md:p-6">
       <div className="mx-auto mb-6 hidden max-w-7xl gap-3 md:grid md:grid-cols-5">
         <AppSectionButton active={currentView === 'home'} icon={House} title="Home" subtitle="Continue and overview" onClick={() => setCurrentView('home')} />
         <AppSectionButton active={currentView === 'story'} icon={Compass} title="Story" subtitle="Situation practice" onClick={() => setCurrentView('story')} />
@@ -2131,8 +2133,37 @@ export default function ChapterUIPrototype() {
         <AppSectionButton active={currentView === 'review'} icon={RotateCcw} title="Review" subtitle="Fix weak spots" onClick={() => setCurrentView('review')} />
         <AppSectionButton active={currentView === 'settings'} icon={Settings2} title="Settings" subtitle="Pilot controls" onClick={() => setCurrentView('settings')} />
       </div>
-      <div className="mx-auto mb-4 max-w-7xl md:hidden">
-  <div className="rounded-3xl bg-neutral-900 p-4 text-white shadow-sm">
+ <div className="mx-auto mb-4 max-w-7xl md:hidden">
+  <div className="relative overflow-hidden rounded-[34px] bg-[#201a16] p-5 text-white shadow-[0_20px_50px_rgba(32,26,22,0.22)]">
+    <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-[#d6a856]/25 blur-2xl" />
+    <div className="absolute -bottom-16 left-8 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
+
+    <div className="relative">
+      <div className="flex items-center justify-between gap-3">
+        <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">
+          Yun Mandarin Lab
+        </div>
+        <div className="rounded-full bg-[#d6a856] px-3 py-1 text-xs font-semibold text-[#201a16]">
+          {currentChapter.level}
+        </div>
+      </div>
+
+      <div className="mt-6 text-sm text-white/60">{currentChapter.label}</div>
+      <div className="mt-1 text-2xl font-bold tracking-tight">{currentChapter.shortTitle}</div>
+      <div className="mt-2 max-w-xs text-sm leading-5 text-white/75">{currentChapter.subtitle}</div>
+
+      <div className="mt-5">
+        <div className="mb-2 flex items-center justify-between text-xs text-white/55">
+          <span>Chapter progress</span>
+          <span>{currentNodeIndex + 1}/{currentChapter.nodes.length}</span>
+        </div>
+        <div className="h-2 overflow-hidden rounded-full bg-white/15">
+          <div className="h-full rounded-full bg-[#d6a856]" style={{ width: `${chapterProgress}%` }} />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
     <div className="text-xs uppercase tracking-[0.25em] text-white/60">Yun Mandarin Lab</div>
     <div className="mt-1 text-xl font-semibold">{currentChapter.shortTitle}</div>
     <div className="mt-1 text-sm text-white/70">{currentChapter.subtitle}</div>
@@ -2150,7 +2181,7 @@ export default function ChapterUIPrototype() {
       setShowFeedback(false);
       setActiveNoteId(chapters[nextIndex].grammarNotes[0].id);
     }}
-    className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm font-medium shadow-sm"
+    className="w-full appearance-none rounded-[24px] border border-[#e6dccf] bg-white/90 px-4 py-4 text-sm font-semibold text-[#2b241f] shadow-[0_10px_30px_rgba(60,45,30,0.08)] outline-none"
   >
     {chapters.map((chapter, index) => (
       <option key={chapter.id} value={index}>
@@ -2247,12 +2278,22 @@ export default function ChapterUIPrototype() {
         </Card>
 
         {renderMainView()}
-        
-       <div className="hidden lg:block">
-        {renderRightPanel()}
+
+        <div className="hidden lg:block">
+          {renderRightPanel()}
+        </div>
       </div>
-   </div>
-      
+
+      <div className="fixed inset-x-0 bottom-3 z-40 px-3 md:hidden">
+        <div className="mx-auto flex max-w-md gap-1 rounded-[30px] border border-[#e8ded1] bg-[#fffaf3]/95 p-2 shadow-[0_18px_45px_rgba(38,30,24,0.18)] backdrop-blur">
+          <MobileTabButton active={currentView === 'home'} icon={House} label="Home" onClick={() => setCurrentView('home')} />
+          <MobileTabButton active={currentView === 'story'} icon={Compass} label="Story" onClick={() => setCurrentView('story')} />
+          <MobileTabButton active={currentView === 'favorites'} icon={Bookmark} label="Saved" onClick={() => setCurrentView('favorites')} />
+          <MobileTabButton active={currentView === 'review'} icon={RotateCcw} label="Review" onClick={() => setCurrentView('review')} />
+          <MobileTabButton active={currentView === 'settings'} icon={Settings2} label="Settings" onClick={() => setCurrentView('settings')} />
+        </div>
+      </div>
+
       <AnimatePresence>
         {showFeedback && selectedOption && currentView === 'story' && (
           <motion.div
