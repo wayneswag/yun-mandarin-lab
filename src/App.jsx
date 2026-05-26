@@ -2170,7 +2170,7 @@ export default function ChapterUIPrototype() {
   </div>
 </div>
 
-<div className="mx-auto mb-4 max-w-7xl md:hidden">
+<div> className="mx-auto mb-4 max-w-7xl md:hidden">
   <select
     value={currentChapterIndex}
     onChange={(e) => {
