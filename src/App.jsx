@@ -92,10 +92,23 @@ function AudioButton({ audioId = '', text, dark = false, small = false }) {
       const audio = new Audio(remoteUrl);
       audio.playbackRate = getSavedAudioRate();
       await audio.play();
-    } catch (error) {
-      console.error('TTS audio failed:', error);
-      alert(error?.message || 'TTS audio failed. Check Vercel logs.');
-    } finally {
+   } catch (error) {
+  console.error('TTS audio failed:', error);
+
+  const message = String(error?.message || '');
+
+  if (
+    message.includes('ACCESS_DENIED') ||
+    message.includes('token') ||
+    message.includes('signature') ||
+    message.includes('AccessKey') ||
+    message.includes('Aliyun')
+  ) {
+    alert('Audio is temporarily unavailable. Please try again later.');
+  } else {
+    alert('Audio could not be played. Please check your connection and try again.');
+  }
+} finally {
       setTimeout(() => setIsLoading(false), 300);
     }
   };
@@ -109,7 +122,11 @@ function AudioButton({ audioId = '', text, dark = false, small = false }) {
       aria-label="Play audio"
       title="Play audio"
     >
-      <Volume2 className={`${small ? 'h-4 w-4' : 'h-4 w-4'} ${dark ? 'text-white' : 'text-neutral-700'} ${isLoading ? 'opacity-50' : ''}`} />
+      {isLoading ? (
+        <span className={`inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent ${dark ? 'text-white' : 'text-neutral-700'}`} />
+      ) : (
+        <Volume2 className={`${small ? 'h-4 w-4' : 'h-4 w-4'} ${dark ? 'text-white' : 'text-neutral-700'}`} />
+)}
     </button>
   );
 }
