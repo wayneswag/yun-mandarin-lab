@@ -1,5 +1,8 @@
 import { list, put } from '@vercel/blob';
 import { createHash } from 'node:crypto';
+import PopCore from '@alicloud/pop-core';
+
+const { RPCClient } = PopCore;
 
 const ALIYUN_TTS_ENDPOINT = 'https://nls-gateway-cn-shanghai.aliyuncs.com/stream/v1/tts';
 
@@ -7,6 +10,10 @@ const DEFAULT_VOICE = process.env.ALIYUN_TTS_VOICE || 'xiaoyun';
 const DEFAULT_SAMPLE_RATE = 16000;
 const DEFAULT_FORMAT = 'mp3';
 const MAX_TEXT_LENGTH = 300;
+
+let cachedAliyunToken = null;
+let cachedAliyunTokenExpireTime = 0;
+let aliyunTokenPromise = null;
 
 const OPENAI_VOICE_NAMES = new Set([
   'nova',
@@ -17,6 +24,63 @@ const OPENAI_VOICE_NAMES = new Set([
   'alloy',
   'coral',
 ]);
+
+async function createAliyunToken() {
+  if (!process.env.ALIYUN_AK_ID || !process.env.ALIYUN_AK_SECRET) {
+    if (process.env.ALIYUN_NLS_TOKEN) {
+      return {
+        token: process.env.ALIYUN_NLS_TOKEN,
+        expireTime: 0,
+      };
+    }
+
+    throw new Error('Missing ALIYUN_AK_ID / ALIYUN_AK_SECRET in Vercel Environment Variables.');
+  }
+
+  const client = new RPCClient({
+    accessKeyId: process.env.ALIYUN_AK_ID,
+    accessKeySecret: process.env.ALIYUN_AK_SECRET,
+    endpoint: 'http://nls-meta.cn-shanghai.aliyuncs.com',
+    apiVersion: '2019-02-28',
+  });
+
+  const result = await client.request('CreateToken', {}, { method: 'POST' });
+
+  const token = result?.Token?.Id;
+  const expireTime = Number(result?.Token?.ExpireTime || 0);
+
+  if (!token) {
+    throw new Error(`Failed to create Aliyun token: ${JSON.stringify(result)}`);
+  }
+
+  return { token, expireTime };
+}
+
+async function getAliyunToken() {
+  const now = Math.floor(Date.now() / 1000);
+
+  if (
+    cachedAliyunToken &&
+    cachedAliyunTokenExpireTime &&
+    now < cachedAliyunTokenExpireTime - 300
+  ) {
+    return cachedAliyunToken;
+  }
+
+  if (aliyunTokenPromise) return aliyunTokenPromise;
+
+  aliyunTokenPromise = createAliyunToken()
+    .then(({ token, expireTime }) => {
+      cachedAliyunToken = token;
+      cachedAliyunTokenExpireTime = expireTime;
+      return token;
+    })
+    .finally(() => {
+      aliyunTokenPromise = null;
+    });
+
+  return aliyunTokenPromise;
+}
 
 function sendJson(res, statusCode, data) {
   res.statusCode = statusCode;
@@ -39,14 +103,10 @@ async function readJsonBody(req) {
 function normalizeVoice(voice) {
   const cleanVoice = String(voice || '').trim();
 
-  // 你现在 App.jsx 可能还会传 nova / alloy 这种 OpenAI voice。
-  // 这里直接忽略，自动改成阿里云默认发音人，避免再次报错。
   if (!cleanVoice || OPENAI_VOICE_NAMES.has(cleanVoice.toLowerCase())) {
     return DEFAULT_VOICE;
   }
 
-  // 阿里云发音人一般是 xiaoyun、xiaogang 等代码。
-  // 这里只做基本安全过滤。
   if (/^[a-zA-Z0-9_-]+$/.test(cleanVoice)) {
     return cleanVoice;
   }
@@ -83,7 +143,7 @@ async function findExistingBlob(pathname) {
 
 async function synthesizeWithAliyun({ text, voice }) {
   const appkey = process.env.ALIYUN_NLS_APP_KEY;
-  const token = process.env.ALIYUN_NLS_TOKEN;
+  const token = await getAliyunToken();
 
   const response = await fetch(ALIYUN_TTS_ENDPOINT, {
     method: 'POST',
@@ -107,7 +167,6 @@ async function synthesizeWithAliyun({ text, voice }) {
   const arrayBuffer = await response.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
-  // 阿里云成功时应该返回音频二进制；失败时通常返回 JSON / 文本错误。
   if (!response.ok || contentType.includes('application/json') || contentType.includes('text/')) {
     const detail = buffer.toString('utf8');
     throw new Error(`Aliyun TTS failed. status=${response.status}; detail=${detail}`);
@@ -134,13 +193,6 @@ export default async function handler(req, res) {
     if (!process.env.ALIYUN_NLS_APP_KEY) {
       sendJson(res, 500, {
         error: 'Missing ALIYUN_NLS_APP_KEY in Vercel Environment Variables.',
-      });
-      return;
-    }
-
-    if (!process.env.ALIYUN_NLS_TOKEN) {
-      sendJson(res, 500, {
-        error: 'Missing ALIYUN_NLS_TOKEN in Vercel Environment Variables.',
       });
       return;
     }
