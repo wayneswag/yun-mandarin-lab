@@ -4,30 +4,24 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
-function EmojiIcon({ symbol, className = '' }) {
-  return (
-    <span aria-hidden="true" className={`inline-flex items-center justify-center leading-none ${className}`}>
-      {symbol}
-    </span>
-  );
-}
-
-const CheckCircle2 = ({ className }) => <EmojiIcon symbol="✅" className={className} />;
-const XCircle = ({ className }) => <EmojiIcon symbol="❌" className={className} />;
-const MessageSquareQuote = ({ className }) => <EmojiIcon symbol="💬" className={className} />;
-const BookOpen = ({ className }) => <EmojiIcon symbol="📘" className={className} />;
-const Sparkles = ({ className }) => <EmojiIcon symbol="✨" className={className} />;
-const Volume2 = ({ className }) => <EmojiIcon symbol="🔊" className={className} />;
-const ChevronRight = ({ className }) => <EmojiIcon symbol="›" className={className} />;
-const Heart = ({ className }) => <EmojiIcon symbol="💗" className={className} />;
-const BrainCircuit = ({ className }) => <EmojiIcon symbol="🧠" className={className} />;
-const CalendarDays = ({ className }) => <EmojiIcon symbol="📅" className={className} />;
-const Home = ({ className }) => <EmojiIcon symbol="🏠" className={className} />;
-const House = ({ className }) => <EmojiIcon symbol="⌂" className={className} />;
-const Compass = ({ className }) => <EmojiIcon symbol="🧭" className={className} />;
-const Bookmark = ({ className }) => <EmojiIcon symbol="🔖" className={className} />;
-const RotateCcw = ({ className }) => <EmojiIcon symbol="↺" className={className} />;
-const Settings2 = ({ className }) => <EmojiIcon symbol="⚙️" className={className} />;
+import {
+  CheckCircle2,
+  XCircle,
+  MessageSquareQuote,
+  BookOpen,
+  Sparkles,
+  Volume2,
+  ChevronRight,
+  Heart,
+  BrainCircuit,
+  CalendarDays,
+  Home,
+  House,
+  Compass,
+  Bookmark,
+  RotateCcw,
+  Settings2,
+} from 'lucide-react';
 
 const STORAGE_KEY = 'yun-mandarin-lab-pilot-v4';
 
