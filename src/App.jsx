@@ -2402,22 +2402,27 @@ export default function ChapterUIPrototype() {
               className="max-h-[88vh] w-full overflow-y-auto rounded-t-[34px] bg-[#fffaf3] p-5 shadow-[0_-18px_50px_rgba(0,0,0,0.20)] md:max-w-3xl md:rounded-[28px] md:bg-white md:p-6 md:shadow-2xl"
             >
               <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[#d8c9b8] md:hidden" />
-                <div>
+                <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <Badge className="rounded-full bg-sky-100 text-sky-800">Tap Glossary</Badge>
                     <Badge variant="outline" className="rounded-full">{selectedGlossary.pinyin}</Badge>
                   </div>
+                   
                   <div className="mt-3 flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <h3 className={`${glossaryTitleClass} font-semibold`}>{selectedGlossary.title}</h3>
                       <AudioButton audioId={`glossary.${normalizeAudioKey(selectedGlossary.pinyin || selectedGlossary.title)}.term`} text={selectedGlossary.title} />
                     </div>
+                    
                     {glossaryTermItem && (
                       <SaveButton saved={glossaryTermSaved} onClick={() => toggleCollected(glossaryTermItem)} />
                     )}
                   </div>
+                   
                   <p className="mt-1 text-sm text-neutral-600">{selectedGlossary.translation}</p>
                 </div>
+                  
                 <div className="mt-4 grid grid-cols-2 gap-2 md:mt-0 md:flex md:items-center">
                   <Button
                     variant={glossaryShowPinyin ? 'default' : 'outline'}
@@ -2426,6 +2431,7 @@ export default function ChapterUIPrototype() {
                   >
                     Glossary Pinyin
                   </Button>
+                  
                   <Button
                     variant={glossaryShowEnglish ? 'default' : 'outline'}
                     className="rounded-2xl"
@@ -2433,9 +2439,13 @@ export default function ChapterUIPrototype() {
                   >
                     Glossary English
                   </Button>
+                  
                   <Button variant="outline" className="rounded-2xl" onClick={() => setSelectedGlossaryKey(null)}>Close</Button>
+                    Close
+                  </Button>
                 </div>
               </div>
+              
 
               <div className="mt-5 rounded-2xl bg-neutral-100 p-4 text-sm leading-6 text-neutral-700">
                 {selectedGlossary.explanation}
