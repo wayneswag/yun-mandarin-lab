@@ -1834,7 +1834,7 @@ export default function ChapterUIPrototype() {
                 <p className="text-sm text-neutral-500">Current mission</p>
                 <h3 className="text-lg font-semibold">{currentNode.mission}</h3>
               </div>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-2 gap-2 md:flex">
                 <Button variant={showPinyin ? 'default' : 'outline'} className="rounded-2xl" onClick={() => setShowPinyin((v) => !v)}>
                   Pinyin
                 </Button>
@@ -2307,14 +2307,15 @@ export default function ChapterUIPrototype() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6"
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 p-0 md:items-center md:p-6"
           >
             <motion.div
               initial={{ y: 24, opacity: 0, scale: 0.98 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 12, opacity: 0, scale: 0.98 }}
-              className="w-full max-w-2xl rounded-[28px] bg-white p-6 shadow-2xl"
+              className="max-h-[88vh] w-full overflow-y-auto rounded-t-[34px] bg-[#fffaf3] p-5 shadow-[0_-18px_50px_rgba(0,0,0,0.22)] md:max-w-2xl md:rounded-[28px] md:bg-white md:p-6 md:shadow-2xl"
             >
+              <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[#d8c9b8] md:hidden" />
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="mb-2 flex items-center gap-2">
@@ -2335,11 +2336,11 @@ export default function ChapterUIPrototype() {
               </div>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <div className="rounded-2xl bg-neutral-100 p-4">
+                <div className="rounded-2xl border border-[#eadfce] bg-white/80 p-4">
                   <div className="mb-2 text-sm font-medium">Why this answer feels this way</div>
                   <p className="text-sm text-neutral-700">{selectedOption.explanation}</p>
                 </div>
-                <div className="rounded-2xl bg-neutral-100 p-4">
+                <div className="rounded-2xl border border-[#eadfce] bg-white/80 p-4">
                   <div className="mb-2 text-sm font-medium">Scene consequence</div>
                   <p className="text-sm text-neutral-700">
                     Social comfort {selectedOption.relationship >= 0 ? '+' : ''}{selectedOption.relationship} · Naturalness +{selectedOption.score * 8}
@@ -2366,7 +2367,7 @@ export default function ChapterUIPrototype() {
                 </div>
               )}
 
-              <div className="mt-6 flex justify-between gap-3">
+              <div className="mt-6 flex flex-col-reverse gap-3 md:flex-row md:justify-between"
                 <div className="flex gap-2">
                   <Button variant="outline" className="rounded-2xl" onClick={handlePreviousNode} disabled={currentNodeIndex === 0}>
                     Previous
@@ -2375,7 +2376,7 @@ export default function ChapterUIPrototype() {
                     Next
                   </Button>
                 </div>
-                <Button className="rounded-2xl px-6" onClick={handleContinue}>
+                <Button className="h-12 rounded-2xl px-6 text-base font-semibold md:h-auto" onClick={handleContinue}>
                   {isLastNode ? (isLastChapter ? 'Finish prototype' : 'Next chapter') : 'Back to lesson'}
                 </Button>
               </div>
@@ -2390,7 +2391,7 @@ export default function ChapterUIPrototype() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 flex items-end justify-center bg-black/30 p-4"
+            className="fixed inset-0 z-40 flex items-end justify-center bg-black/35 p-0 md:p-4"
             onClick={() => setSelectedGlossaryKey(null)}
           >
             <motion.div
@@ -2398,9 +2399,9 @@ export default function ChapterUIPrototype() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 20, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-3xl rounded-[28px] bg-white p-6 shadow-2xl"
+              className="max-h-[88vh] w-full overflow-y-auto rounded-t-[34px] bg-[#fffaf3] p-5 shadow-[0_-18px_50px_rgba(0,0,0,0.20)] md:max-w-3xl md:rounded-[28px] md:bg-white md:p-6 md:shadow-2xl"
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[#d8c9b8] md:hidden" />
                 <div>
                   <div className="flex items-center gap-2">
                     <Badge className="rounded-full bg-sky-100 text-sky-800">Tap Glossary</Badge>
@@ -2417,7 +2418,7 @@ export default function ChapterUIPrototype() {
                   </div>
                   <p className="mt-1 text-sm text-neutral-600">{selectedGlossary.translation}</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="mt-4 grid grid-cols-2 gap-2 md:mt-0 md:flex md:items-center"
                   <Button
                     variant={glossaryShowPinyin ? 'default' : 'outline'}
                     className="rounded-2xl"
