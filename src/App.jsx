@@ -1918,21 +1918,40 @@ export default function ChapterUIPrototype() {
               })}
             </div>
 
-            <div className="mt-6 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <Button variant="outline" className="rounded-2xl" onClick={handlePreviousNode} disabled={currentNodeIndex === 0 || showFeedback}>
-                  Previous
-                </Button>
-                <Button variant="outline" className="rounded-2xl" onClick={handleNextNode} disabled={isLastNode || showFeedback}>
-                  Next
-                </Button>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-neutral-500">
-                <BrainCircuit className="h-4 w-4" />
-                Pick what sounds most natural in this social situation.
-              </div>
-              <Button className="rounded-2xl px-6" disabled={!selectedOption} onClick={handleSubmit}>Submit</Button>
-            </div>
+           <div className="mt-6 space-y-3">
+  <div className="flex items-center gap-2 rounded-2xl bg-[#fff8ef] px-4 py-3 text-sm leading-5 text-[#6f6257]">
+    <BrainCircuit className="h-4 w-4 shrink-0" />
+    <span>Choose the reply that sounds most natural.</span>
+  </div>
+
+  <div className="grid grid-cols-2 gap-3">
+    <Button
+      variant="outline"
+      className="h-12 rounded-2xl text-base font-semibold"
+      onClick={handlePreviousNode}
+      disabled={currentNodeIndex === 0 || showFeedback}
+    >
+      Previous
+    </Button>
+
+    <Button
+      variant="outline"
+      className="h-12 rounded-2xl text-base font-semibold"
+      onClick={handleNextNode}
+      disabled={isLastNode || showFeedback}
+    >
+      Next
+    </Button>
+  </div>
+
+  <Button
+    className="h-14 w-full rounded-[22px] bg-[#201a16] text-base font-semibold shadow-[0_14px_30px_rgba(32,26,22,0.20)]"
+    disabled={!selectedOption}
+    onClick={handleSubmit}
+  >
+    Submit
+  </Button>
+</div>
           </CardContent>
         </Card>
       </div>
