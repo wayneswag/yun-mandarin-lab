@@ -2440,9 +2440,9 @@ export default function ChapterUIPrototype() {
                     Glossary English
                   </Button>
                   
-                  <Button variant="outline" className="rounded-2xl" onClick={() => setSelectedGlossaryKey(null)}>Close</Button>
-                    Close
-                  </Button>
+                 <Button variant="outline" className="rounded-2xl" onClick={() => setSelectedGlossaryKey(null)}>
+                 Close
+                 </Button>
                 </div>
               </div>
               
