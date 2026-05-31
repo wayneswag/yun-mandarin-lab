@@ -2367,7 +2367,7 @@ export default function ChapterUIPrototype() {
                 </div>
               )}
 
-              <div className="mt-6 flex flex-col-reverse gap-3 md:flex-row md:justify-between"
+              <div className="mt-6 flex flex-col-reverse gap-3 md:flex-row md:justify-between">
                 <div className="flex gap-2">
                   <Button variant="outline" className="rounded-2xl" onClick={handlePreviousNode} disabled={currentNodeIndex === 0}>
                     Previous
@@ -2418,7 +2418,7 @@ export default function ChapterUIPrototype() {
                   </div>
                   <p className="mt-1 text-sm text-neutral-600">{selectedGlossary.translation}</p>
                 </div>
-                <div className="mt-4 grid grid-cols-2 gap-2 md:mt-0 md:flex md:items-center"
+                <div className="mt-4 grid grid-cols-2 gap-2 md:mt-0 md:flex md:items-center">
                   <Button
                     variant={glossaryShowPinyin ? 'default' : 'outline'}
                     className="rounded-2xl"
