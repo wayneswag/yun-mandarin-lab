@@ -1829,20 +1829,30 @@ export default function ChapterUIPrototype() {
 
         <Card className="rounded-3xl border-0 shadow-sm">
           <CardContent className="p-6">
-            <div className="mb-5 flex items-center justify-between gap-4">
-              <div>
-                <p className="text-sm text-neutral-500">Current mission</p>
-                <h3 className="text-lg font-semibold">{currentNode.mission}</h3>
-              </div>
-              <div className="grid grid-cols-2 gap-2 md:flex">
-                <Button variant={showPinyin ? 'default' : 'outline'} className="rounded-2xl" onClick={() => setShowPinyin((v) => !v)}>
-                  Pinyin
-                </Button>
-                <Button variant={showEnglish ? 'default' : 'outline'} className="rounded-2xl" onClick={() => setShowEnglish((v) => !v)}>
-                  English
-                </Button>
-              </div>
-            </div>
+           <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+  <div className="min-w-0 w-full md:w-auto">
+    <p className="text-sm text-neutral-500">Current mission</p>
+    <h3 className="text-lg font-semibold leading-snug">{currentNode.mission}</h3>
+  </div>
+
+  <div className="grid w-full grid-cols-2 gap-3 md:w-auto md:flex md:items-center">
+    <Button
+      variant={showPinyin ? 'default' : 'outline'}
+      className="h-12 w-full rounded-2xl px-5 text-base font-semibold whitespace-nowrap md:h-10 md:w-auto md:min-w-[88px] md:px-4 md:text-sm"
+      onClick={() => setShowPinyin((v) => !v)}
+    >
+      Pinyin
+    </Button>
+
+    <Button
+      variant={showEnglish ? 'default' : 'outline'}
+      className="h-12 w-full rounded-2xl px-5 text-base font-semibold whitespace-nowrap md:h-10 md:w-auto md:min-w-[88px] md:px-4 md:text-sm"
+      onClick={() => setShowEnglish((v) => !v)}
+    >
+      English
+    </Button>
+  </div>
+</div>
 
             <div className="mb-4 flex items-center justify-between text-sm text-neutral-500">
               <span>Tip: tap highlighted words or phrases for meaning, explanation, and practical examples.</span>
