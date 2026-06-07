@@ -1810,7 +1810,7 @@ export default function ChapterUIPrototype() {
     }
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 pb-8 md:space-y-6 md:pb-0">
         <Card className="hidden overflow-hidden rounded-3xl border-0 shadow-sm md:block">
           <div className="h-56 bg-[radial-gradient(circle_at_top_left,_#dbeafe,_#e5e7eb_55%,_#fafafa)] p-6">
             <div className="flex h-full flex-col justify-between">
@@ -1828,30 +1828,30 @@ export default function ChapterUIPrototype() {
         </Card>
 
         <Card className="rounded-3xl border-0 shadow-sm">
-          <CardContent className="p-6">
-            <div className="mb-5 flex items-center justify-between gap-4">
-              <div>
+          <CardContent className="p-4 md:p-6">
+            <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div className="min-w-0 w-full md:w-auto">
                 <p className="text-sm text-neutral-500">Current mission</p>
-                <h3 className="text-lg font-semibold">{currentNode.mission}</h3>
+                <h3 className="text-lg font-semibold leading-snug">{currentNode.mission}</h3>
               </div>
-              <div className="grid grid-cols-2 gap-2 md:flex">
-                <Button variant={showPinyin ? 'default' : 'outline'} className="rounded-2xl" onClick={() => setShowPinyin((v) => !v)}>
+              <div className="grid w-full grid-cols-2 gap-3 md:w-auto md:flex md:items-center">
+                <Button variant={showPinyin ? 'default' : 'outline'} className="h-12 w-full rounded-2xl px-5 text-base font-semibold whitespace-nowrap md:h-10 md:w-auto md:min-w-[88px] md:px-4 md:text-sm" onClick={() => setShowPinyin((v) => !v)}>
                   Pinyin
                 </Button>
-                <Button variant={showEnglish ? 'default' : 'outline'} className="rounded-2xl" onClick={() => setShowEnglish((v) => !v)}>
+                <Button variant={showEnglish ? 'default' : 'outline'} className="h-12 w-full rounded-2xl px-5 text-base font-semibold whitespace-nowrap md:h-10 md:w-auto md:min-w-[88px] md:px-4 md:text-sm" onClick={() => setShowEnglish((v) => !v)}>
                   English
                 </Button>
               </div>
             </div>
 
-            <div className="mb-4 flex items-center justify-between text-sm text-neutral-500">
-              <span>Tip: tap highlighted words or phrases for meaning, explanation, and practical examples.</span>
-              <span className="font-medium">{currentNodeIndex + 1}/{currentChapter.nodes.length}</span>
+            <div className="mb-4 flex items-start justify-between gap-3 text-neutral-500">
+              <span className="min-w-0 flex-1 text-xs leading-5 sm:text-sm">Tip: tap highlighted words or phrases for meaning, explanation, and practical examples.</span>
+              <span className="shrink-0 text-sm font-medium">{currentNodeIndex + 1}/{currentChapter.nodes.length}</span>
             </div>
             <Progress value={chapterProgress} className="h-2" />
 
-            <motion.div layout className="mt-4 rounded-3xl bg-neutral-100 p-5">
-              <div className="mb-3 flex items-center gap-2 text-sm text-neutral-500">
+            <motion.div layout className="mt-3 rounded-[24px] bg-neutral-100 p-4 md:mt-4 md:rounded-3xl md:p-5">
+              <div className="mb-2 flex items-center gap-2 text-sm text-neutral-500 md:mb-3">
                 <MessageSquareQuote className="h-4 w-4" /> {currentNode.npc}
                 <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.npc`} text={currentNode.npcLineZh} />
               </div>
@@ -1864,7 +1864,7 @@ export default function ChapterUIPrototype() {
               </div>
             </motion.div>
 
-            <div className="mt-6 grid gap-3">
+            <div className="mt-4 grid gap-2.5 md:mt-6 md:gap-3">
               {displayOptions.map((option) => {
                 const active = selectedOptionId === option.id;
                 const optionCollectionItem = createCollectionItem({
@@ -1883,7 +1883,7 @@ export default function ChapterUIPrototype() {
                   <button
                     key={option.id}
                     onClick={() => handleSelectOption(option.id)}
-                    className={`rounded-[28px] border p-5 text-left transition active:scale-[0.99] ${
+                    className={`rounded-[24px] border p-4 text-left transition active:scale-[0.99] md:rounded-[28px] md:p-5 ${
                       active
                         ? 'border-[#201a16] bg-[#201a16] text-white shadow-[0_16px_35px_rgba(32,26,22,0.18)]'
                         : 'border-[#eadfce] bg-white/95 shadow-[0_10px_28px_rgba(60,45,30,0.08)] hover:border-[#d6a856]'
@@ -1918,40 +1918,40 @@ export default function ChapterUIPrototype() {
               })}
             </div>
 
-           <div className="mt-6 space-y-3">
-  <div className="flex items-center gap-2 rounded-2xl bg-[#fff8ef] px-4 py-3 text-sm leading-5 text-[#6f6257]">
-    <BrainCircuit className="h-4 w-4 shrink-0" />
-    <span>Choose the reply that sounds most natural.</span>
-  </div>
+            <div className="mt-6 space-y-3">
+              <div className="flex w-full items-center gap-2 rounded-2xl bg-[#fff8ef] px-4 py-3 text-left text-sm leading-5 text-[#6f6257]">
+                <BrainCircuit className="h-4 w-4 shrink-0" />
+                <span className="min-w-0">Choose the reply that sounds most natural.</span>
+              </div>
 
-  <div className="grid grid-cols-2 gap-3">
-    <Button
-      variant="outline"
-      className="h-12 rounded-2xl text-base font-semibold"
-      onClick={handlePreviousNode}
-      disabled={currentNodeIndex === 0 || showFeedback}
-    >
-      Previous
-    </Button>
+              <div className="grid w-full grid-cols-2 gap-3">
+                <Button
+                  variant="outline"
+                  className="h-12 w-full rounded-2xl text-base font-semibold"
+                  onClick={handlePreviousNode}
+                  disabled={currentNodeIndex === 0 || showFeedback}
+                >
+                  Previous
+                </Button>
 
-    <Button
-      variant="outline"
-      className="h-12 rounded-2xl text-base font-semibold"
-      onClick={handleNextNode}
-      disabled={isLastNode || showFeedback}
-    >
-      Next
-    </Button>
-  </div>
+                <Button
+                  variant="outline"
+                  className="h-12 w-full rounded-2xl text-base font-semibold"
+                  onClick={handleNextNode}
+                  disabled={isLastNode || showFeedback}
+                >
+                  Next
+                </Button>
+              </div>
 
-  <Button
-    className="h-14 w-full rounded-[22px] bg-[#201a16] text-base font-semibold shadow-[0_14px_30px_rgba(32,26,22,0.20)]"
-    disabled={!selectedOption}
-    onClick={handleSubmit}
-  >
-    Submit
-  </Button>
-</div>
+              <Button
+                className="h-14 w-full rounded-[22px] bg-[#201a16] text-base font-semibold shadow-[0_14px_30px_rgba(32,26,22,0.20)]"
+                disabled={!selectedOption}
+                onClick={handleSubmit}
+              >
+                Submit
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -2155,7 +2155,7 @@ export default function ChapterUIPrototype() {
   const glossaryTermSaved = glossaryTermItem ? isCollected(glossaryTermItem.id) : false;
 
   return (
-    <div className="min-h-screen bg-[#f7f2ea] bg-[radial-gradient(circle_at_top_left,_#fff7e6_0,_#f7f2ea_36%,_#efe7db_100%)] px-3 pb-28 pt-4 text-[#201a16] md:p-6">
+    <div className="min-h-screen bg-[#f7f2ea] bg-[radial-gradient(circle_at_top_left,_#fff7e6_0,_#f7f2ea_36%,_#efe7db_100%)] px-3 pb-36 pt-4 text-[#201a16] md:p-6">
       <div className="mx-auto mb-6 hidden max-w-7xl gap-3 md:grid md:grid-cols-5">
         <AppSectionButton active={currentView === 'home'} icon={House} title="Home" subtitle="Continue and overview" onClick={() => setCurrentView('home')} />
         <AppSectionButton active={currentView === 'story'} icon={Compass} title="Story" subtitle="Situation practice" onClick={() => setCurrentView('story')} />
