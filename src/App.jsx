@@ -1473,6 +1473,7 @@ export default function ChapterUIPrototype() {
     fontScale,
     nodeSelections,
   ]);
+  appStateRef.current = appState;
 
   const isCollected = (id) => collected.some((item) => item.id === id);
 
@@ -1514,7 +1515,6 @@ export default function ChapterUIPrototype() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    appStateRef.current = appState;
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
   }, [appState]);
 
@@ -1552,46 +1552,51 @@ export default function ChapterUIPrototype() {
 
     let cancelled = false;
     setCloudSyncReady(false);
-    setSyncStatus('Checking cloud sync...');
+    setSyncStatus('Signed in. Checking cloud sync...');
 
     const loadCloudState = async () => {
-      const { data, error } = await supabase
-        .from('user_app_state')
-        .select('state')
-        .eq('user_id', session.user.id)
-        .maybeSingle();
+      try {
+        const { data, error } = await supabase
+          .from('user_app_state')
+          .select('state')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
 
-      if (cancelled) return;
+        if (cancelled) return;
 
-      if (error) {
-        setSyncStatus(`Cloud sync unavailable: ${error.message}`);
-        return;
-      }
+        if (error) {
+          setSyncStatus(`Cloud sync unavailable: ${error.message}`);
+          return;
+        }
 
-      if (data?.state) {
-        applyAppState(data.state);
-        setSyncStatus('Cloud progress loaded.');
+        if (data?.state) {
+          appStateRef.current = data.state;
+          applyAppState(data.state);
+          setSyncStatus('Cloud progress loaded.');
+          setCloudSyncReady(true);
+          return;
+        }
+
+        const { error: uploadError } = await supabase
+          .from('user_app_state')
+          .upsert({
+            user_id: session.user.id,
+            state: appStateRef.current || appState,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'user_id' });
+
+        if (cancelled) return;
+
+        if (uploadError) {
+          setSyncStatus(`Cloud sync unavailable: ${uploadError.message}`);
+          return;
+        }
+
+        setSyncStatus('Local progress uploaded to cloud.');
         setCloudSyncReady(true);
-        return;
+      } catch (error) {
+        if (!cancelled) setSyncStatus(`Cloud sync unavailable: ${error.message}`);
       }
-
-      const { error: uploadError } = await supabase
-        .from('user_app_state')
-        .upsert({
-          user_id: session.user.id,
-          state: appStateRef.current || appState,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'user_id' });
-
-      if (cancelled) return;
-
-      if (uploadError) {
-        setSyncStatus(`Cloud sync unavailable: ${uploadError.message}`);
-        return;
-      }
-
-      setSyncStatus('Local progress uploaded to cloud.');
-      setCloudSyncReady(true);
     };
 
     loadCloudState();
@@ -1606,15 +1611,19 @@ export default function ChapterUIPrototype() {
 
     const timeoutId = window.setTimeout(async () => {
       setSyncStatus('Syncing...');
-      const { error } = await supabase
-        .from('user_app_state')
-        .upsert({
-          user_id: session.user.id,
-          state: appState,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'user_id' });
+      try {
+        const { error } = await supabase
+          .from('user_app_state')
+          .upsert({
+            user_id: session.user.id,
+            state: appState,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'user_id' });
 
-      setSyncStatus(error ? `Cloud sync unavailable: ${error.message}` : 'Synced to cloud.');
+        setSyncStatus(error ? `Cloud sync unavailable: ${error.message}` : 'Synced to cloud.');
+      } catch (error) {
+        setSyncStatus(`Cloud sync unavailable: ${error.message}`);
+      }
     }, 900);
 
     return () => window.clearTimeout(timeoutId);
@@ -1742,6 +1751,35 @@ export default function ChapterUIPrototype() {
 
     setAuthPassword('');
     setAuthMessage('Signed out. Guest mode is still available.');
+  };
+
+  const handleSyncNow = async () => {
+    if (!supabase || !session?.user?.id) {
+      setSyncStatus('Guest mode. Progress is saved on this device.');
+      return;
+    }
+
+    setSyncStatus('Syncing...');
+
+    try {
+      const { error } = await supabase
+        .from('user_app_state')
+        .upsert({
+          user_id: session.user.id,
+          state: appStateRef.current || appState,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' });
+
+      if (error) {
+        setSyncStatus(`Cloud sync unavailable: ${error.message}`);
+        return;
+      }
+
+      setCloudSyncReady(true);
+      setSyncStatus('Synced to cloud.');
+    } catch (error) {
+      setSyncStatus(`Cloud sync unavailable: ${error.message}`);
+    }
   };
 
   const resetPilot = () => {
@@ -1954,7 +1992,9 @@ export default function ChapterUIPrototype() {
           <Card className="rounded-3xl border-0 shadow-sm">
             <CardHeader>
               <CardTitle className="text-2xl">Pilot Settings</CardTitle>
-              <p className="text-sm text-neutral-500">Guest progress stays on this device. Sign in to sync across devices.</p>
+              <p className="text-sm text-neutral-500">
+                {session?.user ? 'Progress is syncing with your account.' : 'Guest progress stays on this device. Sign in to sync across devices.'}
+              </p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="rounded-2xl bg-neutral-100 p-4">
@@ -1966,11 +2006,15 @@ export default function ChapterUIPrototype() {
                       <div className="mt-1 font-medium text-neutral-900">{session.user.email}</div>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
+                      <Button className="h-9 rounded-2xl px-4 text-sm" onClick={handleSyncNow} disabled={authLoading}>
+                        Sync now
+                      </Button>
                       <Button variant="outline" className="rounded-2xl" onClick={handleSignOut} disabled={authLoading}>
                         Sign out
                       </Button>
-                      <span className="text-sm text-neutral-600">{authMessage || syncStatus}</span>
                     </div>
+                    {authMessage && <div className="text-sm text-neutral-600">{authMessage}</div>}
+                    <div className="text-sm font-medium text-neutral-700">{syncStatus}</div>
                   </div>
                 ) : (
                   <div className="mt-3 space-y-3">
@@ -1998,7 +2042,8 @@ export default function ChapterUIPrototype() {
                         Sign up
                       </Button>
                     </div>
-                    <div className="text-sm text-neutral-600">{authMessage || syncStatus}</div>
+                    {authMessage && <div className="text-sm text-neutral-600">{authMessage}</div>}
+                    <div className="text-sm font-medium text-neutral-700">{syncStatus}</div>
                   </div>
                 )}
               </div>
