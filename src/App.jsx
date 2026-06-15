@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +25,11 @@ import {
 } from 'lucide-react';
 
 const STORAGE_KEY = 'yun-mandarin-lab-pilot-v4';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const supabase = SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY
+  ? createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
+  : null;
 
 function readPilotState() {
   if (typeof window === 'undefined') return null;
@@ -1372,7 +1378,7 @@ export default function ChapterUIPrototype() {
   const [showEnglish, setShowEnglish] = useState(persisted?.showEnglish ?? true);
   const [trust, setTrust] = useState(persisted?.trust || 30);
   const [mastery, setMastery] = useState(persisted?.mastery || 12);
-  const [collected, setCollected] = useState(persisted?.collected || []);
+  const [collected, setCollected] = useState(persisted?.collected || persisted?.collectedItems || []);
   const [practiceLog, setPracticeLog] = useState(persisted?.practiceLog || []);
   const [activeNoteId, setActiveNoteId] = useState(persisted?.activeNoteId || chapters[0].grammarNotes[0].id);
   const [selectedGlossaryKey, setSelectedGlossaryKey] = useState(null);
@@ -1382,6 +1388,14 @@ export default function ChapterUIPrototype() {
   const [quickExamplesShowEnglish, setQuickExamplesShowEnglish] = useState(persisted?.quickExamplesShowEnglish ?? true);
   const [audioRate, setAudioRate] = useState(persisted?.audioRate ?? 0.75);
   const [fontScale, setFontScale] = useState(persisted?.fontScale || 'md');
+  const [session, setSession] = useState(null);
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authMessage, setAuthMessage] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [syncStatus, setSyncStatus] = useState(supabase ? 'Guest mode. Progress is saved on this device.' : 'Cloud sync is not configured.');
+  const [cloudSyncReady, setCloudSyncReady] = useState(false);
+  const appStateRef = useRef(null);
 
   const makeNodeKey = (chapterIndex, nodeIndex) => `${chapterIndex}-${nodeIndex}`;
 
@@ -1423,38 +1437,25 @@ export default function ChapterUIPrototype() {
     return Array.from(map.values()).slice(-6).reverse();
   }, [practiceLog]);
 
-  const isCollected = (id) => collected.some((item) => item.id === id);
-
-  const toggleCollected = (item) => {
-    setCollected((prev) => {
-      const exists = prev.some((entry) => entry.id === item.id);
-      return exists ? prev.filter((entry) => entry.id !== item.id) : [...prev, item];
-    });
-  };
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        currentView,
-        currentChapterIndex,
-        currentNodeIndex,
-        showPinyin,
-        showEnglish,
-        trust,
-        mastery,
-        collected,
-        practiceLog,
-        activeNoteId,
-        quickExamplesShowPinyin,
-        quickExamplesShowEnglish,
-        audioRate,
-        fontScale,
-        nodeSelections,
-      })
-    );
-  }, [
+  const appState = useMemo(() => ({
+    currentView,
+    currentChapterIndex,
+    currentNodeIndex,
+    showPinyin,
+    showEnglish,
+    trust,
+    mastery,
+    collected,
+    collectedItems: collected,
+    practiceLog,
+    reviewItems,
+    activeNoteId,
+    quickExamplesShowPinyin,
+    quickExamplesShowEnglish,
+    audioRate,
+    fontScale,
+    nodeSelections,
+  }), [
     currentView,
     currentChapterIndex,
     currentNodeIndex,
@@ -1464,6 +1465,7 @@ export default function ChapterUIPrototype() {
     mastery,
     collected,
     practiceLog,
+    reviewItems,
     activeNoteId,
     quickExamplesShowPinyin,
     quickExamplesShowEnglish,
@@ -1471,6 +1473,152 @@ export default function ChapterUIPrototype() {
     fontScale,
     nodeSelections,
   ]);
+
+  const isCollected = (id) => collected.some((item) => item.id === id);
+
+  const toggleCollected = (item) => {
+    setCollected((prev) => {
+      const exists = prev.some((entry) => entry.id === item.id);
+      return exists ? prev.filter((entry) => entry.id !== item.id) : [...prev, item];
+    });
+  };
+
+  const applyAppState = (state) => {
+    if (!state || typeof state !== 'object') return;
+
+    const nextChapterIndex = Number.isInteger(state.currentChapterIndex)
+      ? Math.max(0, Math.min(chapters.length - 1, state.currentChapterIndex))
+      : 0;
+    const nextNodeIndex = Number.isInteger(state.currentNodeIndex)
+      ? Math.max(0, Math.min(chapters[nextChapterIndex].nodes.length - 1, state.currentNodeIndex))
+      : 0;
+
+    setCurrentView(typeof state.currentView === 'string' ? state.currentView : 'home');
+    setCurrentChapterIndex(nextChapterIndex);
+    setCurrentNodeIndex(nextNodeIndex);
+    setNodeSelections(state.nodeSelections && typeof state.nodeSelections === 'object' ? state.nodeSelections : {});
+    setShowPinyin(typeof state.showPinyin === 'boolean' ? state.showPinyin : true);
+    setShowEnglish(typeof state.showEnglish === 'boolean' ? state.showEnglish : true);
+    setTrust(typeof state.trust === 'number' ? state.trust : 30);
+    setMastery(typeof state.mastery === 'number' ? state.mastery : 12);
+    setCollected(Array.isArray(state.collected) ? state.collected : Array.isArray(state.collectedItems) ? state.collectedItems : []);
+    setPracticeLog(Array.isArray(state.practiceLog) ? state.practiceLog : []);
+    setActiveNoteId(typeof state.activeNoteId === 'string' ? state.activeNoteId : chapters[nextChapterIndex].grammarNotes[0].id);
+    setQuickExamplesShowPinyin(typeof state.quickExamplesShowPinyin === 'boolean' ? state.quickExamplesShowPinyin : true);
+    setQuickExamplesShowEnglish(typeof state.quickExamplesShowEnglish === 'boolean' ? state.quickExamplesShowEnglish : true);
+    setAudioRate(typeof state.audioRate === 'number' ? state.audioRate : 0.75);
+    setFontScale(typeof state.fontScale === 'string' ? state.fontScale : 'md');
+    setShowFeedback(false);
+    setSelectedGlossaryKey(null);
+  };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    appStateRef.current = appState;
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+  }, [appState]);
+
+  useEffect(() => {
+    if (!supabase) return undefined;
+
+    let active = true;
+
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (!active) return;
+      if (error) {
+        setSyncStatus(`Cloud sync unavailable: ${error.message}`);
+        return;
+      }
+      setSession(data.session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      if (!active) return;
+      setSession(nextSession);
+      if (!nextSession) {
+        setCloudSyncReady(false);
+        setSyncStatus('Guest mode. Progress is saved on this device.');
+      }
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!supabase || !session?.user?.id) return undefined;
+
+    let cancelled = false;
+    setCloudSyncReady(false);
+    setSyncStatus('Checking cloud sync...');
+
+    const loadCloudState = async () => {
+      const { data, error } = await supabase
+        .from('user_app_state')
+        .select('state')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+
+      if (cancelled) return;
+
+      if (error) {
+        setSyncStatus(`Cloud sync unavailable: ${error.message}`);
+        return;
+      }
+
+      if (data?.state) {
+        applyAppState(data.state);
+        setSyncStatus('Cloud progress loaded.');
+        setCloudSyncReady(true);
+        return;
+      }
+
+      const { error: uploadError } = await supabase
+        .from('user_app_state')
+        .upsert({
+          user_id: session.user.id,
+          state: appStateRef.current || appState,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' });
+
+      if (cancelled) return;
+
+      if (uploadError) {
+        setSyncStatus(`Cloud sync unavailable: ${uploadError.message}`);
+        return;
+      }
+
+      setSyncStatus('Local progress uploaded to cloud.');
+      setCloudSyncReady(true);
+    };
+
+    loadCloudState();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    if (!supabase || !session?.user?.id || !cloudSyncReady) return undefined;
+
+    const timeoutId = window.setTimeout(async () => {
+      setSyncStatus('Syncing...');
+      const { error } = await supabase
+        .from('user_app_state')
+        .upsert({
+          user_id: session.user.id,
+          state: appState,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' });
+
+      setSyncStatus(error ? `Cloud sync unavailable: ${error.message}` : 'Synced to cloud.');
+    }, 900);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [appState, cloudSyncReady, session?.user?.id]);
 
   useEffect(() => {
     const savedSelection = nodeSelections[makeNodeKey(currentChapterIndex, currentNodeIndex)] || null;
@@ -1533,6 +1681,67 @@ export default function ChapterUIPrototype() {
     if (isLastNode) return;
     setShowFeedback(false);
     setCurrentNodeIndex((prev) => Math.min(currentChapter.nodes.length - 1, prev + 1));
+  };
+
+  const handleAuthSubmit = async (mode) => {
+    if (!supabase) {
+      setAuthMessage('Cloud sync is not configured for this build.');
+      return;
+    }
+
+    if (!authEmail.trim() || !authPassword) {
+      setAuthMessage('Enter an email and password.');
+      return;
+    }
+
+    setAuthLoading(true);
+    setAuthMessage('');
+
+    const credentials = {
+      email: authEmail.trim(),
+      password: authPassword,
+    };
+
+    const { data, error } = mode === 'signup'
+      ? await supabase.auth.signUp({
+          ...credentials,
+          options: {
+            emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+          },
+        })
+      : await supabase.auth.signInWithPassword(credentials);
+
+    setAuthLoading(false);
+
+    if (error) {
+      setAuthMessage(error.message);
+      return;
+    }
+
+    if (data.session) {
+      setAuthPassword('');
+      setAuthMessage(mode === 'signup' ? 'Account created and signed in.' : 'Signed in.');
+      return;
+    }
+
+    setAuthPassword('');
+    setAuthMessage('Check your email to confirm your account, then sign in.');
+  };
+
+  const handleSignOut = async () => {
+    if (!supabase) return;
+
+    setAuthLoading(true);
+    const { error } = await supabase.auth.signOut();
+    setAuthLoading(false);
+
+    if (error) {
+      setAuthMessage(error.message);
+      return;
+    }
+
+    setAuthPassword('');
+    setAuthMessage('Signed out. Guest mode is still available.');
   };
 
   const resetPilot = () => {
@@ -1745,9 +1954,54 @@ export default function ChapterUIPrototype() {
           <Card className="rounded-3xl border-0 shadow-sm">
             <CardHeader>
               <CardTitle className="text-2xl">Pilot Settings</CardTitle>
-              <p className="text-sm text-neutral-500">This pilot currently stores progress on this device only.</p>
+              <p className="text-sm text-neutral-500">Guest progress stays on this device. Sign in to sync across devices.</p>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="rounded-2xl bg-neutral-100 p-4">
+                <div className="font-medium">Account / Sync</div>
+                {session?.user ? (
+                  <div className="mt-3 space-y-3">
+                    <div className="rounded-xl bg-white p-3 text-sm">
+                      <div className="text-neutral-500">Signed in as</div>
+                      <div className="mt-1 font-medium text-neutral-900">{session.user.email}</div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button variant="outline" className="rounded-2xl" onClick={handleSignOut} disabled={authLoading}>
+                        Sign out
+                      </Button>
+                      <span className="text-sm text-neutral-600">{authMessage || syncStatus}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-3 space-y-3">
+                    <div className="grid gap-2 md:grid-cols-2">
+                      <input
+                        type="email"
+                        value={authEmail}
+                        onChange={(e) => setAuthEmail(e.target.value)}
+                        placeholder="Email"
+                        className="h-11 rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none focus:border-neutral-500"
+                      />
+                      <input
+                        type="password"
+                        value={authPassword}
+                        onChange={(e) => setAuthPassword(e.target.value)}
+                        placeholder="Password"
+                        className="h-11 rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none focus:border-neutral-500"
+                      />
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button className="rounded-2xl" onClick={() => handleAuthSubmit('signin')} disabled={authLoading}>
+                        Sign in
+                      </Button>
+                      <Button variant="outline" className="rounded-2xl" onClick={() => handleAuthSubmit('signup')} disabled={authLoading}>
+                        Sign up
+                      </Button>
+                    </div>
+                    <div className="text-sm text-neutral-600">{authMessage || syncStatus}</div>
+                  </div>
+                )}
+              </div>
               <div className="rounded-2xl bg-neutral-100 p-4">
                 <div className="font-medium">Main story display</div>
                 <div className="mt-3 flex gap-2">

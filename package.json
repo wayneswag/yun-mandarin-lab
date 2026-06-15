@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@alicloud/pop-core": "latest",
+    "@supabase/supabase-js": "latest",
     "@vercel/blob": "latest",
     "openai": "latest",
     "framer-motion": "^11.11.17",
