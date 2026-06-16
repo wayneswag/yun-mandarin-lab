@@ -44,6 +44,37 @@ function isStrongPassword(password) {
   );
 }
 
+function PasswordInput({ value, onChange, placeholder, visible, onToggle }) {
+  return (
+    <div className="relative">
+      <input
+        type={visible ? 'text' : 'password'}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="h-11 w-full rounded-2xl border border-neutral-200 bg-white px-4 pr-11 text-sm outline-none focus:border-neutral-500"
+      />
+      <button
+        type="button"
+        onClick={onToggle}
+        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-neutral-500 hover:text-neutral-900"
+        aria-label={visible ? 'Hide password' : 'Show password'}
+      >
+        {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      </button>
+    </div>
+  );
+}
+
+function PasswordRequirements() {
+  return (
+    <div className="text-xs leading-5 text-neutral-500">
+      <div>Password must include:</div>
+      <div>At least 8 characters, uppercase letter, lowercase letter, number, and symbol.</div>
+    </div>
+  );
+}
+
 function readPilotState() {
   if (typeof window === 'undefined') return null;
   try {
@@ -1405,6 +1436,8 @@ export default function ChapterUIPrototype() {
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
   const [showAuthPassword, setShowAuthPassword] = useState(false);
+  const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
+  const [showSignupConfirmPassword, setShowSignupConfirmPassword] = useState(false);
   const [authMessage, setAuthMessage] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
@@ -1414,6 +1447,13 @@ export default function ChapterUIPrototype() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [changeNewPassword, setChangeNewPassword] = useState('');
+  const [showChangeNewPassword, setShowChangeNewPassword] = useState(false);
+  const [changeConfirmPassword, setChangeConfirmPassword] = useState('');
+  const [showChangeConfirmPassword, setShowChangeConfirmPassword] = useState(false);
   const [syncStatus, setSyncStatus] = useState(supabase ? 'Guest mode. Progress is saved on this device.' : 'Cloud sync is not configured.');
   const [cloudSyncReady, setCloudSyncReady] = useState(false);
   const [pendingCloudState, setPendingCloudState] = useState(null);
@@ -1778,6 +1818,11 @@ export default function ChapterUIPrototype() {
       return;
     }
 
+    if (mode === 'signup' && authPassword !== signupConfirmPassword) {
+      setAuthMessage('Passwords do not match.');
+      return;
+    }
+
     setAuthLoading(true);
     setAuthMessage('');
 
@@ -1804,11 +1849,13 @@ export default function ChapterUIPrototype() {
 
     if (data.session) {
       setAuthPassword('');
+      setSignupConfirmPassword('');
       setAuthMessage(mode === 'signup' ? 'Signed in. Progress is ready to sync.' : 'Signed in.');
       return;
     }
 
     setAuthPassword('');
+    setSignupConfirmPassword('');
     setAuthMessage('Check your email to confirm your account, then sign in.');
   };
 
@@ -1825,6 +1872,14 @@ export default function ChapterUIPrototype() {
     }
 
     setAuthPassword('');
+    setSignupConfirmPassword('');
+    setNewPassword('');
+    setConfirmNewPassword('');
+    setCurrentPassword('');
+    setChangeNewPassword('');
+    setChangeConfirmPassword('');
+    setPasswordRecovery(false);
+    setShowChangePassword(false);
     setAuthMessage('Signed out. Guest mode is still available.');
   };
 
@@ -1886,6 +1941,58 @@ export default function ChapterUIPrototype() {
     setConfirmNewPassword('');
     setPasswordRecovery(false);
     setAuthMessage('Password updated. You can continue using your account.');
+  };
+
+  const handleChangePassword = async () => {
+    if (!supabase) return;
+
+    if (!currentPassword) {
+      setAuthMessage('Enter your current password.');
+      return;
+    }
+
+    if (!isStrongPassword(changeNewPassword)) {
+      setAuthMessage(PASSWORD_RULE_MESSAGE);
+      return;
+    }
+
+    if (currentPassword === changeNewPassword) {
+      setAuthMessage('New password cannot be the same as your current password.');
+      return;
+    }
+
+    if (changeNewPassword !== changeConfirmPassword) {
+      setAuthMessage('Passwords do not match.');
+      return;
+    }
+
+    setAuthLoading(true);
+    setAuthMessage('');
+
+    const { error: currentPasswordError } = await supabase.auth.signInWithPassword({
+      email: session?.user?.email || '',
+      password: currentPassword,
+    });
+
+    if (currentPasswordError) {
+      setAuthLoading(false);
+      setAuthMessage(currentPasswordError.message);
+      return;
+    }
+
+    const { error } = await supabase.auth.updateUser({ password: changeNewPassword });
+
+    setAuthLoading(false);
+
+    if (error) {
+      setAuthMessage(error.message);
+      return;
+    }
+
+    setCurrentPassword('');
+    setChangeNewPassword('');
+    setChangeConfirmPassword('');
+    setAuthMessage('Password updated.');
   };
 
   const handleSyncNow = async () => {
@@ -2183,46 +2290,69 @@ export default function ChapterUIPrototype() {
                       <div className="rounded-xl border border-[#eadfce] bg-white p-3 text-sm">
                         <div className="font-medium text-neutral-900">Set new password</div>
                         <div className="mt-3 grid gap-2 md:grid-cols-2">
-                          <div className="relative">
-                            <input
-                              type={showNewPassword ? 'text' : 'password'}
-                              value={newPassword}
-                              onChange={(e) => setNewPassword(e.target.value)}
-                              placeholder="New password"
-                              className="h-11 w-full rounded-2xl border border-neutral-200 bg-white px-4 pr-11 text-sm outline-none focus:border-neutral-500"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowNewPassword((value) => !value)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-neutral-500 hover:text-neutral-900"
-                              aria-label={showNewPassword ? 'Hide password' : 'Show password'}
-                            >
-                              {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                            </button>
-                          </div>
-                          <div className="relative">
-                            <input
-                              type={showConfirmNewPassword ? 'text' : 'password'}
-                              value={confirmNewPassword}
-                              onChange={(e) => setConfirmNewPassword(e.target.value)}
-                              placeholder="Confirm new password"
-                              className="h-11 w-full rounded-2xl border border-neutral-200 bg-white px-4 pr-11 text-sm outline-none focus:border-neutral-500"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowConfirmNewPassword((value) => !value)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-neutral-500 hover:text-neutral-900"
-                              aria-label={showConfirmNewPassword ? 'Hide password' : 'Show password'}
-                            >
-                              {showConfirmNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                            </button>
-                          </div>
+                          <PasswordInput
+                            value={newPassword}
+                            onChange={setNewPassword}
+                            placeholder="New password"
+                            visible={showNewPassword}
+                            onToggle={() => setShowNewPassword((value) => !value)}
+                          />
+                          <PasswordInput
+                            value={confirmNewPassword}
+                            onChange={setConfirmNewPassword}
+                            placeholder="Confirm new password"
+                            visible={showConfirmNewPassword}
+                            onToggle={() => setShowConfirmNewPassword((value) => !value)}
+                          />
+                        </div>
+                        <div className="mt-2">
+                          <PasswordRequirements />
                         </div>
                         <Button className="mt-3 h-9 rounded-2xl px-4 text-sm" onClick={handleUpdatePassword} disabled={authLoading}>
                           Update password
                         </Button>
                       </div>
                     )}
+                    <div className="rounded-xl border border-[#eadfce] bg-white p-3 text-sm">
+                      <button
+                        type="button"
+                        onClick={() => setShowChangePassword((value) => !value)}
+                        className="font-medium text-neutral-900"
+                      >
+                        Change password
+                      </button>
+                      {showChangePassword && (
+                        <div className="mt-3 space-y-3">
+                          <div className="grid gap-2 md:grid-cols-3">
+                            <PasswordInput
+                              value={currentPassword}
+                              onChange={setCurrentPassword}
+                              placeholder="Current password"
+                              visible={showCurrentPassword}
+                              onToggle={() => setShowCurrentPassword((value) => !value)}
+                            />
+                            <PasswordInput
+                              value={changeNewPassword}
+                              onChange={setChangeNewPassword}
+                              placeholder="New password"
+                              visible={showChangeNewPassword}
+                              onToggle={() => setShowChangeNewPassword((value) => !value)}
+                            />
+                            <PasswordInput
+                              value={changeConfirmPassword}
+                              onChange={setChangeConfirmPassword}
+                              placeholder="Confirm new password"
+                              visible={showChangeConfirmPassword}
+                              onToggle={() => setShowChangeConfirmPassword((value) => !value)}
+                            />
+                          </div>
+                          <PasswordRequirements />
+                          <Button className="h-9 rounded-2xl px-4 text-sm" onClick={handleChangePassword} disabled={authLoading}>
+                            Update password
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                     {pendingCloudState && (
                       <div className="rounded-xl border border-[#eadfce] bg-white p-3 text-sm">
                         <div className="font-medium text-neutral-900">Cloud progress found.</div>
@@ -2250,7 +2380,7 @@ export default function ChapterUIPrototype() {
                   </div>
                 ) : (
                   <div className="mt-3 space-y-3">
-                    <div className="grid gap-2 md:grid-cols-2">
+                    <div className="grid gap-2 md:grid-cols-3">
                       <input
                         type="email"
                         value={authEmail}
@@ -2258,24 +2388,22 @@ export default function ChapterUIPrototype() {
                         placeholder="Email"
                         className="h-11 rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none focus:border-neutral-500"
                       />
-                      <div className="relative">
-                        <input
-                          type={showAuthPassword ? 'text' : 'password'}
-                          value={authPassword}
-                          onChange={(e) => setAuthPassword(e.target.value)}
-                          placeholder="Password"
-                          className="h-11 w-full rounded-2xl border border-neutral-200 bg-white px-4 pr-11 text-sm outline-none focus:border-neutral-500"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowAuthPassword((value) => !value)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-neutral-500 hover:text-neutral-900"
-                          aria-label={showAuthPassword ? 'Hide password' : 'Show password'}
-                        >
-                          {showAuthPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
-                      </div>
+                      <PasswordInput
+                        value={authPassword}
+                        onChange={setAuthPassword}
+                        placeholder="Password"
+                        visible={showAuthPassword}
+                        onToggle={() => setShowAuthPassword((value) => !value)}
+                      />
+                      <PasswordInput
+                        value={signupConfirmPassword}
+                        onChange={setSignupConfirmPassword}
+                        placeholder="Confirm password for sign up"
+                        visible={showSignupConfirmPassword}
+                        onToggle={() => setShowSignupConfirmPassword((value) => !value)}
+                      />
                     </div>
+                    <PasswordRequirements />
                     <div className="flex flex-wrap gap-2">
                       <Button className="rounded-2xl" onClick={() => handleAuthSubmit('signin')} disabled={authLoading}>
                         Sign in
