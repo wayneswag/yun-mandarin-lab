@@ -1393,6 +1393,11 @@ export default function ChapterUIPrototype() {
   const [authPassword, setAuthPassword] = useState('');
   const [authMessage, setAuthMessage] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [passwordRecovery, setPasswordRecovery] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [syncStatus, setSyncStatus] = useState(supabase ? 'Guest mode. Progress is saved on this device.' : 'Cloud sync is not configured.');
   const [cloudSyncReady, setCloudSyncReady] = useState(false);
   const [pendingCloudState, setPendingCloudState] = useState(null);
@@ -1558,14 +1563,24 @@ export default function ChapterUIPrototype() {
         return;
       }
       setSession(data.session);
+      if (data.session && typeof window !== 'undefined' && window.location.href.includes('type=recovery')) {
+        setPasswordRecovery(true);
+        setCurrentView('settings');
+      }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
       if (!active) return;
       setSession(nextSession);
+      if (event === 'PASSWORD_RECOVERY') {
+        setPasswordRecovery(true);
+        setCurrentView('settings');
+        setAuthMessage('');
+      }
       if (!nextSession) {
         setCloudSyncReady(false);
         setPendingCloudState(null);
+        setPasswordRecovery(false);
         setSyncStatus('Guest mode. Progress is saved on this device.');
       }
     });
@@ -1790,6 +1805,71 @@ export default function ChapterUIPrototype() {
 
     setAuthPassword('');
     setAuthMessage('Signed out. Guest mode is still available.');
+  };
+
+  const handleSendPasswordReset = async () => {
+    if (!supabase) {
+      setAuthMessage('Cloud sync is not configured for this build.');
+      return;
+    }
+
+    const email = resetEmail.trim() || authEmail.trim();
+    if (!email) {
+      setAuthMessage('Enter your email to reset your password.');
+      return;
+    }
+
+    setAuthLoading(true);
+    setAuthMessage('');
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+    });
+
+    setAuthLoading(false);
+
+    if (error) {
+      setAuthMessage(error.message);
+      return;
+    }
+
+    setAuthMessage('Password reset email sent. Please check your inbox.');
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!supabase) return;
+
+    if (!newPassword) {
+      setAuthMessage('Enter a new password.');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setAuthMessage('Password should be at least 6 characters.');
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      setAuthMessage('New password and confirm password must match.');
+      return;
+    }
+
+    setAuthLoading(true);
+    setAuthMessage('');
+
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+    setAuthLoading(false);
+
+    if (error) {
+      setAuthMessage(error.message);
+      return;
+    }
+
+    setNewPassword('');
+    setConfirmNewPassword('');
+    setPasswordRecovery(false);
+    setAuthMessage('Password updated. You can continue using your account.');
   };
 
   const handleSyncNow = async () => {
@@ -2083,6 +2163,30 @@ export default function ChapterUIPrototype() {
                       <div className="text-neutral-500">Signed in as</div>
                       <div className="mt-1 font-medium text-neutral-900">{session.user.email}</div>
                     </div>
+                    {passwordRecovery && (
+                      <div className="rounded-xl border border-[#eadfce] bg-white p-3 text-sm">
+                        <div className="font-medium text-neutral-900">Set new password</div>
+                        <div className="mt-3 grid gap-2 md:grid-cols-2">
+                          <input
+                            type="password"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            placeholder="New password"
+                            className="h-11 rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none focus:border-neutral-500"
+                          />
+                          <input
+                            type="password"
+                            value={confirmNewPassword}
+                            onChange={(e) => setConfirmNewPassword(e.target.value)}
+                            placeholder="Confirm new password"
+                            className="h-11 rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none focus:border-neutral-500"
+                          />
+                        </div>
+                        <Button className="mt-3 h-9 rounded-2xl px-4 text-sm" onClick={handleUpdatePassword} disabled={authLoading}>
+                          Update password
+                        </Button>
+                      </div>
+                    )}
                     {pendingCloudState && (
                       <div className="rounded-xl border border-[#eadfce] bg-white p-3 text-sm">
                         <div className="font-medium text-neutral-900">Cloud progress found.</div>
@@ -2133,7 +2237,35 @@ export default function ChapterUIPrototype() {
                       <Button variant="outline" className="rounded-2xl" onClick={() => handleAuthSubmit('signup')} disabled={authLoading}>
                         Sign up
                       </Button>
+                      <Button
+                        variant="outline"
+                        className="rounded-2xl"
+                        onClick={() => {
+                          setResetEmail(authEmail);
+                          setShowPasswordReset((value) => !value);
+                        }}
+                        disabled={authLoading}
+                      >
+                        Forgot password?
+                      </Button>
                     </div>
+                    {showPasswordReset && (
+                      <div className="rounded-xl border border-[#eadfce] bg-white p-3 text-sm">
+                        <div className="font-medium text-neutral-900">Reset password</div>
+                        <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto]">
+                          <input
+                            type="email"
+                            value={resetEmail}
+                            onChange={(e) => setResetEmail(e.target.value)}
+                            placeholder="Email"
+                            className="h-11 rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none focus:border-neutral-500"
+                          />
+                          <Button className="h-11 rounded-2xl px-4 text-sm" onClick={handleSendPasswordReset} disabled={authLoading}>
+                            Send reset email
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                     {authMessage && <div className="text-sm text-neutral-600">{authMessage}</div>}
                     <div className="text-sm font-medium text-neutral-700">{syncStatus}</div>
                   </div>
