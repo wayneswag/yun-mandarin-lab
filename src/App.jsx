@@ -22,14 +22,27 @@ import {
   Bookmark,
   RotateCcw,
   Settings2,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 const STORAGE_KEY = 'yun-mandarin-lab-pilot-v4';
+const PASSWORD_RULE_MESSAGE = 'Password must be at least 8 characters and include uppercase, lowercase, number, and symbol.';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 const supabase = SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY
   ? createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
   : null;
+
+function isStrongPassword(password) {
+  return (
+    password.length >= 8 &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /\d/.test(password) &&
+    /[^A-Za-z0-9]/.test(password)
+  );
+}
 
 function readPilotState() {
   if (typeof window === 'undefined') return null;
@@ -1391,13 +1404,16 @@ export default function ChapterUIPrototype() {
   const [session, setSession] = useState(null);
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
+  const [showAuthPassword, setShowAuthPassword] = useState(false);
   const [authMessage, setAuthMessage] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [passwordRecovery, setPasswordRecovery] = useState(false);
   const [newPassword, setNewPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
   const [syncStatus, setSyncStatus] = useState(supabase ? 'Guest mode. Progress is saved on this device.' : 'Cloud sync is not configured.');
   const [cloudSyncReady, setCloudSyncReady] = useState(false);
   const [pendingCloudState, setPendingCloudState] = useState(null);
@@ -1757,6 +1773,11 @@ export default function ChapterUIPrototype() {
       return;
     }
 
+    if (mode === 'signup' && !isStrongPassword(authPassword)) {
+      setAuthMessage(PASSWORD_RULE_MESSAGE);
+      return;
+    }
+
     setAuthLoading(true);
     setAuthMessage('');
 
@@ -1839,18 +1860,13 @@ export default function ChapterUIPrototype() {
   const handleUpdatePassword = async () => {
     if (!supabase) return;
 
-    if (!newPassword) {
-      setAuthMessage('Enter a new password.');
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      setAuthMessage('Password should be at least 6 characters.');
+    if (!isStrongPassword(newPassword)) {
+      setAuthMessage(PASSWORD_RULE_MESSAGE);
       return;
     }
 
     if (newPassword !== confirmNewPassword) {
-      setAuthMessage('New password and confirm password must match.');
+      setAuthMessage('Passwords do not match.');
       return;
     }
 
@@ -2167,20 +2183,40 @@ export default function ChapterUIPrototype() {
                       <div className="rounded-xl border border-[#eadfce] bg-white p-3 text-sm">
                         <div className="font-medium text-neutral-900">Set new password</div>
                         <div className="mt-3 grid gap-2 md:grid-cols-2">
-                          <input
-                            type="password"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            placeholder="New password"
-                            className="h-11 rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none focus:border-neutral-500"
-                          />
-                          <input
-                            type="password"
-                            value={confirmNewPassword}
-                            onChange={(e) => setConfirmNewPassword(e.target.value)}
-                            placeholder="Confirm new password"
-                            className="h-11 rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none focus:border-neutral-500"
-                          />
+                          <div className="relative">
+                            <input
+                              type={showNewPassword ? 'text' : 'password'}
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
+                              placeholder="New password"
+                              className="h-11 w-full rounded-2xl border border-neutral-200 bg-white px-4 pr-11 text-sm outline-none focus:border-neutral-500"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowNewPassword((value) => !value)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-neutral-500 hover:text-neutral-900"
+                              aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+                            >
+                              {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                          </div>
+                          <div className="relative">
+                            <input
+                              type={showConfirmNewPassword ? 'text' : 'password'}
+                              value={confirmNewPassword}
+                              onChange={(e) => setConfirmNewPassword(e.target.value)}
+                              placeholder="Confirm new password"
+                              className="h-11 w-full rounded-2xl border border-neutral-200 bg-white px-4 pr-11 text-sm outline-none focus:border-neutral-500"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowConfirmNewPassword((value) => !value)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-neutral-500 hover:text-neutral-900"
+                              aria-label={showConfirmNewPassword ? 'Hide password' : 'Show password'}
+                            >
+                              {showConfirmNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                          </div>
                         </div>
                         <Button className="mt-3 h-9 rounded-2xl px-4 text-sm" onClick={handleUpdatePassword} disabled={authLoading}>
                           Update password
@@ -2222,13 +2258,23 @@ export default function ChapterUIPrototype() {
                         placeholder="Email"
                         className="h-11 rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none focus:border-neutral-500"
                       />
-                      <input
-                        type="password"
-                        value={authPassword}
-                        onChange={(e) => setAuthPassword(e.target.value)}
-                        placeholder="Password"
-                        className="h-11 rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none focus:border-neutral-500"
-                      />
+                      <div className="relative">
+                        <input
+                          type={showAuthPassword ? 'text' : 'password'}
+                          value={authPassword}
+                          onChange={(e) => setAuthPassword(e.target.value)}
+                          placeholder="Password"
+                          className="h-11 w-full rounded-2xl border border-neutral-200 bg-white px-4 pr-11 text-sm outline-none focus:border-neutral-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowAuthPassword((value) => !value)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-neutral-500 hover:text-neutral-900"
+                          aria-label={showAuthPassword ? 'Hide password' : 'Show password'}
+                        >
+                          {showAuthPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <Button className="rounded-2xl" onClick={() => handleAuthSubmit('signin')} disabled={authLoading}>
