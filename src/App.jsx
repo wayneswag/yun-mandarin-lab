@@ -1729,7 +1729,7 @@ export default function ChapterUIPrototype() {
 
     if (data.session) {
       setAuthPassword('');
-      setAuthMessage(mode === 'signup' ? 'Account created and signed in.' : 'Signed in.');
+      setAuthMessage(mode === 'signup' ? 'Signed in. Progress is ready to sync.' : 'Signed in.');
       return;
     }
 
@@ -2015,6 +2015,7 @@ export default function ChapterUIPrototype() {
                     </div>
                     {authMessage && <div className="text-sm text-neutral-600">{authMessage}</div>}
                     <div className="text-sm font-medium text-neutral-700">{syncStatus}</div>
+                    <div className="text-xs text-neutral-500">Use Sync now before switching devices if you want to save immediately.</div>
                   </div>
                 ) : (
                   <div className="mt-3 space-y-3">
