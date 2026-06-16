@@ -27,7 +27,8 @@ import {
 } from 'lucide-react';
 
 const STORAGE_KEY = 'yun-mandarin-lab-pilot-v4';
-const PASSWORD_RULE_MESSAGE = 'Password must be at least 8 characters and include uppercase, lowercase, number, and symbol.';
+const PASSWORD_RULE_MESSAGE = 'Password must be at least 8 characters. Avoid simple passwords like 12345678 or password.';
+const WEAK_PASSWORDS = new Set(['12345678', 'password', 'qwerty123', '11111111', '00000000']);
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 const supabase = SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY
@@ -35,13 +36,8 @@ const supabase = SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY
   : null;
 
 function isStrongPassword(password) {
-  return (
-    password.length >= 8 &&
-    /[A-Z]/.test(password) &&
-    /[a-z]/.test(password) &&
-    /\d/.test(password) &&
-    /[^A-Za-z0-9]/.test(password)
-  );
+  const normalized = password.trim().toLowerCase();
+  return password.length >= 8 && normalized.length > 0 && !WEAK_PASSWORDS.has(normalized);
 }
 
 function PasswordInput({ value, onChange, placeholder, visible, onToggle }) {
@@ -69,8 +65,8 @@ function PasswordInput({ value, onChange, placeholder, visible, onToggle }) {
 function PasswordRequirements() {
   return (
     <div className="text-xs leading-5 text-neutral-500">
-      <div>Password must include:</div>
-      <div>At least 8 characters, uppercase letter, lowercase letter, number, and symbol.</div>
+      <div>Password must be at least 8 characters.</div>
+      <div>Avoid simple passwords like 12345678 or password.</div>
     </div>
   );
 }
