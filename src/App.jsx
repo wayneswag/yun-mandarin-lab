@@ -71,6 +71,36 @@ function PasswordRequirements() {
   );
 }
 
+function getCurrentDeviceLabel() {
+  if (typeof navigator === 'undefined') return 'This device';
+
+  const userAgent = navigator.userAgent;
+  const browser = userAgent.includes('Edg/')
+    ? 'Edge'
+    : userAgent.includes('Chrome/')
+    ? 'Chrome'
+    : userAgent.includes('Safari/') && !userAgent.includes('Chrome/')
+    ? 'Safari'
+    : userAgent.includes('Firefox/')
+    ? 'Firefox'
+    : 'Browser';
+  const device = /iPhone|iPad|iPod/.test(userAgent)
+    ? userAgent.includes('iPad')
+      ? 'iPad'
+      : 'iPhone'
+    : userAgent.includes('Android')
+    ? 'Android'
+    : userAgent.includes('Windows')
+    ? 'Windows'
+    : userAgent.includes('Mac OS X')
+    ? 'Mac'
+    : userAgent.includes('Linux')
+    ? 'Linux'
+    : 'this device';
+
+  return `${browser} on ${device}`;
+}
+
 function readPilotState() {
   if (typeof window === 'undefined') return null;
   try {
@@ -1463,6 +1493,7 @@ export default function ChapterUIPrototype() {
 
   const currentChapter = chapters[currentChapterIndex];
   const currentNode = currentChapter.nodes[currentNodeIndex];
+  const currentDeviceLabel = useMemo(() => getCurrentDeviceLabel(), []);
   const displayOptions = useMemo(() => {
     const shuffled = shuffleArray(currentNode.options);
     const labels = ['A', 'B', 'C', 'D'];
@@ -2440,6 +2471,25 @@ export default function ChapterUIPrototype() {
                     <div className="text-sm font-medium text-neutral-700">{syncStatus}</div>
                   </div>
                 )}
+              </div>
+              <div className="rounded-2xl bg-neutral-100 p-4">
+                <div className="font-medium">Device / Progress</div>
+                <div className="mt-3 grid gap-3 text-sm md:grid-cols-3">
+                  <div className="rounded-xl bg-white p-3">
+                    <div className="text-neutral-500">Current device</div>
+                    <div className="mt-1 font-medium text-neutral-900">{currentDeviceLabel}</div>
+                  </div>
+                  <div className="rounded-xl bg-white p-3">
+                    <div className="text-neutral-500">Current progress</div>
+                    <div className="mt-1 font-medium text-neutral-900">Chapter {currentChapterIndex + 1} &middot; {currentChapter.shortTitle}</div>
+                    <div className="mt-1 text-neutral-600">Question {currentNodeIndex + 1}</div>
+                  </div>
+                  <div className="rounded-xl bg-white p-3">
+                    <div className="text-neutral-500">Last synced</div>
+                    <div className="mt-1 font-medium text-neutral-900">Not yet</div>
+                  </div>
+                </div>
+                <div className="mt-3 text-xs text-neutral-500">This helps you check which device progress you are about to sync.</div>
               </div>
               <div className="rounded-2xl bg-neutral-100 p-4">
                 <div className="font-medium">Main story display</div>
