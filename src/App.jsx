@@ -2195,7 +2195,7 @@ export default function ChapterUIPrototype() {
               <CardTitle className="text-lg">Chapter / Scenario overview</CardTitle>
               <p className="text-sm text-neutral-500">Choose a situation to practice or review your progress.</p>
             </CardHeader>
-            <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <CardContent className="grid gap-3 lg:grid-cols-2">
               {chapterOverview.map(({ chapter, index, completed, total, status, action, recommended }) => {
                 const Icon = chapter.icon;
                 return (
@@ -2205,7 +2205,7 @@ export default function ChapterUIPrototype() {
                         <Icon className="h-5 w-5 text-neutral-700" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className="space-y-2">
                           <h3 className="font-semibold leading-snug text-neutral-900">{chapter.title}</h3>
                           {recommended && <Badge className="rounded-full bg-[#201a16] text-white">Recommended next</Badge>}
                         </div>
@@ -2213,12 +2213,12 @@ export default function ChapterUIPrototype() {
                       </div>
                     </div>
 
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
+                    <div className="mt-4 flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <div className="font-medium text-neutral-900">{completed} / {total} completed</div>
                         <div className="mt-1 text-neutral-500">{status}</div>
                       </div>
-                      <Button className="h-11 rounded-2xl px-5 text-sm font-semibold" onClick={() => switchChapter(index)}>
+                      <Button className="h-11 w-full rounded-2xl px-5 text-sm font-semibold sm:w-auto" onClick={() => switchChapter(index)}>
                         {action}
                       </Button>
                     </div>
@@ -2232,16 +2232,16 @@ export default function ChapterUIPrototype() {
             <CardHeader>
               <CardTitle className="text-lg">Most recent saved items</CardTitle>
             </CardHeader>
-            <CardContent className="grid gap-3 md:grid-cols-3">
+            <CardContent className="grid gap-3 lg:grid-cols-2">
               {recentCollected.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-neutral-300 p-6 text-sm text-neutral-500 md:col-span-3">
+                <div className="rounded-2xl border border-dashed border-neutral-300 p-6 text-sm text-neutral-500 lg:col-span-2">
                   Nothing saved yet. Students can now decide for themselves what to keep.
                 </div>
               ) : (
                 recentCollected.map((item) => (
                   <div key={item.id} className="rounded-2xl border border-neutral-200 p-4">
                     <div className="flex items-start justify-between gap-3">
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">
                         <div className="font-semibold">{item.expression}</div>
                         <AudioButton audioId={item.audioId} text={item.expression} small />
