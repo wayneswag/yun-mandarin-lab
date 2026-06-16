@@ -1565,6 +1565,7 @@ export default function ChapterUIPrototype() {
       setSession(nextSession);
       if (!nextSession) {
         setCloudSyncReady(false);
+        setPendingCloudState(null);
         setSyncStatus('Guest mode. Progress is saved on this device.');
       }
     });
@@ -1580,6 +1581,7 @@ export default function ChapterUIPrototype() {
 
     let cancelled = false;
     setCloudSyncReady(false);
+    setPendingCloudState(null);
     setSyncStatus('Signed in. Checking cloud sync...');
 
     const loadCloudState = async () => {
@@ -1598,6 +1600,15 @@ export default function ChapterUIPrototype() {
         }
 
         if (data?.state) {
+          const localState = appStateRef.current || appState;
+          const shouldAskBeforeLoading = hasMeaningfulLocalProgress(localState) && !appStatesMatch(localState, data.state);
+
+          if (shouldAskBeforeLoading) {
+            setPendingCloudState(data.state);
+            setSyncStatus('Cloud progress found.');
+            return;
+          }
+
           appStateRef.current = data.state;
           applyAppState(data.state);
           setSyncStatus('Cloud progress loaded.');
@@ -1805,6 +1816,45 @@ export default function ChapterUIPrototype() {
 
       setCloudSyncReady(true);
       setSyncStatus('Synced to cloud.');
+    } catch (error) {
+      setSyncStatus(`Cloud sync unavailable: ${error.message}`);
+    }
+  };
+
+  const handleUseCloudProgress = () => {
+    if (!pendingCloudState) return;
+
+    appStateRef.current = pendingCloudState;
+    saveAppStateLocally(pendingCloudState);
+    applyAppState(pendingCloudState);
+    setPendingCloudState(null);
+    setCloudSyncReady(true);
+    setSyncStatus('Cloud progress loaded.');
+  };
+
+  const handleKeepDeviceProgress = async () => {
+    if (!supabase || !session?.user?.id) return;
+
+    const localState = appStateRef.current || appState;
+    setPendingCloudState(null);
+    setSyncStatus('Syncing...');
+
+    try {
+      const { error } = await supabase
+        .from('user_app_state')
+        .upsert({
+          user_id: session.user.id,
+          state: localState,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' });
+
+      if (error) {
+        setSyncStatus(`Cloud sync unavailable: ${error.message}`);
+        return;
+      }
+
+      setCloudSyncReady(true);
+      setSyncStatus('This device progress uploaded to cloud.');
     } catch (error) {
       setSyncStatus(`Cloud sync unavailable: ${error.message}`);
     }
@@ -2033,6 +2083,19 @@ export default function ChapterUIPrototype() {
                       <div className="text-neutral-500">Signed in as</div>
                       <div className="mt-1 font-medium text-neutral-900">{session.user.email}</div>
                     </div>
+                    {pendingCloudState && (
+                      <div className="rounded-xl border border-[#eadfce] bg-white p-3 text-sm">
+                        <div className="font-medium text-neutral-900">Cloud progress found.</div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <Button className="h-9 rounded-2xl px-4 text-sm" onClick={handleUseCloudProgress}>
+                            Use cloud progress
+                          </Button>
+                          <Button variant="outline" className="h-9 rounded-2xl px-4 text-sm" onClick={handleKeepDeviceProgress}>
+                            Keep this device
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                     <div className="flex flex-wrap items-center gap-2">
                       <Button className="h-9 rounded-2xl px-4 text-sm" onClick={handleSyncNow} disabled={authLoading}>
                         Sync now
