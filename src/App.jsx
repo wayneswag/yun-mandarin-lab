@@ -1513,6 +1513,20 @@ export default function ChapterUIPrototype() {
   const overallProgress = ((currentChapterIndex + 1) / chapters.length) * 100;
   const isLastNode = currentNodeIndex === currentChapter.nodes.length - 1;
   const isLastChapter = currentChapterIndex === chapters.length - 1;
+  const chapterOverview = useMemo(() => {
+    const overview = chapters.map((chapter, index) => {
+      const completed = chapter.nodes.filter((_, nodeIndex) => nodeSelections[makeNodeKey(index, nodeIndex)]).length;
+      const total = chapter.nodes.length;
+      const status = completed === 0 ? 'Not started' : completed >= total ? 'Completed' : 'In progress';
+      const action = status === 'Not started' ? 'Start' : status === 'Completed' ? 'Review' : 'Continue';
+      return { chapter, index, completed, total, status, action };
+    });
+    const firstIncomplete = overview.find((item) => item.status !== 'Completed');
+    return overview.map((item) => ({
+      ...item,
+      recommended: item.index === (firstIncomplete?.index ?? currentChapterIndex),
+    }));
+  }, [currentChapterIndex, nodeSelections]);
 
   const recentCollected = [...collected].slice(-3).reverse();
   const reviewItems = useMemo(() => {
@@ -2175,6 +2189,44 @@ export default function ChapterUIPrototype() {
               </CardContent>
             </Card>
           </div>
+
+          <Card className="rounded-3xl border-0 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg">Chapter / Scenario overview</CardTitle>
+              <p className="text-sm text-neutral-500">Choose a situation to practice or review your progress.</p>
+            </CardHeader>
+            <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {chapterOverview.map(({ chapter, index, completed, total, status, action, recommended }) => {
+                const Icon = chapter.icon;
+                return (
+                  <div key={chapter.id} className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-2xl bg-neutral-100 p-2">
+                        <Icon className="h-5 w-5 text-neutral-700" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="font-semibold leading-snug text-neutral-900">{chapter.title}</h3>
+                          {recommended && <Badge className="rounded-full bg-[#201a16] text-white">Recommended next</Badge>}
+                        </div>
+                        <p className="mt-1 text-sm leading-5 text-neutral-600">{chapter.subtitle}</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
+                      <div>
+                        <div className="font-medium text-neutral-900">{completed} / {total} completed</div>
+                        <div className="mt-1 text-neutral-500">{status}</div>
+                      </div>
+                      <Button className="h-11 rounded-2xl px-5 text-sm font-semibold" onClick={() => switchChapter(index)}>
+                        {action}
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
 
           <Card className="rounded-3xl border-0 shadow-sm">
             <CardHeader>
