@@ -1395,6 +1395,7 @@ export default function ChapterUIPrototype() {
   const [authLoading, setAuthLoading] = useState(false);
   const [syncStatus, setSyncStatus] = useState(supabase ? 'Guest mode. Progress is saved on this device.' : 'Cloud sync is not configured.');
   const [cloudSyncReady, setCloudSyncReady] = useState(false);
+  const [pendingCloudState, setPendingCloudState] = useState(null);
   const appStateRef = useRef(null);
 
   const makeNodeKey = (chapterIndex, nodeIndex) => `${chapterIndex}-${nodeIndex}`;
@@ -1513,9 +1514,36 @@ export default function ChapterUIPrototype() {
     setSelectedGlossaryKey(null);
   };
 
+  const saveAppStateLocally = (state) => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  };
+
+  const hasMeaningfulLocalProgress = (state) => {
+    if (!state || typeof state !== 'object') return false;
+    return (
+      state.currentChapterIndex > 0 ||
+      state.currentNodeIndex > 0 ||
+      state.trust !== 30 ||
+      state.mastery !== 12 ||
+      (Array.isArray(state.collected) && state.collected.length > 0) ||
+      (Array.isArray(state.collectedItems) && state.collectedItems.length > 0) ||
+      (Array.isArray(state.practiceLog) && state.practiceLog.length > 0) ||
+      (state.nodeSelections && Object.keys(state.nodeSelections).length > 0)
+    );
+  };
+
+  const appStatesMatch = (left, right) => {
+    try {
+      return JSON.stringify(left) === JSON.stringify(right);
+    } catch {
+      return false;
+    }
+  };
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    saveAppStateLocally(appState);
   }, [appState]);
 
   useEffect(() => {
