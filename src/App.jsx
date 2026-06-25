@@ -84,7 +84,7 @@ function DisplayToggleButton({ active, label, onClick, compact = false }) {
       }`}
       aria-pressed={active}
     >
-      <span>{label}</span>
+      <span className="min-w-0 truncate">{label}</span>
       <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${active ? 'bg-white/20 text-white' : 'bg-[#f3eadf] text-[#6f6257]'}`}>
         {active ? 'On' : 'Off'}
       </span>
@@ -2370,7 +2370,10 @@ export default function ChapterUIPrototype() {
                   Nothing to review yet. Replies that need another look will appear here.
                 </div>
               ) : (
-                reviewItems.map((item, idx) => (
+                reviewItems.map((item, idx) => {
+                  const reviewPinyin = item.selectedPinyin || item.pinyin || '';
+                  const reviewEnglish = item.selectedEnglish || item.english || '';
+                  return (
                   <div key={`${item.selected}-${idx}`} className="rounded-2xl border border-neutral-200 p-4">
                     <div className="flex items-center gap-2">
                       <RatingBadge rating={item.rating} />
@@ -2379,8 +2382,8 @@ export default function ChapterUIPrototype() {
                     <div className="mt-3 flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <div className="text-2xl font-semibold leading-snug text-[#201a16]">{item.selected}</div>
-                        {reviewShowPinyin && item.selectedPinyin && <div className="mt-2 text-sm leading-5 text-neutral-500">{item.selectedPinyin}</div>}
-                        {reviewShowEnglish && item.selectedEnglish && <div className="mt-1 text-sm leading-5 text-neutral-700">{item.selectedEnglish}</div>}
+                        {reviewShowPinyin && reviewPinyin && <div className="mt-2 text-sm leading-5 text-neutral-500">{reviewPinyin}</div>}
+                        {reviewShowEnglish && reviewEnglish && <div className="mt-1 text-sm leading-5 text-neutral-700">{reviewEnglish}</div>}
                       </div>
                       <AudioButton audioId={item.selectedAudioId} text={item.selected} small />
                     </div>
@@ -2395,7 +2398,8 @@ export default function ChapterUIPrototype() {
                       </div>
                     )}
                   </div>
-                ))
+                  );
+                })
               )}
             </CardContent>
           </Card>
@@ -2928,9 +2932,9 @@ export default function ChapterUIPrototype() {
             </div>
 
             <div className="mt-4">
-              <div className="mb-2 flex items-center justify-between gap-2">
+              <div className="mb-3 flex flex-col gap-2">
                 <div className="text-sm font-medium">Quick examples</div>
-                <div className="flex items-center gap-2">
+                <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                   <DisplayToggleButton active={quickExamplesShowPinyin} label="Quick Pinyin" onClick={() => setQuickExamplesShowPinyin((v) => !v)} compact />
                   <DisplayToggleButton active={quickExamplesShowEnglish} label="Quick English" onClick={() => setQuickExamplesShowEnglish((v) => !v)} compact />
                 </div>
@@ -3279,7 +3283,7 @@ export default function ChapterUIPrototype() {
                  <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <Badge className="rounded-full bg-sky-100 text-sky-800">Tap Glossary</Badge>
-                    <Badge variant="outline" className="rounded-full">{selectedGlossary.pinyin}</Badge>
+                    {glossaryShowPinyin && <Badge variant="outline" className="rounded-full">{selectedGlossary.pinyin}</Badge>}
                   </div>
                    
                   <div className="mt-3 flex items-start justify-between gap-3">
@@ -3293,29 +3297,15 @@ export default function ChapterUIPrototype() {
                     )}
                   </div>
                    
-                  <p className="mt-1 text-sm text-neutral-600">{selectedGlossary.translation}</p>
+                  {glossaryShowEnglish && <p className="mt-1 text-sm text-neutral-600">{selectedGlossary.translation}</p>}
                 </div>
                   
-                <div className="mt-4 grid grid-cols-2 gap-2 md:mt-0 md:flex md:items-center">
-                  <Button
-                    variant={glossaryShowPinyin ? 'default' : 'outline'}
-                    className="rounded-2xl"
-                    onClick={() => setGlossaryShowPinyin((v) => !v)}
-                  >
-                    Glossary Pinyin
+                <div className="mt-4 grid w-full grid-cols-1 gap-2 sm:grid-cols-2 md:mt-0 md:max-w-sm">
+                  <DisplayToggleButton active={glossaryShowPinyin} label="Glossary Pinyin" onClick={() => setGlossaryShowPinyin((v) => !v)} compact />
+                  <DisplayToggleButton active={glossaryShowEnglish} label="Glossary English" onClick={() => setGlossaryShowEnglish((v) => !v)} compact />
+                  <Button variant="outline" className="h-11 rounded-2xl sm:col-span-2" onClick={() => setSelectedGlossaryKey(null)}>
+                    Close
                   </Button>
-                  
-                  <Button
-                    variant={glossaryShowEnglish ? 'default' : 'outline'}
-                    className="rounded-2xl"
-                    onClick={() => setGlossaryShowEnglish((v) => !v)}
-                  >
-                    Glossary English
-                  </Button>
-                  
-                 <Button variant="outline" className="rounded-2xl" onClick={() => setSelectedGlossaryKey(null)}>
-                 Close
-                 </Button>
                 </div>
               </div>
               
