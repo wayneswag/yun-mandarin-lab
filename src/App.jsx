@@ -1401,18 +1401,18 @@ function AppSectionButton({ active, icon: Icon, title, subtitle, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full rounded-3xl border p-4 text-left transition ${
+      className={`w-full rounded-full px-4 py-3 text-left transition ${
         active
-          ? 'border-neutral-900 bg-neutral-900 text-white shadow-md'
-          : 'border-neutral-200 bg-white hover:border-neutral-400 hover:shadow-sm'
+          ? 'bg-[#201a16] text-white shadow-sm'
+          : 'text-[#6f6257] hover:bg-[#f3eadf] hover:text-[#201a16]'
       }`}
     >
-      <div className="flex items-start gap-3">
-        <div className={`rounded-2xl p-2 ${active ? 'bg-white/15' : 'bg-neutral-100'}`}>
-          <Icon className={`h-5 w-5 ${active ? 'text-white' : 'text-neutral-700'}`} />
+      <div className="flex items-center gap-3">
+        <div className={`rounded-full p-2 ${active ? 'bg-white/15' : 'bg-[#fffaf3]'}`}>
+          <Icon className={`h-4 w-4 ${active ? 'text-white' : 'text-[#6f6257]'}`} />
         </div>
-        <div>
-          <div className={`font-semibold ${active ? 'text-white' : 'text-neutral-900'}`}>{title}</div>
+        <div className="min-w-0">
+          <div className={`text-sm font-semibold ${active ? 'text-white' : 'text-[#201a16]'}`}>{title}</div>
           <div className={`mt-1 text-xs ${active ? 'text-white/80' : 'text-neutral-600'}`}>{subtitle}</div>
         </div>
       </div>
@@ -2762,22 +2762,22 @@ export default function ChapterUIPrototype() {
   const renderRightPanel = () => {
     if (currentView === 'home') {
       return (
-        <div className="space-y-6">
-          <Card className="rounded-3xl border-0 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-lg">How to practice</CardTitle>
+        <div className="space-y-4 text-sm">
+          <Card className="rounded-3xl border-0 bg-[#fffaf3]/60 shadow-none ring-1 ring-[#eadfce]/70">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">How to practice</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-sm text-neutral-700">
-              <div className="rounded-2xl bg-neutral-100 p-4">Start with a scene, listen for tone, and choose the reply that feels most natural.</div>
-              <div className="rounded-2xl bg-neutral-100 p-4">Save phrases you would actually want to say again.</div>
-              <div className="rounded-2xl bg-neutral-100 p-4">Review helps you revisit choices that sounded stiff, awkward, or unclear.</div>
+            <CardContent className="space-y-3 text-sm leading-6 text-neutral-600">
+              <div className="border-l-2 border-[#d6a856] pl-3">Start with a scene, listen for tone, and choose the reply that feels most natural.</div>
+              <div className="border-l-2 border-[#d6a856] pl-3">Save phrases you would actually want to say again.</div>
+              <div className="border-l-2 border-[#d6a856] pl-3">Review helps you revisit choices that sounded stiff, awkward, or unclear.</div>
             </CardContent>
           </Card>
-          <Card className="rounded-3xl border-0 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-lg">Sync note</CardTitle>
+          <Card className="rounded-3xl border-0 bg-[#fffaf3]/45 shadow-none ring-1 ring-[#eadfce]/60">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Sync note</CardTitle>
             </CardHeader>
-            <CardContent className="text-sm text-neutral-700">
+            <CardContent className="text-sm leading-6 text-neutral-600">
               Your progress can stay on this device or sync with your account when you sign in.
             </CardContent>
           </Card>
@@ -2787,14 +2787,14 @@ export default function ChapterUIPrototype() {
 
     if (currentView === 'favorites') {
       return (
-        <div className="space-y-6">
-          <Card className="rounded-3xl border-0 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-lg">Why collection matters</CardTitle>
+        <div className="space-y-4 text-sm">
+          <Card className="rounded-3xl border-0 bg-[#fffaf3]/60 shadow-none ring-1 ring-[#eadfce]/70">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Why collection matters</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-sm text-neutral-700">
-              <div className="rounded-2xl bg-neutral-100 p-4">Collection is now intentional, not automatic. That makes it a better signal of what the student actually values.</div>
-              <div className="rounded-2xl bg-neutral-100 p-4">Later, this can become one of the strongest signals for personalized review and recommendation.</div>
+            <CardContent className="space-y-3 text-sm leading-6 text-neutral-600">
+              <div className="border-l-2 border-[#d6a856] pl-3">Collection is now intentional, not automatic. That makes it a better signal of what the student actually values.</div>
+              <div className="border-l-2 border-[#d6a856] pl-3">Later, this can become one of the strongest signals for personalized review and recommendation.</div>
             </CardContent>
           </Card>
         </div>
@@ -2803,14 +2803,14 @@ export default function ChapterUIPrototype() {
 
     if (currentView === 'review') {
       return (
-        <div className="space-y-6">
-          <Card className="rounded-3xl border-0 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-lg">How review works</CardTitle>
+        <div className="space-y-4 text-sm">
+          <Card className="rounded-3xl border-0 bg-[#fffaf3]/60 shadow-none ring-1 ring-[#eadfce]/70">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">How review works</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-sm text-neutral-700">
-              <div className="rounded-2xl bg-neutral-100 p-4">Natural answers are not the only data point. Stiff, awkward, and incorrect choices also matter.</div>
-              <div className="rounded-2xl bg-neutral-100 p-4">This queue is the beginning of a future personalized memory system.</div>
+            <CardContent className="space-y-3 text-sm leading-6 text-neutral-600">
+              <div className="border-l-2 border-[#d6a856] pl-3">Natural answers are not the only data point. Stiff, awkward, and incorrect choices also matter.</div>
+              <div className="border-l-2 border-[#d6a856] pl-3">This queue is the beginning of a future personalized memory system.</div>
             </CardContent>
           </Card>
         </div>
@@ -2819,14 +2819,14 @@ export default function ChapterUIPrototype() {
 
     if (currentView === 'settings') {
       return (
-        <div className="space-y-6">
-          <Card className="rounded-3xl border-0 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-lg">Teacher notes</CardTitle>
+        <div className="space-y-4 text-sm">
+          <Card className="rounded-3xl border-0 bg-[#fffaf3]/60 shadow-none ring-1 ring-[#eadfce]/70">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Teacher notes</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-sm text-neutral-700">
-              <div className="rounded-2xl bg-neutral-100 p-4">Keep the display comfortable for how you like to read Chinese.</div>
-              <div className="rounded-2xl bg-neutral-100 p-4">Use sync when you want your practice to follow you to another device.</div>
+            <CardContent className="space-y-3 text-sm leading-6 text-neutral-600">
+              <div className="border-l-2 border-[#d6a856] pl-3">Keep the display comfortable for how you like to read Chinese.</div>
+              <div className="border-l-2 border-[#d6a856] pl-3">Use sync when you want your practice to follow you to another device.</div>
             </CardContent>
           </Card>
         </div>
@@ -2834,10 +2834,10 @@ export default function ChapterUIPrototype() {
     }
 
     return (
-      <div className="space-y-6">
-        <Card className="rounded-3xl border-0 shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg">Why this chapter works</CardTitle>
+      <div className="space-y-4 text-sm">
+        <Card className="rounded-3xl border-0 bg-[#fffaf3]/60 shadow-none ring-1 ring-[#eadfce]/70">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Why this chapter works</CardTitle>
             <p className="text-sm text-neutral-500">Grammar is explained where the learner is most likely to get stuck.</p>
           </CardHeader>
           <CardContent>
@@ -2848,8 +2848,8 @@ export default function ChapterUIPrototype() {
                   onClick={() => setActiveNoteId(note.id)}
                   className={`rounded-2xl border px-3 py-2 text-left text-sm transition ${
                     activeNote.id === note.id
-                      ? 'border-neutral-900 bg-neutral-900 text-white'
-                      : 'border-neutral-200 bg-white hover:border-neutral-400'
+                      ? 'border-[#d6a856] bg-[#f3eadf] text-[#201a16]'
+                      : 'border-[#eadfce] bg-[#fffaf3]/70 text-neutral-600 hover:border-[#d6a856]'
                   }`}
                 >
                   {note.title}
@@ -2857,7 +2857,7 @@ export default function ChapterUIPrototype() {
               ))}
             </div>
 
-            <div className="rounded-2xl bg-neutral-100 p-4">
+            <div className="rounded-2xl bg-[#f3eadf]/70 p-4">
               <h4 className="font-semibold">{activeNote.title}</h4>
               <p className="mt-1 text-sm text-neutral-600">{activeNote.short}</p>
             </div>
@@ -2872,18 +2872,18 @@ export default function ChapterUIPrototype() {
               <div className="mb-2 flex items-center justify-between gap-2">
                 <div className="text-sm font-medium">Quick examples</div>
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant={quickExamplesShowPinyin ? 'default' : 'outline'}
-                    className="rounded-2xl"
-                    onClick={() => setQuickExamplesShowPinyin((v) => !v)}
-                  >
+	                  <Button
+	                    variant="outline"
+	                    className={`rounded-2xl border-[#d8cbb8] ${quickExamplesShowPinyin ? 'bg-[#f3eadf] text-[#201a16]' : 'bg-[#fffaf3]/70 text-neutral-600'}`}
+	                    onClick={() => setQuickExamplesShowPinyin((v) => !v)}
+	                  >
                     Quick Pinyin
                   </Button>
-                  <Button
-                    variant={quickExamplesShowEnglish ? 'default' : 'outline'}
-                    className="rounded-2xl"
-                    onClick={() => setQuickExamplesShowEnglish((v) => !v)}
-                  >
+	                  <Button
+	                    variant="outline"
+	                    className={`rounded-2xl border-[#d8cbb8] ${quickExamplesShowEnglish ? 'bg-[#f3eadf] text-[#201a16]' : 'bg-[#fffaf3]/70 text-neutral-600'}`}
+	                    onClick={() => setQuickExamplesShowEnglish((v) => !v)}
+	                  >
                     Quick English
                   </Button>
                 </div>
@@ -2919,20 +2919,20 @@ export default function ChapterUIPrototype() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-3xl border-0 shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg">Retention by design</CardTitle>
+        <Card className="rounded-3xl border-0 bg-[#fffaf3]/60 shadow-none ring-1 ring-[#eadfce]/70">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Retention by design</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm text-neutral-700">
-            <div className="rounded-2xl bg-neutral-100 p-4">
+          <CardContent className="space-y-3 text-sm leading-6 text-neutral-600">
+            <div className="rounded-2xl bg-[#f3eadf]/70 p-4">
               <div className="font-medium">1. No answer-position pattern</div>
               <p className="mt-1 text-neutral-600">Options are shuffled when a new node loads, so learners must judge language quality instead of guessing that the first choice is always right.</p>
             </div>
-            <div className="rounded-2xl bg-neutral-100 p-4">
+            <div className="rounded-2xl bg-[#f3eadf]/70 p-4">
               <div className="font-medium">2. Intentional collection</div>
               <p className="mt-1 text-neutral-600">Students now decide for themselves what to save from options, glossary, and examples instead of having the system collect things automatically.</p>
             </div>
-            <div className="rounded-2xl bg-neutral-100 p-4">
+            <div className="rounded-2xl bg-[#f3eadf]/70 p-4">
               <div className="font-medium">3. Immediate consequence</div>
               <p className="mt-1 text-neutral-600">The user does not just see right or wrong. The social meter changes.</p>
             </div>
@@ -2957,7 +2957,7 @@ export default function ChapterUIPrototype() {
 
   return (
     <div className="min-h-screen bg-[#f7f2ea] bg-[radial-gradient(circle_at_top_left,_#fff7e6_0,_#f7f2ea_36%,_#efe7db_100%)] px-3 pb-36 pt-4 text-[#201a16] md:p-6">
-      <div className="mx-auto mb-6 hidden max-w-7xl gap-3 md:grid md:grid-cols-5">
+      <div className="mx-auto mb-6 hidden max-w-[1440px] rounded-full bg-[#fffaf3]/75 p-2 shadow-sm ring-1 ring-[#eadfce] md:grid md:grid-cols-5">
         <AppSectionButton active={currentView === 'home'} icon={House} title="Home" subtitle="Continue and overview" onClick={() => setCurrentView('home')} />
         <AppSectionButton active={currentView === 'story'} icon={Compass} title="Story" subtitle="Situation practice" onClick={() => setCurrentView('story')} />
         <AppSectionButton active={currentView === 'favorites'} icon={Bookmark} title="Collection" subtitle="Saved expressions" onClick={() => setCurrentView('favorites')} />
@@ -3017,15 +3017,15 @@ export default function ChapterUIPrototype() {
           ))}
         </select>
       </div>
-            <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 md:gap-6 lg:grid-cols-[260px_minmax(0,1fr)_320px]">
-        <Card className="hidden rounded-3xl border-0 shadow-sm lg:block">
+      <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-4 md:gap-6 lg:grid-cols-[240px_minmax(640px,920px)_260px] lg:items-start xl:grid-cols-[260px_minmax(720px,1020px)_280px]">
+        <Card className="hidden rounded-[28px] border-0 bg-[#fffaf3]/80 shadow-sm ring-1 ring-[#eadfce] lg:block">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <Badge className="rounded-full bg-neutral-900 text-white">Yun Mandarin Lab</Badge>
-              <Badge variant="outline" className="rounded-full">Practice studio</Badge>
+              <Badge className="rounded-full bg-[#201a16] text-white">Yun Mandarin Lab</Badge>
+              <Badge variant="outline" className="rounded-full border-[#d8cbb8] bg-[#fffaf3] text-[#6f6257]">Practice studio</Badge>
             </div>
             <CardTitle className="pt-2 text-2xl">Yun Mandarin Lab</CardTitle>
-            <p className="text-sm text-neutral-500">A scenario-based Chinese learning prototype by Yun. Train useful Chinese through consequences, not through isolated drills.</p>
+            <p className="text-sm leading-6 text-neutral-600">Guided Mandarin practice for everyday scenes, natural replies, and phrases worth keeping.</p>
           </CardHeader>
           <CardContent className="space-y-5">
             <div>
@@ -3044,17 +3044,17 @@ export default function ChapterUIPrototype() {
                   <button
                     key={chapter.id}
                     onClick={() => switchChapter(index)}
-                    className={`w-full rounded-3xl border p-4 text-left transition ${
+                    className={`w-full rounded-2xl border p-4 text-left transition ${
                       active
-                        ? 'border-neutral-900 bg-neutral-900 text-white shadow-md'
-                        : 'border-neutral-200 bg-white hover:border-neutral-400 hover:shadow-sm'
+                        ? 'border-[#201a16] bg-[#201a16] text-white shadow-sm'
+                        : 'border-transparent bg-transparent hover:bg-[#f3eadf]'
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className={`rounded-2xl p-2 ${active ? 'bg-white/15' : 'bg-neutral-100'}`}>
-                        <Icon className={`h-5 w-5 ${active ? 'text-white' : 'text-neutral-700'}`} />
+                      <div className={`rounded-2xl p-2 ${active ? 'bg-white/15' : 'bg-[#f3eadf]'}`}>
+                        <Icon className={`h-5 w-5 ${active ? 'text-white' : 'text-[#6f6257]'}`} />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <div className={`text-sm ${active ? 'text-white/75' : 'text-neutral-500'}`}>{chapter.label}</div>
                         <div className="font-semibold">{chapter.shortTitle}</div>
                         <div className={`mt-1 text-xs ${active ? 'text-white/80' : 'text-neutral-600'}`}>{chapter.subtitle}</div>
@@ -3065,7 +3065,7 @@ export default function ChapterUIPrototype() {
               })}
             </div>
 
-            <div className="rounded-2xl bg-neutral-100 p-4">
+            <div className="rounded-2xl bg-[#f3eadf]/70 p-4">
               <div className="mb-2 flex items-center gap-2 text-sm font-medium">
                 <Heart className="h-4 w-4" /> Social comfort
               </div>
@@ -3073,15 +3073,15 @@ export default function ChapterUIPrototype() {
               <p className="mt-2 text-xs text-neutral-500">Good Chinese should feel socially safe, not just grammatically correct.</p>
             </div>
 
-            <div className="rounded-2xl bg-neutral-100 p-4">
+            <div className="rounded-2xl bg-[#f3eadf]/70 p-4">
               <div className="mb-2 flex items-center gap-2 text-sm font-medium">
                 <Sparkles className="h-4 w-4" /> Naturalness mastery
               </div>
               <Progress value={mastery} className="h-2" />
-              <p className="mt-2 text-xs text-neutral-500">The target is not only “correct.” The target is “something a real person would say.”</p>
+              <p className="mt-2 text-xs text-neutral-500">The target is not only correct. The target is something a real person would say.</p>
             </div>
 
-            <div className="rounded-2xl border border-dashed border-neutral-300 p-4">
+            <div className="rounded-2xl border border-dashed border-[#d8cbb8] bg-[#fffaf3]/70 p-4">
               <div className="mb-2 flex items-center gap-2 text-sm font-medium">
                 <BookOpen className="h-4 w-4" /> Saved items
               </div>
@@ -3090,25 +3090,27 @@ export default function ChapterUIPrototype() {
                   <p className="text-neutral-500">Students now choose for themselves what to save.</p>
                 ) : (
                   collected.slice(-5).reverse().map((item) => (
-                    <div key={item.id} className="rounded-xl bg-white p-2 shadow-sm">{item.expression}</div>
+                    <div key={item.id} className="rounded-xl bg-[#f3eadf]/70 p-2">{item.expression}</div>
                   ))
                 )}
               </div>
             </div>
 
-            <div className="rounded-2xl bg-neutral-900 p-4 text-sm text-white">
+            <div className="rounded-2xl bg-[#201a16] p-4 text-sm text-white">
               <div className="font-semibold">Yun Mandarin Lab</div>
               <div className="mt-1 text-white/80">Mandarin practice for real conversations.</div>
-              <div className="mt-2 text-white/70">© Yun Mandarin Lab</div>
+              <div className="mt-2 text-white/70">Yun Mandarin Lab</div>
             </div>
           </CardContent>
         </Card>
 
-        {renderMainView()}
+        <main className="min-w-0">
+          {renderMainView()}
+        </main>
 
-        <div className="hidden lg:block">
+        <aside className="hidden lg:block">
           {renderRightPanel()}
-        </div>
+        </aside>
       </div>
 
       <div className="fixed inset-x-0 bottom-3 z-40 px-3 md:hidden">
