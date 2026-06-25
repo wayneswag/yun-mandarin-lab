@@ -2137,12 +2137,12 @@ export default function ChapterUIPrototype() {
               <div className="flex h-full flex-col justify-between">
                 <div className="flex items-center justify-between">
                   <Badge className="rounded-full bg-white/80 text-neutral-800">Yun Mandarin Lab</Badge>
-                  <Badge variant="outline" className="rounded-full bg-white/70">Pilot for students</Badge>
+                  <Badge variant="outline" className="rounded-full bg-white/70">Mandarin practice studio</Badge>
                 </div>
                 <div>
                   <h2 className="text-3xl font-semibold">Train Chinese through situations</h2>
                   <p className="mt-2 max-w-xl text-sm text-neutral-600">
-                    This pilot is built for Yun’s current students. Learn by making choices, seeing consequences, and saving the expressions that feel worth keeping.
+                    Practice with everyday scenes, notice what sounds natural, and keep the phrases you want to use again.
                   </p>
                 </div>
               </div>
@@ -2150,23 +2150,23 @@ export default function ChapterUIPrototype() {
           </Card>
 
           <div className="grid gap-6 md:grid-cols-2">
-            <Card className="rounded-3xl border-0 shadow-sm">
+            <Card className="rounded-3xl border-0 bg-[#fffaf3]/90 shadow-sm">
               <CardHeader>
-                <CardTitle className="text-lg">Continue learning</CardTitle>
+                <CardTitle className="text-lg">Continue practice</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="rounded-2xl bg-neutral-100 p-4">
+                <div className="rounded-2xl bg-[#f3eadf] p-4">
                   <div className="text-sm text-neutral-500">Current chapter</div>
                   <div className="mt-1 text-xl font-semibold">{currentChapter.title}</div>
                   <div className="mt-1 text-sm text-neutral-600">Node {currentNodeIndex + 1} of {currentChapter.nodes.length}</div>
                 </div>
-                <Button className="rounded-2xl px-6" onClick={() => setCurrentView('story')}>Continue story mode</Button>
+                <Button className="rounded-2xl px-6" onClick={() => setCurrentView('story')}>Continue practice</Button>
               </CardContent>
             </Card>
 
-            <Card className="rounded-3xl border-0 shadow-sm">
+            <Card className="rounded-3xl border-0 bg-[#fffaf3]/70 shadow-sm">
               <CardHeader>
-                <CardTitle className="text-lg">Progress snapshot</CardTitle>
+                <CardTitle className="text-lg">Learning notes</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -2177,11 +2177,11 @@ export default function ChapterUIPrototype() {
                   <Progress value={overallProgress} className="h-2" />
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="rounded-2xl bg-neutral-100 p-4">
+                  <div className="rounded-2xl bg-[#f3eadf] p-4">
                     <div className="text-neutral-500">Collected</div>
                     <div className="mt-1 text-2xl font-semibold">{collected.length}</div>
                   </div>
-                  <div className="rounded-2xl bg-neutral-100 p-4">
+                  <div className="rounded-2xl bg-[#f3eadf] p-4">
                     <div className="text-neutral-500">Needs review</div>
                     <div className="mt-1 text-2xl font-semibold">{reviewItems.length}</div>
                   </div>
@@ -2190,24 +2190,26 @@ export default function ChapterUIPrototype() {
             </Card>
           </div>
 
-          <Card className="rounded-3xl border-0 shadow-sm">
+          <Card className="rounded-3xl border-0 bg-transparent shadow-none">
             <CardHeader>
-              <CardTitle className="text-lg">Chapter / Scenario overview</CardTitle>
-              <p className="text-sm text-neutral-500">Choose a situation to practice or review your progress.</p>
+              <CardTitle className="text-lg">Your practice path</CardTitle>
+              <p className="text-sm text-neutral-500">Pick a scene and continue from where you left off.</p>
             </CardHeader>
             <CardContent className="grid gap-3 lg:grid-cols-2">
               {chapterOverview.map(({ chapter, index, completed, total, status, action, recommended }) => {
                 const Icon = chapter.icon;
+                const primaryAction = action !== 'Review';
                 return (
-                  <div key={chapter.id} className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+                  <div key={chapter.id} className="rounded-2xl bg-[#fffaf3] p-4 shadow-sm ring-1 ring-[#eadfce]">
                     <div className="flex items-start gap-3">
-                      <div className="rounded-2xl bg-neutral-100 p-2">
+                      <div className="rounded-2xl bg-[#f3eadf] p-2">
                         <Icon className="h-5 w-5 text-neutral-700" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="space-y-2">
+                        <div className="text-xs font-medium uppercase tracking-[0.16em] text-neutral-500">{chapter.label}</div>
+                        <div className="mt-1 space-y-2">
                           <h3 className="font-semibold leading-snug text-neutral-900">{chapter.title}</h3>
-                          {recommended && <Badge className="rounded-full bg-[#201a16] text-white">Recommended next</Badge>}
+                          {recommended && <Badge variant="outline" className="w-fit rounded-full border-[#d6a856] bg-[#fff8ef] text-[#6f4f18]">Recommended next</Badge>}
                         </div>
                         <p className="mt-1 text-sm leading-5 text-neutral-600">{chapter.subtitle}</p>
                       </div>
@@ -2218,7 +2220,11 @@ export default function ChapterUIPrototype() {
                         <div className="font-medium text-neutral-900">{completed} / {total} completed</div>
                         <div className="mt-1 text-neutral-500">{status}</div>
                       </div>
-                      <Button className="h-11 w-full rounded-2xl px-5 text-sm font-semibold sm:w-auto" onClick={() => switchChapter(index)}>
+                      <Button
+                        variant={primaryAction ? 'default' : 'outline'}
+                        className="h-11 w-full rounded-2xl px-5 text-sm font-semibold sm:w-auto"
+                        onClick={() => switchChapter(index)}
+                      >
                         {action}
                       </Button>
                     </div>
@@ -2228,9 +2234,9 @@ export default function ChapterUIPrototype() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-3xl border-0 shadow-sm">
+          <Card className="rounded-3xl border-0 bg-transparent shadow-none">
             <CardHeader>
-              <CardTitle className="text-lg">Most recent saved items</CardTitle>
+              <CardTitle className="text-lg">Recent saved phrases</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-3 lg:grid-cols-2">
               {recentCollected.length === 0 ? (
@@ -2239,17 +2245,17 @@ export default function ChapterUIPrototype() {
                 </div>
               ) : (
                 recentCollected.map((item) => (
-                  <div key={item.id} className="rounded-2xl border border-neutral-200 p-4">
+                  <div key={item.id} className="rounded-2xl bg-[#fffaf3] p-4 shadow-sm ring-1 ring-[#eadfce]">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">
-                        <div className="font-semibold">{item.expression}</div>
-                        <AudioButton audioId={item.audioId} text={item.expression} small />
-                      </div>
-                      {item.pinyin && <div className="mt-1 text-sm text-neutral-500">{item.pinyin}</div>}
+                          <div className="text-lg font-semibold leading-snug">{item.expression}</div>
+                          <AudioButton audioId={item.audioId} text={item.expression} small />
+                        </div>
+                        {item.pinyin && <div className="mt-2 text-sm text-neutral-500">{item.pinyin}</div>}
                         {item.english && <div className="mt-1 text-sm text-neutral-700">{item.english}</div>}
                       </div>
-                      <Badge variant="outline" className="rounded-full">{item.type}</Badge>
+                      <Badge variant="outline" className="shrink-0 rounded-full">{item.type}</Badge>
                     </div>
                     <div className="mt-2 text-xs text-neutral-500">{item.source || item.chapter}</div>
                     {item.mission && <div className="mt-1 text-sm text-neutral-600">{item.mission}</div>}
@@ -2351,7 +2357,7 @@ export default function ChapterUIPrototype() {
         <div className="space-y-6">
           <Card className="rounded-3xl border-0 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-2xl">Pilot Settings</CardTitle>
+              <CardTitle className="text-2xl">Settings</CardTitle>
               <p className="text-sm text-neutral-500">
                 {session?.user ? 'Progress is syncing with your account.' : 'Guest progress stays on this device. Sign in to sync across devices.'}
               </p>
@@ -2594,7 +2600,7 @@ export default function ChapterUIPrototype() {
                 </div>
               </div>
               <div className="rounded-2xl border border-dashed border-rose-300 p-4">
-                <div className="font-medium text-rose-700">Reset local pilot data</div>
+                <div className="font-medium text-rose-700">Reset local practice data</div>
                 <p className="mt-1 text-sm text-neutral-600">This clears current progress, collection, review items, and local settings on this device.</p>
                 <Button variant="outline" className="mt-3 rounded-2xl" onClick={resetPilot}>Reset local data</Button>
               </div>
@@ -2626,7 +2632,7 @@ export default function ChapterUIPrototype() {
           <CardContent className="p-4 md:p-6">
             <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
               <div className="min-w-0 w-full md:w-auto">
-                <p className="text-sm text-neutral-500">Current mission</p>
+                <p className="text-sm text-neutral-500">Practice focus</p>
                 <h3 className="text-lg font-semibold leading-snug">{currentNode.mission}</h3>
               </div>
               <div className="grid w-full grid-cols-2 gap-3 md:w-auto md:flex md:items-center">
@@ -2759,12 +2765,12 @@ export default function ChapterUIPrototype() {
         <div className="space-y-6">
           <Card className="rounded-3xl border-0 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-lg">Pilot structure</CardTitle>
+              <CardTitle className="text-lg">How to practice</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-neutral-700">
-              <div className="rounded-2xl bg-neutral-100 p-4">Home gives students a clear restart point instead of throwing them straight into a chapter.</div>
-              <div className="rounded-2xl bg-neutral-100 p-4">Collection now stores whatever the student actively chooses to keep.</div>
-              <div className="rounded-2xl bg-neutral-100 p-4">Review surfaces non-natural choices so the student can revisit weak spots later.</div>
+              <div className="rounded-2xl bg-neutral-100 p-4">Start with a scene, listen for tone, and choose the reply that feels most natural.</div>
+              <div className="rounded-2xl bg-neutral-100 p-4">Save phrases you would actually want to say again.</div>
+              <div className="rounded-2xl bg-neutral-100 p-4">Review helps you revisit choices that sounded stiff, awkward, or unclear.</div>
             </CardContent>
           </Card>
           <Card className="rounded-3xl border-0 shadow-sm">
@@ -2772,7 +2778,7 @@ export default function ChapterUIPrototype() {
               <CardTitle className="text-lg">Sync note</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-neutral-700">
-              This pilot stores progress on this device only. Cross-device sync and teacher-side analytics can be added later when you decide on a mainland-friendly backend.
+              Your progress can stay on this device or sync with your account when you sign in.
             </CardContent>
           </Card>
         </div>
@@ -2816,11 +2822,11 @@ export default function ChapterUIPrototype() {
         <div className="space-y-6">
           <Card className="rounded-3xl border-0 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-lg">Trial notes</CardTitle>
+              <CardTitle className="text-lg">Teacher notes</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-neutral-700">
-              <div className="rounded-2xl bg-neutral-100 p-4">This version is designed for current students, not open public distribution.</div>
-              <div className="rounded-2xl bg-neutral-100 p-4">Brand trace is already visible as Yun Mandarin Lab across the pilot.</div>
+              <div className="rounded-2xl bg-neutral-100 p-4">Keep the display comfortable for how you like to read Chinese.</div>
+              <div className="rounded-2xl bg-neutral-100 p-4">Use sync when you want your practice to follow you to another device.</div>
             </CardContent>
           </Card>
         </div>
@@ -2956,7 +2962,7 @@ export default function ChapterUIPrototype() {
         <AppSectionButton active={currentView === 'story'} icon={Compass} title="Story" subtitle="Situation practice" onClick={() => setCurrentView('story')} />
         <AppSectionButton active={currentView === 'favorites'} icon={Bookmark} title="Collection" subtitle="Saved expressions" onClick={() => setCurrentView('favorites')} />
         <AppSectionButton active={currentView === 'review'} icon={RotateCcw} title="Review" subtitle="Fix weak spots" onClick={() => setCurrentView('review')} />
-        <AppSectionButton active={currentView === 'settings'} icon={Settings2} title="Settings" subtitle="Pilot controls" onClick={() => setCurrentView('settings')} />
+        <AppSectionButton active={currentView === 'settings'} icon={Settings2} title="Settings" subtitle="Preferences" onClick={() => setCurrentView('settings')} />
       </div>
 
       <div className="mx-auto mb-4 max-w-7xl md:hidden">
@@ -3016,7 +3022,7 @@ export default function ChapterUIPrototype() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <Badge className="rounded-full bg-neutral-900 text-white">Yun Mandarin Lab</Badge>
-              <Badge variant="outline" className="rounded-full">Pilot Version</Badge>
+              <Badge variant="outline" className="rounded-full">Practice studio</Badge>
             </div>
             <CardTitle className="pt-2 text-2xl">Yun Mandarin Lab</CardTitle>
             <p className="text-sm text-neutral-500">A scenario-based Chinese learning prototype by Yun. Train useful Chinese through consequences, not through isolated drills.</p>
@@ -3092,8 +3098,8 @@ export default function ChapterUIPrototype() {
 
             <div className="rounded-2xl bg-neutral-900 p-4 text-sm text-white">
               <div className="font-semibold">Yun Mandarin Lab</div>
-              <div className="mt-1 text-white/80">Pilot build for Yun’s current students.</div>
-              <div className="mt-2 text-white/70">© Yun Mandarin Lab · Internal trial</div>
+              <div className="mt-1 text-white/80">Mandarin practice for real conversations.</div>
+              <div className="mt-2 text-white/70">© Yun Mandarin Lab</div>
             </div>
           </CardContent>
         </Card>
