@@ -12,7 +12,6 @@ import {
   BookOpen,
   Sparkles,
   Volume2,
-  ChevronRight,
   Heart,
   BrainCircuit,
   CalendarDays,
@@ -2634,17 +2633,17 @@ export default function ChapterUIPrototype() {
         </Card>
 
         <Card className="rounded-[30px] border-0 bg-[#fffaf3]/95 shadow-sm ring-1 ring-[#eadfce] md:rounded-3xl md:bg-white md:ring-0">
-          <CardContent className="px-4 py-5 md:p-6">
+          <CardContent className="px-4 py-5 md:p-7">
             <div className="mb-5 flex flex-col gap-4 border-b border-[#e7dccd] pb-5 md:flex-row md:items-start md:justify-between">
               <div className="min-w-0 w-full md:w-auto">
-                <p className="text-sm font-medium text-[#8a6a28]">Teacher note</p>
-                <h3 className="mt-1 text-xl font-semibold leading-snug md:text-lg">{currentNode.mission}</h3>
+                <p className="text-sm font-medium text-[#8a6a28]">Practice focus</p>
+                <h3 className="mt-1 max-w-2xl text-xl font-semibold leading-snug md:text-2xl">{currentNode.mission}</h3>
               </div>
               <div className="grid w-full grid-cols-2 gap-3 md:w-auto md:flex md:items-center">
-                <Button variant={showPinyin ? 'default' : 'outline'} className="h-12 w-full rounded-2xl px-5 text-base font-semibold whitespace-nowrap md:h-10 md:w-auto md:min-w-[88px] md:px-4 md:text-sm" onClick={() => setShowPinyin((v) => !v)}>
+                <Button variant="outline" className={`h-12 w-full rounded-2xl px-5 text-base font-semibold whitespace-nowrap md:h-10 md:w-auto md:min-w-[88px] md:px-4 md:text-sm ${showPinyin ? 'border-[#d6a856] bg-[#f3eadf] text-[#201a16]' : 'border-[#eadfce] bg-white/70 text-neutral-600'}`} onClick={() => setShowPinyin((v) => !v)}>
                   Pinyin
                 </Button>
-                <Button variant={showEnglish ? 'default' : 'outline'} className="h-12 w-full rounded-2xl px-5 text-base font-semibold whitespace-nowrap md:h-10 md:w-auto md:min-w-[88px] md:px-4 md:text-sm" onClick={() => setShowEnglish((v) => !v)}>
+                <Button variant="outline" className={`h-12 w-full rounded-2xl px-5 text-base font-semibold whitespace-nowrap md:h-10 md:w-auto md:min-w-[88px] md:px-4 md:text-sm ${showEnglish ? 'border-[#d6a856] bg-[#f3eadf] text-[#201a16]' : 'border-[#eadfce] bg-white/70 text-neutral-600'}`} onClick={() => setShowEnglish((v) => !v)}>
                   English
                 </Button>
               </div>
@@ -2656,22 +2655,31 @@ export default function ChapterUIPrototype() {
             </div>
             <Progress value={chapterProgress} className="h-2" />
 
-            <motion.div layout className="mt-5 border-l-2 border-[#d6a856] bg-[#f3eadf]/70 py-4 pl-4 pr-3 md:mt-5 md:rounded-r-3xl md:bg-[#f3eadf]/60 md:p-5">
-              <div className="mb-3 flex items-center gap-2 text-sm text-neutral-500">
-                <MessageSquareQuote className="h-4 w-4" /> Listen first · {currentNode.npc}
-                <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.npc`} text={currentNode.npcLineZh} />
+            <motion.div layout className="mt-5 rounded-[28px] bg-[#f3eadf]/80 p-5 md:mt-6 md:p-6">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 text-sm text-neutral-600">
+                <div className="flex items-center gap-2">
+                  <MessageSquareQuote className="h-4 w-4 text-[#8a6a28]" />
+                  <span>Listen to {currentNode.npc}</span>
+                </div>
+                <div className="flex items-center gap-2 rounded-full bg-[#fffaf3]/80 px-3 py-1.5 text-xs font-medium text-[#6f6257]">
+                  <span>Play line</span>
+                  <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.npc`} text={currentNode.npcLineZh} />
+                </div>
               </div>
               <div className="space-y-3">
-                <div className={`${chineseHeadingClass} font-semibold leading-snug tracking-tight text-[#201a16]`}>
+                <div className={`${fontScale === 'sm' ? 'text-3xl' : fontScale === 'lg' ? 'text-5xl' : 'text-4xl'} font-semibold leading-tight tracking-tight text-[#201a16]`}>
                   <AnnotatedText text={currentNode.npcLineZh} glossaryKeys={currentNode.npcGlossary} onOpen={setSelectedGlossaryKey} />
                 </div>
-                {showPinyin && <p className="text-sm leading-5 text-neutral-500">{currentNode.npcLinePy}</p>}
+                {showPinyin && <p className="text-sm leading-6 text-neutral-500 md:text-base">{currentNode.npcLinePy}</p>}
                 {showEnglish && <p className="text-sm leading-5 text-neutral-600">{currentNode.npcLineEn}</p>}
               </div>
             </motion.div>
 
-            <div className="mt-5 grid gap-3 md:mt-6">
-              <div className="text-sm font-medium text-neutral-600">Choose your reply</div>
+            <div className="mt-6 grid gap-3 md:mt-7">
+              <div>
+                <div className="text-sm font-medium text-[#8a6a28]">Your turn</div>
+                <p className="mt-1 text-sm text-neutral-500">Pick the reply you would actually say in this moment.</p>
+              </div>
               {displayOptions.map((option) => {
                 const active = selectedOptionId === option.id;
                 const optionCollectionItem = createCollectionItem({
@@ -2690,17 +2698,18 @@ export default function ChapterUIPrototype() {
                   <button
                     key={option.id}
                     onClick={() => handleSelectOption(option.id)}
-                    className={`border-l-2 p-4 text-left transition active:scale-[0.99] md:rounded-r-[24px] md:p-5 ${
+                    className={`rounded-[26px] border p-4 text-left transition active:scale-[0.99] md:p-5 ${
                       active
                         ? 'border-[#201a16] bg-[#201a16] text-white shadow-[0_16px_35px_rgba(32,26,22,0.18)]'
-                        : 'border-[#d6a856] bg-white/75 hover:bg-white'
+                        : 'border-[#eadfce] bg-white/80 hover:border-[#d6a856] hover:bg-white'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 w-full">
-                        <div className="mb-2 flex items-center justify-between gap-2 text-sm font-medium opacity-80">
-                          <span>Reply {option.displayId}</span>
-                          <div className="flex items-center gap-1">
+                        <div className="mb-3 flex items-center justify-between gap-2 text-sm font-medium opacity-80">
+                          <span>{active ? 'Selected reply' : `Reply ${option.displayId}`}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="hidden text-xs sm:inline">Listen</span>
                             <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.option.${option.rating.toLowerCase()}`} text={option.zh} dark={active} small />
                             <SaveButton
                             saved={optionSaved}
@@ -2712,23 +2721,22 @@ export default function ChapterUIPrototype() {
                           />
                           </div>
                         </div>
-                        <div className={`${chineseOptionClass} font-semibold leading-snug`}>
+                        <div className={`${fontScale === 'sm' ? 'text-xl' : fontScale === 'lg' ? 'text-3xl' : 'text-2xl'} font-semibold leading-snug`}>
                           <AnnotatedText text={option.zh} glossaryKeys={option.glossary} onOpen={setSelectedGlossaryKey} />
                         </div>
                         {showPinyin && <div className={`mt-2 text-sm leading-5 ${active ? 'text-white/75' : 'text-neutral-500'}`}>{option.py}</div>}
                         {showEnglish && <div className={`mt-1 text-sm leading-5 ${active ? 'text-white/85' : 'text-neutral-700'}`}>{option.en}</div>}
                       </div>
-                      <ChevronRight className={`mt-1 h-5 w-5 shrink-0 ${active ? 'text-white' : 'text-neutral-400'}`} />
                     </div>
                   </button>
                 );
               })}
             </div>
 
-            <div className="mt-6 space-y-3">
+            <div className="mt-7 space-y-3 border-t border-[#e7dccd] pt-5">
               <div className="flex w-full items-center gap-2 rounded-2xl bg-[#fff8ef] px-4 py-3 text-left text-sm leading-5 text-[#6f6257]">
                 <BrainCircuit className="h-4 w-4 shrink-0" />
-                <span className="min-w-0">Choose the reply that sounds most natural.</span>
+                <span className="min-w-0">Natural Chinese is about the relationship, not just the words.</span>
               </div>
 
               <div className="grid w-full grid-cols-2 gap-3">
@@ -3141,11 +3149,12 @@ export default function ChapterUIPrototype() {
               initial={{ y: 24, opacity: 0, scale: 0.98 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 12, opacity: 0, scale: 0.98 }}
-              className="max-h-[88vh] w-full overflow-y-auto rounded-t-[34px] bg-[#fffaf3] p-5 shadow-[0_-18px_50px_rgba(0,0,0,0.22)] md:max-w-2xl md:rounded-[28px] md:bg-white md:p-6 md:shadow-2xl"
+              className="max-h-[88vh] w-full overflow-y-auto rounded-t-[34px] bg-[#fffaf3] p-5 shadow-[0_-18px_50px_rgba(0,0,0,0.22)] md:max-w-2xl md:rounded-[30px] md:p-6 md:shadow-2xl"
             >
               <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[#d8c9b8] md:hidden" />
               <div className="flex items-start justify-between gap-4">
                 <div>
+                  <div className="mb-2 text-sm font-medium text-[#8a6a28]">Teacher feedback</div>
                   <div className="mb-2 flex items-center gap-2">
                     {selectedOption.rating === 'Natural' ? (
                       <CheckCircle2 className="h-5 w-5 text-emerald-600" />
@@ -3154,26 +3163,29 @@ export default function ChapterUIPrototype() {
                     )}
                     <RatingBadge rating={selectedOption.rating} />
                   </div>
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className={`${fontScale === 'sm' ? 'text-lg' : fontScale === 'lg' ? 'text-2xl' : 'text-xl'} font-semibold`}>{selectedOption.zh}</h3>
-                    <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.option.${selectedOption.rating.toLowerCase()}`} text={selectedOption.zh} />
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className={`${fontScale === 'sm' ? 'text-2xl' : fontScale === 'lg' ? 'text-4xl' : 'text-3xl'} font-semibold leading-tight text-[#201a16]`}>{selectedOption.zh}</h3>
+                    <div className="flex shrink-0 items-center gap-2 rounded-full bg-[#f3eadf] px-3 py-1.5 text-xs font-medium text-[#6f6257]">
+                      <span className="hidden sm:inline">Hear it</span>
+                      <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.option.${selectedOption.rating.toLowerCase()}`} text={selectedOption.zh} />
+                    </div>
                   </div>
-                  {showPinyin && <p className="mt-1 text-sm text-neutral-500">{selectedOption.py}</p>}
-                  {showEnglish && <p className="mt-1 text-sm text-neutral-700">{selectedOption.en}</p>}
+                  {showPinyin && <p className="mt-2 text-sm leading-6 text-neutral-500">{selectedOption.py}</p>}
+                  {showEnglish && <p className="mt-1 text-sm leading-6 text-neutral-700">{selectedOption.en}</p>}
                 </div>
               </div>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <div className="rounded-2xl border border-[#eadfce] bg-white/80 p-4">
-                  <div className="mb-2 text-sm font-medium">Why this answer feels this way</div>
-                  <p className="text-sm text-neutral-700">{selectedOption.explanation}</p>
+                <div className="border-l-2 border-[#d6a856] bg-white/55 py-3 pl-4 pr-3">
+                  <div className="mb-2 text-sm font-medium">Teacher note</div>
+                  <p className="text-sm leading-6 text-neutral-700">{selectedOption.explanation}</p>
                 </div>
-                <div className="rounded-2xl border border-[#eadfce] bg-white/80 p-4">
-                  <div className="mb-2 text-sm font-medium">Scene consequence</div>
+                <div className="border-l-2 border-[#d6a856] bg-white/55 py-3 pl-4 pr-3">
+                  <div className="mb-2 text-sm font-medium">How it lands</div>
                   <p className="text-sm text-neutral-700">
-                    Social comfort {selectedOption.relationship >= 0 ? '+' : ''}{selectedOption.relationship} · Naturalness +{selectedOption.score * 8}
+                    Social comfort {selectedOption.relationship >= 0 ? '+' : ''}{selectedOption.relationship} - Naturalness +{selectedOption.score * 8}
                   </p>
-                  <p className="mt-2 text-sm text-neutral-600">
+                  <p className="mt-2 text-sm leading-6 text-neutral-600">
                     {selectedOption.rating === 'Natural'
                       ? 'Good. The conversation moves forward smoothly.'
                       : selectedOption.rating === 'Stiff'
@@ -3186,12 +3198,12 @@ export default function ChapterUIPrototype() {
               </div>
 
               {selectedOption.correction && (
-                <div className="mt-4 rounded-2xl border border-dashed border-neutral-300 p-4">
+                <div className="mt-4 rounded-[24px] border border-dashed border-[#d8cbb8] bg-white/50 p-4">
                   <div className="mb-2 flex items-center justify-between gap-2 text-sm font-medium">
-                  <span>Better version</span>
+                  <span>Try this more natural version</span>
                   <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.correction.${selectedOption.rating.toLowerCase()}`} text={selectedOption.correction} small />
                 </div>
-                <p className="text-base font-medium">{selectedOption.correction}</p>
+                <p className="text-xl font-semibold leading-snug">{selectedOption.correction}</p>
                 </div>
               )}
 
