@@ -2266,42 +2266,53 @@ export default function ChapterUIPrototype() {
 
     if (currentView === 'favorites') {
       return (
-        <div className="space-y-5 pb-8 md:space-y-6 md:pb-0">
+        <div className="space-y-6 pb-8 md:space-y-7 md:pb-0">
           <section className="px-1 md:px-0">
-            <div className="max-w-2xl">
-              <div className="text-sm font-medium text-[#8a6a28]">Language notebook</div>
-              <h2 className="mt-1 text-3xl font-semibold leading-tight">Your saved language notes</h2>
-              <p className="mt-2 text-sm leading-6 text-neutral-600">Keep the phrases that feel useful, natural, or worth saying again.</p>
+            <div className="max-w-3xl">
+              <div className="text-sm font-medium text-[#8a6a28]">Phrase notebook</div>
+              <h2 className="mt-1 text-3xl font-semibold leading-tight md:text-4xl">Your Mandarin phrase notebook</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">
+                A quiet place for phrases you want to hear again, say aloud, and bring back into real conversation.
+              </p>
             </div>
           </section>
 
           <section>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-4">
               {collected.length === 0 ? (
-                <div className="rounded-[24px] border border-dashed border-[#d8cbb8] bg-[#fffaf3]/60 p-6 text-sm leading-6 text-neutral-500 md:col-span-2">
-                  No saved notes yet. When a phrase sounds like something you would actually use, save it here.
+                <div className="rounded-[28px] border border-dashed border-[#d8cbb8] bg-[#fffaf3]/70 p-6 text-sm leading-6 text-neutral-500 md:p-8">
+                  No saved phrases yet. During practice, save anything that sounds useful, natural, or worth trying in your own speech.
                 </div>
               ) : (
                 collected.map((item) => (
-                  <article key={item.id} className="border-l-2 border-[#d6a856] bg-[#fffaf3]/75 py-4 pl-4 pr-3 md:rounded-r-[24px]">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
+                  <article key={item.id} className="border-l-2 border-[#d6a856] bg-[#fffaf3]/75 px-4 py-5 md:rounded-r-[28px] md:px-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0 flex-1 space-y-2">
                         <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0 flex-1 text-2xl font-semibold leading-snug md:text-xl">{item.expression}</div>
-                        <AudioButton audioId={item.audioId} text={item.expression} small />
+                          <div className="min-w-0 flex-1 text-3xl font-semibold leading-tight text-[#201a16] md:text-4xl">{item.expression}</div>
+                          <div className="flex shrink-0 items-center gap-2 rounded-full bg-[#f3eadf] px-3 py-1.5 text-xs font-medium text-[#6f6257]">
+                            <span className="hidden sm:inline">Listen</span>
+                            <AudioButton audioId={item.audioId} text={item.expression} small />
+                          </div>
+                        </div>
+                        {item.pinyin && <div className="text-sm leading-6 text-neutral-500 md:text-base">{item.pinyin}</div>}
+                        {item.english && <div className="text-sm leading-6 text-neutral-700">{item.english}</div>}
                       </div>
-                      {item.pinyin && <div className="mt-2 text-sm leading-5 text-neutral-500">{item.pinyin}</div>}
-                        {item.english && <div className="mt-1 text-sm leading-5 text-neutral-700">{item.english}</div>}
-                      </div>
-                      <div className="flex shrink-0 items-center gap-2">
-                        <SaveButton saved onClick={() => toggleCollected(item)} />
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => toggleCollected(item)}
+                        className="rounded-full p-2 text-neutral-400 transition hover:bg-[#f3eadf] hover:text-neutral-700"
+                        aria-label="Remove saved phrase"
+                        title="Remove saved phrase"
+                      >
+                        <Bookmark className="h-4 w-4 fill-current" />
+                      </button>
                     </div>
-                    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
-                      <Badge variant="outline" className="rounded-full">{item.type}</Badge>
+                    <div className="mt-4 flex flex-wrap items-center gap-2 text-xs leading-5 text-neutral-500">
+                      <span className="rounded-full bg-[#f3eadf]/80 px-2.5 py-1">{item.type}</span>
                       <span>{item.source || item.chapter}</span>
                     </div>
-                    {item.mission && <div className="mt-1 text-sm text-neutral-600">{item.mission}</div>}
+                    {item.mission && <div className="mt-2 border-l border-[#d8cbb8] pl-3 text-sm leading-6 text-neutral-600">{item.mission}</div>}
                   </article>
                 ))
               )}
