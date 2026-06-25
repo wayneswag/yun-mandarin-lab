@@ -84,7 +84,7 @@ function DisplayToggleButton({ active, label, onClick, compact = false }) {
       }`}
       aria-pressed={active}
     >
-      <span className="min-w-0 truncate">{label}</span>
+      <span className="whitespace-nowrap">{label}</span>
       <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${active ? 'bg-white/20 text-white' : 'bg-[#f3eadf] text-[#6f6257]'}`}>
         {active ? 'On' : 'Off'}
       </span>
@@ -1563,6 +1563,19 @@ export default function ChapterUIPrototype() {
     return Array.from(map.values()).slice(-6).reverse();
   }, [practiceLog]);
 
+  const getReviewSourceOption = (item) => {
+    const sourceChapter = chapters.find((chapter) => chapter.shortTitle === item.chapter || chapter.title === item.chapter);
+    const chapterPool = sourceChapter ? [sourceChapter] : chapters;
+    for (const chapter of chapterPool) {
+      for (const node of chapter.nodes) {
+        if (item.mission && node.mission !== item.mission) continue;
+        const option = node.options.find((candidate) => candidate.zh === item.selected);
+        if (option) return option;
+      }
+    }
+    return null;
+  };
+
   const appState = useMemo(() => ({
     currentView,
     currentChapterIndex,
@@ -2371,8 +2384,12 @@ export default function ChapterUIPrototype() {
                 </div>
               ) : (
                 reviewItems.map((item, idx) => {
-                  const reviewPinyin = item.selectedPinyin || item.pinyin || '';
-                  const reviewEnglish = item.selectedEnglish || item.english || '';
+                  const sourceOption = getReviewSourceOption(item);
+                  const reviewPinyin = item.selectedPinyin || item.pinyin || sourceOption?.py || '';
+                  const reviewEnglish = item.selectedEnglish || item.english || sourceOption?.en || '';
+                  const reviewExplanation = item.explanation || sourceOption?.explanation || '';
+                  const correctionPinyin = item.correctionPinyin || '';
+                  const correctionEnglish = item.correctionEnglish || '';
                   return (
                   <div key={`${item.selected}-${idx}`} className="rounded-2xl border border-neutral-200 p-4">
                     <div className="flex items-center gap-2">
@@ -2387,14 +2404,17 @@ export default function ChapterUIPrototype() {
                       </div>
                       <AudioButton audioId={item.selectedAudioId} text={item.selected} small />
                     </div>
-                    <div className="mt-2 text-sm text-neutral-600">{item.mission}</div>
+                    {reviewShowEnglish && item.mission && <div className="mt-2 text-sm text-neutral-600">{item.mission}</div>}
+                    {reviewShowEnglish && reviewExplanation && <div className="mt-2 text-sm leading-6 text-neutral-700">{reviewExplanation}</div>}
                     {item.correction && (
                       <div className="mt-3 rounded-xl bg-neutral-100 p-3 text-sm">
                         <div className="flex items-center justify-between gap-2 font-medium">
                         <span>Better version</span>
                         <AudioButton audioId={item.correctionAudioId} text={item.correction} small />
                       </div>
-                      <div className="mt-1">{item.correction}</div>
+                      <div className="mt-1 font-medium text-[#201a16]">{item.correction}</div>
+                      {reviewShowPinyin && correctionPinyin && <div className="mt-1 text-sm text-neutral-500">{correctionPinyin}</div>}
+                      {reviewShowEnglish && correctionEnglish && <div className="mt-1 text-sm text-neutral-700">{correctionEnglish}</div>}
                       </div>
                     )}
                   </div>
@@ -2818,6 +2838,77 @@ export default function ChapterUIPrototype() {
             </div>
           </CardContent>
         </Card>
+        <section className="space-y-5 rounded-[28px] bg-[#fffaf3]/85 p-4 ring-1 ring-[#eadfce] lg:hidden">
+          <div>
+            <div className="text-sm font-medium text-[#8a6a28]">Teacher notes</div>
+            <p className="mt-1 text-sm leading-6 text-neutral-600">Use these notes after the main practice when you want a little more support.</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            {currentChapter.grammarNotes.map((note) => (
+              <button
+                key={note.id}
+                onClick={() => setActiveNoteId(note.id)}
+                className={`rounded-2xl border px-3 py-2 text-left text-sm transition ${
+                  activeNote.id === note.id
+                    ? 'border-[#d6a856] bg-[#f3eadf] text-[#201a16]'
+                    : 'border-[#eadfce] bg-[#fffaf3]/70 text-neutral-600 hover:border-[#d6a856]'
+                }`}
+              >
+                {note.title}
+              </button>
+            ))}
+          </div>
+
+          <div className="border-l-2 border-[#d6a856] bg-white/55 py-3 pl-4 pr-3">
+            <h4 className="font-semibold">{activeNote.title}</h4>
+            <p className="mt-1 text-sm leading-6 text-neutral-600">{activeNote.short}</p>
+          </div>
+
+          <div className="space-y-3 text-sm leading-6 text-neutral-700">
+            {activeNote.body.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <div className="text-sm font-medium">Quick examples</div>
+              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <DisplayToggleButton active={quickExamplesShowPinyin} label="Quick Pinyin" onClick={() => setQuickExamplesShowPinyin((v) => !v)} compact />
+                <DisplayToggleButton active={quickExamplesShowEnglish} label="Quick English" onClick={() => setQuickExamplesShowEnglish((v) => !v)} compact />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {activeNote.examples.map((example, index) => {
+                const quickExampleItem = createCollectionItem({
+                  expression: example.zh,
+                  pinyin: example.py,
+                  english: example.en,
+                  audioId: `${currentChapter.id}.grammar.${activeNote.id}.ex${index + 1}`,
+                  type: 'quick-example',
+                  source: `${activeNote.title} - Quick example`,
+                  chapter: currentChapter.shortTitle,
+                });
+                const quickSaved = isCollected(quickExampleItem.id);
+                return (
+                  <div key={example.zh} className="rounded-2xl border border-[#eadfce] bg-white/65 p-3 text-sm">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="font-semibold leading-snug text-[#201a16]">{example.zh}</div>
+                      <div className="flex shrink-0 items-center gap-1">
+                        <AudioButton audioId={`${currentChapter.id}.grammar.${activeNote.id}.ex${index + 1}`} text={example.zh} small />
+                        <SaveButton saved={quickSaved} onClick={() => toggleCollected(quickExampleItem)} />
+                      </div>
+                    </div>
+                    {quickExamplesShowPinyin && <div className="mt-2 text-sm leading-5 text-neutral-500">{example.py}</div>}
+                    {quickExamplesShowEnglish && <div className="mt-1 text-sm leading-5 text-neutral-700">{example.en}</div>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
       </div>
     );
   };
@@ -2934,7 +3025,7 @@ export default function ChapterUIPrototype() {
             <div className="mt-4">
               <div className="mb-3 flex flex-col gap-2">
                 <div className="text-sm font-medium">Quick examples</div>
-                <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2">
                   <DisplayToggleButton active={quickExamplesShowPinyin} label="Quick Pinyin" onClick={() => setQuickExamplesShowPinyin((v) => !v)} compact />
                   <DisplayToggleButton active={quickExamplesShowEnglish} label="Quick English" onClick={() => setQuickExamplesShowEnglish((v) => !v)} compact />
                 </div>
@@ -3310,9 +3401,11 @@ export default function ChapterUIPrototype() {
               </div>
               
 
-              <div className="mt-5 rounded-2xl bg-neutral-100 p-4 text-sm leading-6 text-neutral-700">
-                {selectedGlossary.explanation}
-              </div>
+              {glossaryShowEnglish && (
+                <div className="mt-5 rounded-2xl bg-neutral-100 p-4 text-sm leading-6 text-neutral-700">
+                  {selectedGlossary.explanation}
+                </div>
+              )}
 
               <div className="mt-5">
                 <div className="mb-2 text-sm font-medium">Practical examples</div>
