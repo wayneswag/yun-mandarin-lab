@@ -70,6 +70,28 @@ function PasswordRequirements() {
   );
 }
 
+function DisplayToggleButton({ active, label, onClick, compact = false }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex min-w-0 items-center justify-between gap-3 rounded-2xl border font-semibold transition ${
+        compact ? 'h-11 px-3 text-sm' : 'h-12 px-4 text-base'
+      } ${
+        active
+          ? 'border-[#201a16] bg-[#201a16] text-white shadow-[0_10px_24px_rgba(32,26,22,0.16)]'
+          : 'border-[#d8cbb8] bg-white/70 text-neutral-600 hover:border-[#d6a856] hover:bg-[#fffaf3]'
+      }`}
+      aria-pressed={active}
+    >
+      <span>{label}</span>
+      <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${active ? 'bg-white/20 text-white' : 'bg-[#f3eadf] text-[#6f6257]'}`}>
+        {active ? 'On' : 'Off'}
+      </span>
+    </button>
+  );
+}
+
 function getCurrentDeviceLabel() {
   if (typeof navigator === 'undefined') return 'This device';
 
@@ -1445,6 +1467,8 @@ export default function ChapterUIPrototype() {
   const [showFeedback, setShowFeedback] = useState(false);
   const [showPinyin, setShowPinyin] = useState(persisted?.showPinyin ?? true);
   const [showEnglish, setShowEnglish] = useState(persisted?.showEnglish ?? true);
+  const [reviewShowPinyin, setReviewShowPinyin] = useState(true);
+  const [reviewShowEnglish, setReviewShowEnglish] = useState(true);
   const [trust, setTrust] = useState(persisted?.trust || 30);
   const [mastery, setMastery] = useState(persisted?.mastery || 12);
   const [collected, setCollected] = useState(persisted?.collected || persisted?.collectedItems || []);
@@ -1810,6 +1834,8 @@ export default function ChapterUIPrototype() {
       chapter: currentChapter.shortTitle,
       mission: currentNode.mission,
       selected: selectedOption.zh,
+      selectedPinyin: selectedOption.py,
+      selectedEnglish: selectedOption.en,
       selectedAudioId: `${currentChapter.id}.node${currentNode.id}.option.${selectedRole}`,
       rating: selectedOption.rating,
       correction: selectedOption.correction,
@@ -2327,8 +2353,16 @@ export default function ChapterUIPrototype() {
         <div className="space-y-6">
           <Card className="rounded-3xl border-0 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-2xl">Review practice</CardTitle>
-              <p className="text-sm text-neutral-500">Come back to replies that sounded stiff, awkward, or unclear.</p>
+              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <CardTitle className="text-2xl">Review practice</CardTitle>
+                  <p className="text-sm text-neutral-500">Come back to replies that sounded stiff, awkward, or unclear.</p>
+                </div>
+                <div className="grid w-full grid-cols-2 gap-2 md:w-auto md:min-w-[260px]">
+                  <DisplayToggleButton active={reviewShowPinyin} label="Pinyin" onClick={() => setReviewShowPinyin((v) => !v)} compact />
+                  <DisplayToggleButton active={reviewShowEnglish} label="English" onClick={() => setReviewShowEnglish((v) => !v)} compact />
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-3">
               {reviewItems.length === 0 ? (
@@ -2342,8 +2376,12 @@ export default function ChapterUIPrototype() {
                       <RatingBadge rating={item.rating} />
                       <span className="text-xs text-neutral-500">{item.chapter}</span>
                     </div>
-                    <div className="mt-3 flex items-start justify-between gap-2">
-                      <div className="font-semibold">{item.selected}</div>
+                    <div className="mt-3 flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="text-2xl font-semibold leading-snug text-[#201a16]">{item.selected}</div>
+                        {reviewShowPinyin && item.selectedPinyin && <div className="mt-2 text-sm leading-5 text-neutral-500">{item.selectedPinyin}</div>}
+                        {reviewShowEnglish && item.selectedEnglish && <div className="mt-1 text-sm leading-5 text-neutral-700">{item.selectedEnglish}</div>}
+                      </div>
                       <AudioButton audioId={item.selectedAudioId} text={item.selected} small />
                     </div>
                     <div className="mt-2 text-sm text-neutral-600">{item.mission}</div>
@@ -2568,15 +2606,15 @@ export default function ChapterUIPrototype() {
               <div className="rounded-[26px] bg-[#fffaf3]/70 p-4 ring-1 ring-[#eadfce] md:p-5">
                 <div className="font-medium">Reading supports</div>
                 <div className="mt-3 grid grid-cols-2 gap-2 sm:flex">
-                  <Button variant={showPinyin ? 'default' : 'outline'} className="h-11 rounded-2xl" onClick={() => setShowPinyin((v) => !v)}>Pinyin</Button>
-                  <Button variant={showEnglish ? 'default' : 'outline'} className="h-11 rounded-2xl" onClick={() => setShowEnglish((v) => !v)}>English</Button>
+                  <DisplayToggleButton active={showPinyin} label="Pinyin" onClick={() => setShowPinyin((v) => !v)} compact />
+                  <DisplayToggleButton active={showEnglish} label="English" onClick={() => setShowEnglish((v) => !v)} compact />
                 </div>
               </div>
               <div className="rounded-[26px] bg-[#fffaf3]/70 p-4 ring-1 ring-[#eadfce] md:p-5">
                 <div className="font-medium">Example notes</div>
                 <div className="mt-3 grid grid-cols-2 gap-2 sm:flex">
-                  <Button variant={quickExamplesShowPinyin ? 'default' : 'outline'} className="h-11 rounded-2xl text-sm" onClick={() => setQuickExamplesShowPinyin((v) => !v)}>Quick Pinyin</Button>
-                  <Button variant={quickExamplesShowEnglish ? 'default' : 'outline'} className="h-11 rounded-2xl text-sm" onClick={() => setQuickExamplesShowEnglish((v) => !v)}>Quick English</Button>
+                  <DisplayToggleButton active={quickExamplesShowPinyin} label="Quick Pinyin" onClick={() => setQuickExamplesShowPinyin((v) => !v)} compact />
+                  <DisplayToggleButton active={quickExamplesShowEnglish} label="Quick English" onClick={() => setQuickExamplesShowEnglish((v) => !v)} compact />
                 </div>
               </div>
               <div className="rounded-[26px] bg-[#fffaf3]/70 p-4 ring-1 ring-[#eadfce] md:p-5">
@@ -2651,12 +2689,8 @@ export default function ChapterUIPrototype() {
                 <h3 className="mt-1 max-w-2xl text-xl font-semibold leading-snug md:text-2xl">{currentNode.mission}</h3>
               </div>
               <div className="grid w-full grid-cols-2 gap-3 md:w-auto md:flex md:items-center">
-                <Button variant="outline" className={`h-12 w-full rounded-2xl px-5 text-base font-semibold whitespace-nowrap md:h-10 md:w-auto md:min-w-[88px] md:px-4 md:text-sm ${showPinyin ? 'border-[#d6a856] bg-[#f3eadf] text-[#201a16]' : 'border-[#eadfce] bg-white/70 text-neutral-600'}`} onClick={() => setShowPinyin((v) => !v)}>
-                  Pinyin
-                </Button>
-                <Button variant="outline" className={`h-12 w-full rounded-2xl px-5 text-base font-semibold whitespace-nowrap md:h-10 md:w-auto md:min-w-[88px] md:px-4 md:text-sm ${showEnglish ? 'border-[#d6a856] bg-[#f3eadf] text-[#201a16]' : 'border-[#eadfce] bg-white/70 text-neutral-600'}`} onClick={() => setShowEnglish((v) => !v)}>
-                  English
-                </Button>
+                <DisplayToggleButton active={showPinyin} label="Pinyin" onClick={() => setShowPinyin((v) => !v)} compact />
+                <DisplayToggleButton active={showEnglish} label="English" onClick={() => setShowEnglish((v) => !v)} compact />
               </div>
             </div>
 
@@ -2897,20 +2931,8 @@ export default function ChapterUIPrototype() {
               <div className="mb-2 flex items-center justify-between gap-2">
                 <div className="text-sm font-medium">Quick examples</div>
                 <div className="flex items-center gap-2">
-	                  <Button
-	                    variant="outline"
-	                    className={`rounded-2xl border-[#d8cbb8] ${quickExamplesShowPinyin ? 'bg-[#f3eadf] text-[#201a16]' : 'bg-[#fffaf3]/70 text-neutral-600'}`}
-	                    onClick={() => setQuickExamplesShowPinyin((v) => !v)}
-	                  >
-                    Quick Pinyin
-                  </Button>
-	                  <Button
-	                    variant="outline"
-	                    className={`rounded-2xl border-[#d8cbb8] ${quickExamplesShowEnglish ? 'bg-[#f3eadf] text-[#201a16]' : 'bg-[#fffaf3]/70 text-neutral-600'}`}
-	                    onClick={() => setQuickExamplesShowEnglish((v) => !v)}
-	                  >
-                    Quick English
-                  </Button>
+                  <DisplayToggleButton active={quickExamplesShowPinyin} label="Quick Pinyin" onClick={() => setQuickExamplesShowPinyin((v) => !v)} compact />
+                  <DisplayToggleButton active={quickExamplesShowEnglish} label="Quick English" onClick={() => setQuickExamplesShowEnglish((v) => !v)} compact />
                 </div>
               </div>
               <div className="space-y-2">
