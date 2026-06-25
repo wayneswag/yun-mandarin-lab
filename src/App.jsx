@@ -2131,7 +2131,7 @@ export default function ChapterUIPrototype() {
   const renderMainView = () => {
     if (currentView === 'home') {
       return (
-        <div className="space-y-6">
+        <div className="space-y-5 md:space-y-6">
           <Card className="hidden overflow-hidden rounded-3xl border-0 shadow-sm md:block">
             <div className="h-56 bg-[radial-gradient(circle_at_top_left,_#dbeafe,_#e5e7eb_55%,_#fafafa)] p-6">
               <div className="flex h-full flex-col justify-between">
@@ -2149,26 +2149,26 @@ export default function ChapterUIPrototype() {
             </div>
           </Card>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card className="rounded-3xl border-0 bg-[#fffaf3]/90 shadow-sm">
-              <CardHeader>
+          <div className="grid gap-4 md:grid-cols-2 md:gap-6">
+            <Card className="rounded-[28px] border-0 bg-[#fffaf3]/90 shadow-sm md:rounded-3xl">
+              <CardHeader className="pb-3">
                 <CardTitle className="text-lg">Continue practice</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 pt-0">
                 <div className="rounded-2xl bg-[#f3eadf] p-4">
                   <div className="text-sm text-neutral-500">Current chapter</div>
                   <div className="mt-1 text-xl font-semibold">{currentChapter.title}</div>
                   <div className="mt-1 text-sm text-neutral-600">Node {currentNodeIndex + 1} of {currentChapter.nodes.length}</div>
                 </div>
-                <Button className="rounded-2xl px-6" onClick={() => setCurrentView('story')}>Continue practice</Button>
+                <Button className="h-12 w-full rounded-2xl px-6 text-base font-semibold sm:w-auto sm:text-sm" onClick={() => setCurrentView('story')}>Continue practice</Button>
               </CardContent>
             </Card>
 
-            <Card className="rounded-3xl border-0 bg-[#fffaf3]/70 shadow-sm">
-              <CardHeader>
+            <Card className="rounded-[28px] border-0 bg-[#fffaf3]/70 shadow-sm md:rounded-3xl">
+              <CardHeader className="pb-3">
                 <CardTitle className="text-lg">Learning notes</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 pt-0">
                 <div>
                   <div className="mb-2 flex items-center justify-between text-sm">
                     <span className="text-neutral-500">Overall progress</span>
@@ -2191,16 +2191,16 @@ export default function ChapterUIPrototype() {
           </div>
 
           <Card className="rounded-3xl border-0 bg-transparent shadow-none">
-            <CardHeader>
+            <CardHeader className="px-1 pb-3 md:px-6">
               <CardTitle className="text-lg">Your practice path</CardTitle>
               <p className="text-sm text-neutral-500">Pick a scene and continue from where you left off.</p>
             </CardHeader>
-            <CardContent className="grid gap-3 lg:grid-cols-2">
+            <CardContent className="grid gap-3 px-0 md:px-6 lg:grid-cols-2">
               {chapterOverview.map(({ chapter, index, completed, total, status, action, recommended }) => {
                 const Icon = chapter.icon;
                 const primaryAction = action !== 'Review';
                 return (
-                  <div key={chapter.id} className="rounded-2xl bg-[#fffaf3] p-4 shadow-sm ring-1 ring-[#eadfce]">
+                  <div key={chapter.id} className="rounded-[24px] bg-[#fffaf3] p-4 shadow-sm ring-1 ring-[#eadfce]">
                     <div className="flex items-start gap-3">
                       <div className="rounded-2xl bg-[#f3eadf] p-2">
                         <Icon className="h-5 w-5 text-neutral-700" />
@@ -2222,7 +2222,7 @@ export default function ChapterUIPrototype() {
                       </div>
                       <Button
                         variant={primaryAction ? 'default' : 'outline'}
-                        className="h-11 w-full rounded-2xl px-5 text-sm font-semibold sm:w-auto"
+                        className="h-12 w-full rounded-2xl px-5 text-base font-semibold sm:h-11 sm:w-auto sm:text-sm"
                         onClick={() => switchChapter(index)}
                       >
                         {action}
@@ -2235,29 +2235,27 @@ export default function ChapterUIPrototype() {
           </Card>
 
           <Card className="rounded-3xl border-0 bg-transparent shadow-none">
-            <CardHeader>
+            <CardHeader className="px-1 pb-3 md:px-6">
               <CardTitle className="text-lg">Recent saved phrases</CardTitle>
             </CardHeader>
-            <CardContent className="grid gap-3 lg:grid-cols-2">
+            <CardContent className="grid gap-3 px-0 md:px-6 lg:grid-cols-2">
               {recentCollected.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-neutral-300 p-6 text-sm text-neutral-500 lg:col-span-2">
                   Nothing saved yet. Students can now decide for themselves what to keep.
                 </div>
               ) : (
                 recentCollected.map((item) => (
-                  <div key={item.id} className="rounded-2xl bg-[#fffaf3] p-4 shadow-sm ring-1 ring-[#eadfce]">
+                  <div key={item.id} className="rounded-[24px] bg-[#fffaf3] p-4 shadow-sm ring-1 ring-[#eadfce]">
                     <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="text-lg font-semibold leading-snug">{item.expression}</div>
-                          <AudioButton audioId={item.audioId} text={item.expression} small />
-                        </div>
-                        {item.pinyin && <div className="mt-2 text-sm text-neutral-500">{item.pinyin}</div>}
-                        {item.english && <div className="mt-1 text-sm text-neutral-700">{item.english}</div>}
-                      </div>
-                      <Badge variant="outline" className="shrink-0 rounded-full">{item.type}</Badge>
+                      <div className="min-w-0 flex-1 text-xl font-semibold leading-snug">{item.expression}</div>
+                      <AudioButton audioId={item.audioId} text={item.expression} small />
                     </div>
-                    <div className="mt-2 text-xs text-neutral-500">{item.source || item.chapter}</div>
+                    {item.pinyin && <div className="mt-2 text-sm leading-5 text-neutral-500">{item.pinyin}</div>}
+                    {item.english && <div className="mt-1 text-sm leading-5 text-neutral-700">{item.english}</div>}
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                      <Badge variant="outline" className="rounded-full">{item.type}</Badge>
+                      <span>{item.source || item.chapter}</span>
+                    </div>
                     {item.mission && <div className="mt-1 text-sm text-neutral-600">{item.mission}</div>}
                   </div>
                 ))
@@ -2270,35 +2268,37 @@ export default function ChapterUIPrototype() {
 
     if (currentView === 'favorites') {
       return (
-        <div className="space-y-6">
-          <Card className="rounded-3xl border-0 shadow-sm">
-            <CardHeader>
+        <div className="space-y-5 pb-8 md:space-y-6 md:pb-0">
+          <Card className="rounded-none border-0 bg-transparent shadow-none md:rounded-3xl md:bg-white md:shadow-sm">
+            <CardHeader className="px-1 pb-4 md:px-6">
               <CardTitle className="text-2xl">Expression Collection</CardTitle>
               <p className="text-sm text-neutral-500">Students decide what to keep. Options, glossary terms, glossary examples, and quick examples can all be saved here.</p>
             </CardHeader>
-            <CardContent className="grid gap-3 md:grid-cols-2">
+            <CardContent className="grid gap-3 px-0 md:grid-cols-2 md:px-6">
               {collected.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-neutral-300 p-6 text-sm text-neutral-500 md:col-span-2">
                   The collection is empty. Save anything that feels useful, natural, or worth reviewing later.
                 </div>
               ) : (
                 collected.map((item) => (
-                  <div key={item.id} className="rounded-2xl border border-neutral-200 p-4">
+                  <div key={item.id} className="rounded-[24px] border border-[#eadfce] bg-[#fffaf3] p-4 shadow-sm md:rounded-2xl md:bg-white md:shadow-none">
                     <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="flex items-start justify-between gap-2">
-                        <div className="font-semibold">{item.expression}</div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1 text-xl font-semibold leading-snug md:text-base">{item.expression}</div>
                         <AudioButton audioId={item.audioId} text={item.expression} small />
                       </div>
-                      {item.pinyin && <div className="mt-1 text-sm text-neutral-500">{item.pinyin}</div>}
-                        {item.english && <div className="mt-1 text-sm text-neutral-700">{item.english}</div>}
+                      {item.pinyin && <div className="mt-2 text-sm leading-5 text-neutral-500">{item.pinyin}</div>}
+                        {item.english && <div className="mt-1 text-sm leading-5 text-neutral-700">{item.english}</div>}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="rounded-full">{item.type}</Badge>
+                      <div className="flex shrink-0 items-center gap-2">
                         <SaveButton saved onClick={() => toggleCollected(item)} />
                       </div>
                     </div>
-                    <div className="mt-2 text-xs text-neutral-500">{item.source || item.chapter}</div>
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                      <Badge variant="outline" className="rounded-full">{item.type}</Badge>
+                      <span>{item.source || item.chapter}</span>
+                    </div>
                     {item.mission && <div className="mt-1 text-sm text-neutral-600">{item.mission}</div>}
                   </div>
                 ))
@@ -2354,27 +2354,27 @@ export default function ChapterUIPrototype() {
 
     if (currentView === 'settings') {
       return (
-        <div className="space-y-6">
-          <Card className="rounded-3xl border-0 shadow-sm">
-            <CardHeader>
+        <div className="space-y-5 pb-8 md:space-y-6 md:pb-0">
+          <Card className="rounded-none border-0 bg-transparent shadow-none md:rounded-3xl md:bg-white md:shadow-sm">
+            <CardHeader className="px-1 pb-4 md:px-6">
               <CardTitle className="text-2xl">Settings</CardTitle>
               <p className="text-sm text-neutral-500">
                 {session?.user ? 'Progress is syncing with your account.' : 'Guest progress stays on this device. Sign in to sync across devices.'}
               </p>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="rounded-2xl bg-neutral-100 p-4">
+            <CardContent className="space-y-4 px-0 md:px-6">
+              <div className="rounded-[24px] bg-[#fffaf3]/90 p-4 shadow-sm ring-1 ring-[#eadfce] md:rounded-2xl md:bg-neutral-100 md:shadow-none md:ring-0">
                 <div className="font-medium">Account / Sync</div>
                 {session?.user ? (
                   <div className="mt-3 space-y-3">
-                    <div className="rounded-xl bg-white p-3 text-sm">
+                    <div className="rounded-2xl bg-white p-3 text-sm">
                       <div className="text-neutral-500">Signed in as</div>
                       <div className="mt-1 font-medium text-neutral-900">{session.user.email}</div>
                     </div>
                     {passwordRecovery && (
-                      <div className="rounded-xl border border-[#eadfce] bg-white p-3 text-sm">
+                      <div className="rounded-2xl border border-[#eadfce] bg-white p-3 text-sm">
                         <div className="font-medium text-neutral-900">Set new password</div>
-                        <div className="mt-3 grid gap-2 md:grid-cols-2">
+                        <div className="mt-3 grid gap-3 md:grid-cols-2">
                           <PasswordInput
                             value={newPassword}
                             onChange={setNewPassword}
@@ -2393,12 +2393,12 @@ export default function ChapterUIPrototype() {
                         <div className="mt-2">
                           <PasswordRequirements />
                         </div>
-                        <Button className="mt-3 h-9 rounded-2xl px-4 text-sm" onClick={handleUpdatePassword} disabled={authLoading}>
+                        <Button className="mt-3 h-11 w-full rounded-2xl px-4 text-sm font-semibold sm:w-auto md:h-9" onClick={handleUpdatePassword} disabled={authLoading}>
                           Update password
                         </Button>
                       </div>
                     )}
-                    <div className="rounded-xl border border-[#eadfce] bg-white p-3 text-sm">
+                    <div className="rounded-2xl border border-[#eadfce] bg-white p-3 text-sm">
                       <button
                         type="button"
                         onClick={() => setShowChangePassword((value) => !value)}
@@ -2408,7 +2408,7 @@ export default function ChapterUIPrototype() {
                       </button>
                       {showChangePassword && (
                         <div className="mt-3 space-y-3">
-                          <div className="grid gap-2 md:grid-cols-3">
+                          <div className="grid gap-3 md:grid-cols-3">
                             <PasswordInput
                               value={currentPassword}
                               onChange={setCurrentPassword}
@@ -2432,30 +2432,30 @@ export default function ChapterUIPrototype() {
                             />
                           </div>
                           <PasswordRequirements />
-                          <Button className="h-9 rounded-2xl px-4 text-sm" onClick={handleChangePassword} disabled={authLoading}>
+                          <Button className="h-11 w-full rounded-2xl px-4 text-sm font-semibold sm:w-auto md:h-9" onClick={handleChangePassword} disabled={authLoading}>
                             Update password
                           </Button>
                         </div>
                       )}
                     </div>
                     {pendingCloudState && (
-                      <div className="rounded-xl border border-[#eadfce] bg-white p-3 text-sm">
+                      <div className="rounded-2xl border border-[#eadfce] bg-white p-3 text-sm">
                         <div className="font-medium text-neutral-900">Cloud progress found.</div>
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          <Button className="h-9 rounded-2xl px-4 text-sm" onClick={handleUseCloudProgress}>
+                        <div className="mt-3 grid gap-2 sm:flex sm:flex-wrap">
+                          <Button className="h-11 w-full rounded-2xl px-4 text-sm font-semibold sm:w-auto md:h-9" onClick={handleUseCloudProgress}>
                             Use cloud progress
                           </Button>
-                          <Button variant="outline" className="h-9 rounded-2xl px-4 text-sm" onClick={handleKeepDeviceProgress}>
+                          <Button variant="outline" className="h-11 w-full rounded-2xl px-4 text-sm font-semibold sm:w-auto md:h-9" onClick={handleKeepDeviceProgress}>
                             Keep this device
                           </Button>
                         </div>
                       </div>
                     )}
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Button className="h-9 rounded-2xl px-4 text-sm" onClick={handleSyncNow} disabled={authLoading}>
+                    <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center">
+                      <Button className="h-11 w-full rounded-2xl px-4 text-sm font-semibold sm:w-auto md:h-9" onClick={handleSyncNow} disabled={authLoading}>
                         Sync now
                       </Button>
-                      <Button variant="outline" className="rounded-2xl" onClick={handleSignOut} disabled={authLoading}>
+                      <Button variant="outline" className="h-11 w-full rounded-2xl px-4 text-sm font-semibold sm:w-auto md:h-9" onClick={handleSignOut} disabled={authLoading}>
                         Sign out
                       </Button>
                     </div>
@@ -2465,7 +2465,7 @@ export default function ChapterUIPrototype() {
                   </div>
                 ) : (
                   <div className="mt-3 space-y-3">
-                    <div className="grid gap-2 md:grid-cols-3">
+                    <div className="grid gap-3 md:grid-cols-3">
                       <input
                         type="email"
                         value={authEmail}
@@ -2489,16 +2489,16 @@ export default function ChapterUIPrototype() {
                       />
                     </div>
                     <PasswordRequirements />
-                    <div className="flex flex-wrap gap-2">
-                      <Button className="rounded-2xl" onClick={() => handleAuthSubmit('signin')} disabled={authLoading}>
+                    <div className="grid gap-2 sm:flex sm:flex-wrap">
+                      <Button className="h-11 w-full rounded-2xl px-4 text-sm font-semibold sm:w-auto" onClick={() => handleAuthSubmit('signin')} disabled={authLoading}>
                         Sign in
                       </Button>
-                      <Button variant="outline" className="rounded-2xl" onClick={() => handleAuthSubmit('signup')} disabled={authLoading}>
+                      <Button variant="outline" className="h-11 w-full rounded-2xl px-4 text-sm font-semibold sm:w-auto" onClick={() => handleAuthSubmit('signup')} disabled={authLoading}>
                         Sign up
                       </Button>
                       <Button
                         variant="outline"
-                        className="rounded-2xl"
+                        className="h-11 w-full rounded-2xl px-4 text-sm font-semibold sm:w-auto"
                         onClick={() => {
                           setResetEmail(authEmail);
                           setShowPasswordReset((value) => !value);
@@ -2509,7 +2509,7 @@ export default function ChapterUIPrototype() {
                       </Button>
                     </div>
                     {showPasswordReset && (
-                      <div className="rounded-xl border border-[#eadfce] bg-white p-3 text-sm">
+                      <div className="rounded-2xl border border-[#eadfce] bg-white p-3 text-sm">
                         <div className="font-medium text-neutral-900">Reset password</div>
                         <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto]">
                           <input
@@ -2519,7 +2519,7 @@ export default function ChapterUIPrototype() {
                             placeholder="Email"
                             className="h-11 rounded-2xl border border-neutral-200 bg-white px-4 text-sm outline-none focus:border-neutral-500"
                           />
-                          <Button className="h-11 rounded-2xl px-4 text-sm" onClick={handleSendPasswordReset} disabled={authLoading}>
+                          <Button className="h-11 w-full rounded-2xl px-4 text-sm font-semibold md:w-auto" onClick={handleSendPasswordReset} disabled={authLoading}>
                             Send reset email
                           </Button>
                         </div>
@@ -2530,40 +2530,40 @@ export default function ChapterUIPrototype() {
                   </div>
                 )}
               </div>
-              <div className="rounded-2xl bg-neutral-100 p-4">
+              <div className="rounded-[24px] bg-[#fffaf3]/90 p-4 shadow-sm ring-1 ring-[#eadfce] md:rounded-2xl md:bg-neutral-100 md:shadow-none md:ring-0">
                 <div className="font-medium">Device / Progress</div>
                 <div className="mt-3 grid gap-3 text-sm md:grid-cols-3">
-                  <div className="rounded-xl bg-white p-3">
+                  <div className="rounded-2xl bg-white p-3">
                     <div className="text-neutral-500">Current device</div>
                     <div className="mt-1 font-medium text-neutral-900">{currentDeviceLabel}</div>
                   </div>
-                  <div className="rounded-xl bg-white p-3">
+                  <div className="rounded-2xl bg-white p-3">
                     <div className="text-neutral-500">Current progress</div>
                     <div className="mt-1 font-medium text-neutral-900">Chapter {currentChapterIndex + 1} &middot; {currentChapter.shortTitle}</div>
                     <div className="mt-1 text-neutral-600">Question {currentNodeIndex + 1}</div>
                   </div>
-                  <div className="rounded-xl bg-white p-3">
+                  <div className="rounded-2xl bg-white p-3">
                     <div className="text-neutral-500">Last synced</div>
                     <div className="mt-1 font-medium text-neutral-900">Not yet</div>
                   </div>
                 </div>
                 <div className="mt-3 text-xs text-neutral-500">This helps you check which device progress you are about to sync.</div>
               </div>
-              <div className="rounded-2xl bg-neutral-100 p-4">
+              <div className="rounded-[24px] bg-[#fffaf3]/90 p-4 shadow-sm ring-1 ring-[#eadfce] md:rounded-2xl md:bg-neutral-100 md:shadow-none md:ring-0">
                 <div className="font-medium">Main story display</div>
-                <div className="mt-3 flex gap-2">
-                  <Button variant={showPinyin ? 'default' : 'outline'} className="rounded-2xl" onClick={() => setShowPinyin((v) => !v)}>Pinyin</Button>
-                  <Button variant={showEnglish ? 'default' : 'outline'} className="rounded-2xl" onClick={() => setShowEnglish((v) => !v)}>English</Button>
+                <div className="mt-3 grid grid-cols-2 gap-2 sm:flex">
+                  <Button variant={showPinyin ? 'default' : 'outline'} className="h-11 rounded-2xl" onClick={() => setShowPinyin((v) => !v)}>Pinyin</Button>
+                  <Button variant={showEnglish ? 'default' : 'outline'} className="h-11 rounded-2xl" onClick={() => setShowEnglish((v) => !v)}>English</Button>
                 </div>
               </div>
-              <div className="rounded-2xl bg-neutral-100 p-4">
+              <div className="rounded-[24px] bg-[#fffaf3]/90 p-4 shadow-sm ring-1 ring-[#eadfce] md:rounded-2xl md:bg-neutral-100 md:shadow-none md:ring-0">
                 <div className="font-medium">Quick examples display</div>
-                <div className="mt-3 flex gap-2">
-                  <Button variant={quickExamplesShowPinyin ? 'default' : 'outline'} className="rounded-2xl" onClick={() => setQuickExamplesShowPinyin((v) => !v)}>Quick Pinyin</Button>
-                  <Button variant={quickExamplesShowEnglish ? 'default' : 'outline'} className="rounded-2xl" onClick={() => setQuickExamplesShowEnglish((v) => !v)}>Quick English</Button>
+                <div className="mt-3 grid grid-cols-2 gap-2 sm:flex">
+                  <Button variant={quickExamplesShowPinyin ? 'default' : 'outline'} className="h-11 rounded-2xl text-sm" onClick={() => setQuickExamplesShowPinyin((v) => !v)}>Quick Pinyin</Button>
+                  <Button variant={quickExamplesShowEnglish ? 'default' : 'outline'} className="h-11 rounded-2xl text-sm" onClick={() => setQuickExamplesShowEnglish((v) => !v)}>Quick English</Button>
                 </div>
               </div>
-              <div className="rounded-2xl bg-neutral-100 p-4">
+              <div className="rounded-[24px] bg-[#fffaf3]/90 p-4 shadow-sm ring-1 ring-[#eadfce] md:rounded-2xl md:bg-neutral-100 md:shadow-none md:ring-0">
                 <div className="font-medium">Audio speed</div>
                 <p className="mt-1 text-sm text-neutral-600">Choose the playback speed for all Chinese audio in the app.</p>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -2571,7 +2571,7 @@ export default function ChapterUIPrototype() {
                     <Button
                       key={rate}
                       variant={audioRate === rate ? 'default' : 'outline'}
-                      className="rounded-2xl"
+                      className="h-11 rounded-2xl"
                       onClick={() => setAudioRate(rate)}
                     >
                       {rate.toFixed(2).replace(/\.00$/, '.0')}x
@@ -2579,7 +2579,7 @@ export default function ChapterUIPrototype() {
                   ))}
                 </div>
               </div>
-              <div className="rounded-2xl bg-neutral-100 p-4">
+              <div className="rounded-[24px] bg-[#fffaf3]/90 p-4 shadow-sm ring-1 ring-[#eadfce] md:rounded-2xl md:bg-neutral-100 md:shadow-none md:ring-0">
                 <div className="font-medium">Font size</div>
                 <p className="mt-1 text-sm text-neutral-600">Adjust the Chinese text size for easier reading.</p>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -2591,7 +2591,7 @@ export default function ChapterUIPrototype() {
                     <Button
                       key={item.value}
                       variant={fontScale === item.value ? 'default' : 'outline'}
-                      className="rounded-2xl"
+                      className="h-11 rounded-2xl"
                       onClick={() => setFontScale(item.value)}
                     >
                       {item.label}
@@ -2599,10 +2599,10 @@ export default function ChapterUIPrototype() {
                   ))}
                 </div>
               </div>
-              <div className="rounded-2xl border border-dashed border-rose-300 p-4">
+              <div className="rounded-[24px] border border-dashed border-rose-300 bg-white/60 p-4 md:rounded-2xl md:bg-transparent">
                 <div className="font-medium text-rose-700">Reset local practice data</div>
                 <p className="mt-1 text-sm text-neutral-600">This clears current progress, collection, review items, and local settings on this device.</p>
-                <Button variant="outline" className="mt-3 rounded-2xl" onClick={resetPilot}>Reset local data</Button>
+                <Button variant="outline" className="mt-3 h-11 w-full rounded-2xl sm:w-auto" onClick={resetPilot}>Reset local data</Button>
               </div>
             </CardContent>
           </Card>
@@ -2628,12 +2628,12 @@ export default function ChapterUIPrototype() {
           </div>
         </Card>
 
-        <Card className="rounded-3xl border-0 shadow-sm">
-          <CardContent className="p-4 md:p-6">
+        <Card className="rounded-[28px] border-0 bg-[#fffaf3]/95 shadow-sm md:rounded-3xl md:bg-white">
+          <CardContent className="px-4 py-5 md:p-6">
             <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
               <div className="min-w-0 w-full md:w-auto">
-                <p className="text-sm text-neutral-500">Practice focus</p>
-                <h3 className="text-lg font-semibold leading-snug">{currentNode.mission}</h3>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500 md:text-sm md:normal-case md:tracking-normal">Practice focus</p>
+                <h3 className="mt-1 text-xl font-semibold leading-snug md:text-lg">{currentNode.mission}</h3>
               </div>
               <div className="grid w-full grid-cols-2 gap-3 md:w-auto md:flex md:items-center">
                 <Button variant={showPinyin ? 'default' : 'outline'} className="h-12 w-full rounded-2xl px-5 text-base font-semibold whitespace-nowrap md:h-10 md:w-auto md:min-w-[88px] md:px-4 md:text-sm" onClick={() => setShowPinyin((v) => !v)}>
@@ -2645,27 +2645,27 @@ export default function ChapterUIPrototype() {
               </div>
             </div>
 
-            <div className="mb-4 flex items-start justify-between gap-3 text-neutral-500">
+            <div className="mb-4 flex items-start justify-between gap-3 rounded-2xl bg-[#fff8ef] px-3 py-2.5 text-neutral-500 md:bg-transparent md:px-0 md:py-0">
               <span className="min-w-0 flex-1 text-xs leading-5 sm:text-sm">Tip: tap highlighted words or phrases for meaning, explanation, and practical examples.</span>
               <span className="shrink-0 text-sm font-medium">{currentNodeIndex + 1}/{currentChapter.nodes.length}</span>
             </div>
             <Progress value={chapterProgress} className="h-2" />
 
-            <motion.div layout className="mt-3 rounded-[24px] bg-neutral-100 p-4 md:mt-4 md:rounded-3xl md:p-5">
+            <motion.div layout className="mt-4 rounded-[24px] bg-[#f3eadf]/80 p-4 md:mt-4 md:rounded-3xl md:bg-neutral-100 md:p-5">
               <div className="mb-2 flex items-center gap-2 text-sm text-neutral-500 md:mb-3">
                 <MessageSquareQuote className="h-4 w-4" /> {currentNode.npc}
                 <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.npc`} text={currentNode.npcLineZh} />
               </div>
               <div className="space-y-2">
-                <div className={`${chineseHeadingClass} font-semibold tracking-tight`}>
+                <div className={`${chineseHeadingClass} font-semibold leading-snug tracking-tight`}>
                   <AnnotatedText text={currentNode.npcLineZh} glossaryKeys={currentNode.npcGlossary} onOpen={setSelectedGlossaryKey} />
                 </div>
-                {showPinyin && <p className="text-sm text-neutral-500">{currentNode.npcLinePy}</p>}
-                {showEnglish && <p className="text-sm text-neutral-600">{currentNode.npcLineEn}</p>}
+                {showPinyin && <p className="text-sm leading-5 text-neutral-500">{currentNode.npcLinePy}</p>}
+                {showEnglish && <p className="text-sm leading-5 text-neutral-600">{currentNode.npcLineEn}</p>}
               </div>
             </motion.div>
 
-            <div className="mt-4 grid gap-2.5 md:mt-6 md:gap-3">
+            <div className="mt-4 grid gap-3 md:mt-6">
               {displayOptions.map((option) => {
                 const active = selectedOptionId === option.id;
                 const optionCollectionItem = createCollectionItem({
@@ -2691,7 +2691,7 @@ export default function ChapterUIPrototype() {
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <div className="w-full">
+                      <div className="min-w-0 w-full">
                         <div className="mb-1 flex items-center justify-between gap-2 text-sm font-medium opacity-80">
                           <span>Option {option.displayId}</span>
                           <div className="flex items-center gap-1">
@@ -2706,13 +2706,13 @@ export default function ChapterUIPrototype() {
                           />
                           </div>
                         </div>
-                        <div className={`${chineseOptionClass} font-semibold`}>
+                        <div className={`${chineseOptionClass} font-semibold leading-snug`}>
                           <AnnotatedText text={option.zh} glossaryKeys={option.glossary} onOpen={setSelectedGlossaryKey} />
                         </div>
-                        {showPinyin && <div className={`mt-1 text-sm ${active ? 'text-white/75' : 'text-neutral-500'}`}>{option.py}</div>}
-                        {showEnglish && <div className={`mt-1 text-sm ${active ? 'text-white/85' : 'text-neutral-700'}`}>{option.en}</div>}
+                        {showPinyin && <div className={`mt-2 text-sm leading-5 ${active ? 'text-white/75' : 'text-neutral-500'}`}>{option.py}</div>}
+                        {showEnglish && <div className={`mt-1 text-sm leading-5 ${active ? 'text-white/85' : 'text-neutral-700'}`}>{option.en}</div>}
                       </div>
-                      <ChevronRight className={`mt-1 h-5 w-5 ${active ? 'text-white' : 'text-neutral-400'}`} />
+                      <ChevronRight className={`mt-1 h-5 w-5 shrink-0 ${active ? 'text-white' : 'text-neutral-400'}`} />
                     </div>
                   </button>
                 );
@@ -2956,7 +2956,7 @@ export default function ChapterUIPrototype() {
   const glossaryTermSaved = glossaryTermItem ? isCollected(glossaryTermItem.id) : false;
 
   return (
-    <div className="min-h-screen bg-[#f7f2ea] bg-[radial-gradient(circle_at_top_left,_#fff7e6_0,_#f7f2ea_36%,_#efe7db_100%)] px-3 pb-36 pt-4 text-[#201a16] md:p-6">
+    <div className="min-h-screen bg-[#f7f2ea] bg-[radial-gradient(circle_at_top_left,_#fff7e6_0,_#f7f2ea_36%,_#efe7db_100%)] px-3 pb-44 pt-4 text-[#201a16] md:p-6">
       <div className="mx-auto mb-6 hidden max-w-[1440px] rounded-full bg-[#fffaf3]/75 p-2 shadow-sm ring-1 ring-[#eadfce] md:grid md:grid-cols-5">
         <AppSectionButton active={currentView === 'home'} icon={House} title="Home" subtitle="Continue and overview" onClick={() => setCurrentView('home')} />
         <AppSectionButton active={currentView === 'story'} icon={Compass} title="Story" subtitle="Situation practice" onClick={() => setCurrentView('story')} />
