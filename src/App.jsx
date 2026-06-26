@@ -1563,13 +1563,13 @@ export default function ChapterUIPrototype() {
     return Array.from(map.values()).slice(-6).reverse();
   }, [practiceLog]);
 
-  const getReviewSourceOption = (item) => {
+  const getReviewSourceOption = (item, text = item.selected) => {
     const sourceChapter = chapters.find((chapter) => chapter.shortTitle === item.chapter || chapter.title === item.chapter);
     const chapterPool = sourceChapter ? [sourceChapter] : chapters;
     for (const chapter of chapterPool) {
       for (const node of chapter.nodes) {
         if (item.mission && node.mission !== item.mission) continue;
-        const option = node.options.find((candidate) => candidate.zh === item.selected);
+        const option = node.options.find((candidate) => candidate.zh === text);
         if (option) return option;
       }
     }
@@ -2385,11 +2385,12 @@ export default function ChapterUIPrototype() {
               ) : (
                 reviewItems.map((item, idx) => {
                   const sourceOption = getReviewSourceOption(item);
+                  const correctionSourceOption = item.correction ? getReviewSourceOption(item, item.correction) : null;
                   const reviewPinyin = item.selectedPinyin || item.pinyin || sourceOption?.py || '';
                   const reviewEnglish = item.selectedEnglish || item.english || sourceOption?.en || '';
                   const reviewExplanation = item.explanation || sourceOption?.explanation || '';
-                  const correctionPinyin = item.correctionPinyin || '';
-                  const correctionEnglish = item.correctionEnglish || '';
+                  const correctionPinyin = item.betterPinyin || item.correctionPinyin || item.improvedPinyin || item.naturalPinyin || correctionSourceOption?.py || '';
+                  const correctionEnglish = item.betterEnglish || item.correctionEnglish || item.improvedEnglish || item.naturalEnglish || correctionSourceOption?.en || '';
                   return (
                   <div key={`${item.selected}-${idx}`} className="rounded-2xl border border-neutral-200 p-4">
                     <div className="flex items-center gap-2">
@@ -2412,9 +2413,9 @@ export default function ChapterUIPrototype() {
                         <span>Better version</span>
                         <AudioButton audioId={item.correctionAudioId} text={item.correction} small />
                       </div>
-                      <div className="mt-1 font-medium text-[#201a16]">{item.correction}</div>
-                      {reviewShowPinyin && correctionPinyin && <div className="mt-1 text-sm text-neutral-500">{correctionPinyin}</div>}
-                      {reviewShowEnglish && correctionEnglish && <div className="mt-1 text-sm text-neutral-700">{correctionEnglish}</div>}
+                      <div className="mt-1 text-base font-medium leading-snug text-[#201a16]">{item.correction}</div>
+                      {reviewShowPinyin && correctionPinyin && <div className="mt-1 text-sm leading-5 text-neutral-500">{correctionPinyin}</div>}
+                      {reviewShowEnglish && correctionEnglish && <div className="mt-1 text-sm leading-5 text-neutral-700">{correctionEnglish}</div>}
                       </div>
                     )}
                   </div>
