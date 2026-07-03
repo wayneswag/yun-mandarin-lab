@@ -2432,29 +2432,33 @@ export default function ChapterUIPrototype() {
 
     if (currentView === 'settings') {
       return (
-        <div className="space-y-5 pb-8 md:space-y-6 md:pb-0">
+        <div className="space-y-7 pb-8 md:space-y-8 md:pb-0">
           <section className="px-1 md:px-0">
             <div className="max-w-2xl">
-              <div className="text-sm font-medium text-[#8a6a28]">Practice setup</div>
+              <div className="text-sm font-medium text-[#8a6a28]">Your practice space</div>
               <h2 className="mt-1 text-3xl font-semibold leading-tight">Settings</h2>
-              <p className="text-sm text-neutral-500">
+              <p className="mt-2 text-sm leading-6 text-neutral-500">
                 {session?.user ? 'Progress is syncing with your account.' : 'Guest progress stays on this device. Sign in to sync across devices.'}
               </p>
             </div>
           </section>
 
-          <section className="space-y-4">
-              <div className="rounded-[26px] bg-[#fffaf3]/85 p-4 ring-1 ring-[#eadfce] md:p-5">
-                <div className="font-medium">Account and sync</div>
+          <section className="space-y-6">
+              <div className="border-t border-[#eadfce] pt-5">
+                <div className="mb-4">
+                  <div className="font-semibold">Account and sync</div>
+                  <p className="mt-1 text-sm leading-6 text-neutral-500">Keep your practice available here, or carry it to another device when you sign in.</p>
+                </div>
                 {session?.user ? (
                   <div className="mt-3 space-y-3">
-                    <div className="border-l-2 border-[#d6a856] bg-white/60 py-3 pl-3 pr-2 text-sm">
+                    <div className="border-l-2 border-[#d6a856] bg-[#fffaf3]/65 py-3 pl-3 pr-2 text-sm">
                       <div className="text-neutral-500">Signed in as</div>
                       <div className="mt-1 font-medium text-neutral-900">{session.user.email}</div>
                     </div>
                     {passwordRecovery && (
-                      <div className="rounded-2xl bg-white/70 p-3 text-sm ring-1 ring-[#eadfce]">
+                      <div className="rounded-[24px] bg-[#fffaf3]/75 p-4 text-sm ring-1 ring-[#eadfce]/80">
                         <div className="font-medium text-neutral-900">Set new password</div>
+                        <p className="mt-1 text-sm leading-6 text-neutral-500">Choose a new password for this account.</p>
                         <div className="mt-3 grid gap-3 md:grid-cols-2">
                           <PasswordInput
                             value={newPassword}
@@ -2479,11 +2483,11 @@ export default function ChapterUIPrototype() {
                         </Button>
                       </div>
                     )}
-                    <div className="rounded-2xl bg-white/70 p-3 text-sm ring-1 ring-[#eadfce]">
+                    <div className="rounded-[24px] bg-[#fffaf3]/75 p-4 text-sm ring-1 ring-[#eadfce]/80">
                       <button
                         type="button"
                         onClick={() => setShowChangePassword((value) => !value)}
-                        className="font-medium text-neutral-900"
+                        className="font-medium text-neutral-900 underline-offset-4 hover:underline"
                       >
                         Change password
                       </button>
@@ -2520,8 +2524,9 @@ export default function ChapterUIPrototype() {
                       )}
                     </div>
                     {pendingCloudState && (
-                      <div className="rounded-2xl bg-white/70 p-3 text-sm ring-1 ring-[#eadfce]">
+                      <div className="rounded-[24px] bg-[#fffaf3]/75 p-4 text-sm ring-1 ring-[#eadfce]/80">
                         <div className="font-medium text-neutral-900">Cloud progress found.</div>
+                        <p className="mt-1 leading-6 text-neutral-500">Choose which practice record should become your account copy.</p>
                         <div className="mt-3 grid gap-2 sm:flex sm:flex-wrap">
                           <Button className="h-11 w-full rounded-2xl px-4 text-sm font-semibold sm:w-auto md:h-9" onClick={handleUseCloudProgress}>
                             Use cloud progress
@@ -2536,13 +2541,16 @@ export default function ChapterUIPrototype() {
                       <Button className="h-11 w-full rounded-2xl px-4 text-sm font-semibold sm:w-auto md:h-9" onClick={handleSyncNow} disabled={authLoading}>
                         Sync now
                       </Button>
-                      <Button variant="outline" className="h-11 w-full rounded-2xl px-4 text-sm font-semibold sm:w-auto md:h-9" onClick={handleSignOut} disabled={authLoading}>
+                      <Button variant="outline" className="h-11 w-full rounded-2xl border-[#d8cbb8] bg-transparent px-4 text-sm font-semibold text-neutral-700 sm:w-auto md:h-9" onClick={handleSignOut} disabled={authLoading}>
                         Sign out
                       </Button>
                     </div>
-                    {authMessage && <div className="text-sm text-neutral-600">{authMessage}</div>}
-                    <div className="text-sm font-medium text-neutral-700">{syncStatus}</div>
-                    <div className="text-xs text-neutral-500">Use Sync now before switching devices if you want to save immediately.</div>
+                    {authMessage && <div className="text-sm leading-6 text-neutral-600">{authMessage}</div>}
+                    <div className="rounded-[22px] bg-[#f3eadf]/55 p-3 text-sm">
+                      <div className="text-xs font-medium uppercase tracking-[0.16em] text-neutral-500">Sync status</div>
+                      <div className="mt-1 font-medium leading-6 text-neutral-800">{syncStatus}</div>
+                      <div className="mt-2 text-xs leading-5 text-neutral-500">Use Sync now before switching devices if you want to save immediately.</div>
+                    </div>
                   </div>
                 ) : (
                   <div className="mt-3 space-y-3">
@@ -2574,12 +2582,12 @@ export default function ChapterUIPrototype() {
                       <Button className="h-11 w-full rounded-2xl px-4 text-sm font-semibold sm:w-auto" onClick={() => handleAuthSubmit('signin')} disabled={authLoading}>
                         Sign in
                       </Button>
-                      <Button variant="outline" className="h-11 w-full rounded-2xl px-4 text-sm font-semibold sm:w-auto" onClick={() => handleAuthSubmit('signup')} disabled={authLoading}>
+                      <Button variant="outline" className="h-11 w-full rounded-2xl border-[#d8cbb8] bg-transparent px-4 text-sm font-semibold text-neutral-700 sm:w-auto" onClick={() => handleAuthSubmit('signup')} disabled={authLoading}>
                         Sign up
                       </Button>
                       <Button
                         variant="outline"
-                        className="h-11 w-full rounded-2xl px-4 text-sm font-semibold sm:w-auto"
+                        className="h-11 w-full rounded-2xl border-[#d8cbb8] bg-transparent px-4 text-sm font-semibold text-neutral-700 sm:w-auto"
                         onClick={() => {
                           setResetEmail(authEmail);
                           setShowPasswordReset((value) => !value);
@@ -2590,8 +2598,9 @@ export default function ChapterUIPrototype() {
                       </Button>
                     </div>
                     {showPasswordReset && (
-                      <div className="rounded-2xl bg-white/70 p-3 text-sm ring-1 ring-[#eadfce]">
+                      <div className="rounded-[24px] bg-[#fffaf3]/75 p-4 text-sm ring-1 ring-[#eadfce]/80">
                         <div className="font-medium text-neutral-900">Reset password</div>
+                        <p className="mt-1 leading-6 text-neutral-500">Send a recovery link to your email, then return here to set a new password.</p>
                         <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto]">
                           <input
                             type="email"
@@ -2606,46 +2615,54 @@ export default function ChapterUIPrototype() {
                         </div>
                       </div>
                     )}
-                    {authMessage && <div className="text-sm text-neutral-600">{authMessage}</div>}
-                    <div className="text-sm font-medium text-neutral-700">{syncStatus}</div>
+                    {authMessage && <div className="text-sm leading-6 text-neutral-600">{authMessage}</div>}
+                    <div className="rounded-[22px] bg-[#f3eadf]/55 p-3 text-sm">
+                      <div className="text-xs font-medium uppercase tracking-[0.16em] text-neutral-500">Sync status</div>
+                      <div className="mt-1 font-medium leading-6 text-neutral-800">{syncStatus}</div>
+                    </div>
                   </div>
                 )}
               </div>
-              <div className="rounded-[26px] bg-[#fffaf3]/70 p-4 ring-1 ring-[#eadfce] md:p-5">
-                <div className="font-medium">This device</div>
-                <div className="mt-3 grid gap-3 text-sm md:grid-cols-3">
-                  <div className="bg-white/60 p-3">
+              <div className="border-t border-[#eadfce] pt-5">
+                <div className="mb-4">
+                  <div className="font-semibold">Device and progress</div>
+                  <p className="mt-1 text-sm leading-6 text-neutral-500">A quick check before you sync or switch devices.</p>
+                </div>
+                <div className="grid gap-3 text-sm md:grid-cols-3">
+                  <div className="border-l-2 border-[#d6a856] bg-[#fffaf3]/60 py-3 pl-3 pr-2">
                     <div className="text-neutral-500">Current device</div>
                     <div className="mt-1 font-medium text-neutral-900">{currentDeviceLabel}</div>
                   </div>
-                  <div className="bg-white/60 p-3">
+                  <div className="border-l-2 border-[#d6a856] bg-[#fffaf3]/60 py-3 pl-3 pr-2">
                     <div className="text-neutral-500">Current progress</div>
                     <div className="mt-1 font-medium text-neutral-900">Chapter {currentChapterIndex + 1} &middot; {currentChapter.shortTitle}</div>
                     <div className="mt-1 text-neutral-600">Question {currentNodeIndex + 1}</div>
                   </div>
-                  <div className="bg-white/60 p-3">
+                  <div className="border-l-2 border-[#d6a856] bg-[#fffaf3]/60 py-3 pl-3 pr-2">
                     <div className="text-neutral-500">Last synced</div>
                     <div className="mt-1 font-medium text-neutral-900">Not yet</div>
                   </div>
                 </div>
-                <div className="mt-3 text-xs text-neutral-500">This helps you check which device progress you are about to sync.</div>
+                <div className="mt-3 text-xs leading-5 text-neutral-500">This helps you check which device progress you are about to sync.</div>
               </div>
-              <div className="rounded-[26px] bg-[#fffaf3]/70 p-4 ring-1 ring-[#eadfce] md:p-5">
-                <div className="font-medium">Reading supports</div>
+              <div className="border-t border-[#eadfce] pt-5">
+                <div className="font-semibold">Reading support</div>
+                <p className="mt-1 text-sm leading-6 text-neutral-500">Choose what helps you read during practice.</p>
                 <div className="mt-3 grid grid-cols-2 gap-2 sm:flex">
                   <DisplayToggleButton active={showPinyin} label="Pinyin" onClick={() => setShowPinyin((v) => !v)} compact />
                   <DisplayToggleButton active={showEnglish} label="English" onClick={() => setShowEnglish((v) => !v)} compact />
                 </div>
               </div>
-              <div className="rounded-[26px] bg-[#fffaf3]/70 p-4 ring-1 ring-[#eadfce] md:p-5">
-                <div className="font-medium">Example notes</div>
+              <div className="border-t border-[#eadfce] pt-5">
+                <div className="font-semibold">Example notes</div>
+                <p className="mt-1 text-sm leading-6 text-neutral-500">Control how much support appears in quick examples.</p>
                 <div className="mt-3 grid grid-cols-2 gap-2 sm:flex">
                   <DisplayToggleButton active={quickExamplesShowPinyin} label="Quick Pinyin" onClick={() => setQuickExamplesShowPinyin((v) => !v)} compact />
                   <DisplayToggleButton active={quickExamplesShowEnglish} label="Quick English" onClick={() => setQuickExamplesShowEnglish((v) => !v)} compact />
                 </div>
               </div>
-              <div className="rounded-[26px] bg-[#fffaf3]/70 p-4 ring-1 ring-[#eadfce] md:p-5">
-                <div className="font-medium">Audio speed</div>
+              <div className="border-t border-[#eadfce] pt-5">
+                <div className="font-semibold">Audio speed</div>
                 <p className="mt-1 text-sm text-neutral-600">Choose the playback speed for all Chinese audio in the app.</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {[0.5, 0.75, 1].map((rate) => (
@@ -2660,8 +2677,8 @@ export default function ChapterUIPrototype() {
                   ))}
                 </div>
               </div>
-              <div className="rounded-[26px] bg-[#fffaf3]/70 p-4 ring-1 ring-[#eadfce] md:p-5">
-                <div className="font-medium">Chinese text size</div>
+              <div className="border-t border-[#eadfce] pt-5">
+                <div className="font-semibold">Chinese text size</div>
                 <p className="mt-1 text-sm text-neutral-600">Adjust the Chinese text size for easier reading.</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {[
@@ -2680,10 +2697,10 @@ export default function ChapterUIPrototype() {
                   ))}
                 </div>
               </div>
-              <div className="rounded-[24px] border border-dashed border-rose-300 bg-white/60 p-4 md:rounded-2xl md:bg-transparent">
+              <div className="border-t border-rose-200 pt-5">
                 <div className="font-medium text-rose-700">Reset local practice data</div>
                 <p className="mt-1 text-sm text-neutral-600">This clears current progress, collection, review items, and local settings on this device.</p>
-                <Button variant="outline" className="mt-3 h-11 w-full rounded-2xl sm:w-auto" onClick={resetPilot}>Reset local data</Button>
+                <Button variant="outline" className="mt-3 h-11 w-full rounded-2xl border-rose-200 bg-transparent text-rose-700 hover:bg-rose-50 sm:w-auto" onClick={resetPilot}>Reset local data</Button>
               </div>
           </section>
         </div>
@@ -2970,16 +2987,14 @@ export default function ChapterUIPrototype() {
 
     if (currentView === 'settings') {
       return (
-        <div className="space-y-4 text-sm">
-          <Card className="rounded-3xl border-0 bg-[#fffaf3]/60 shadow-none ring-1 ring-[#eadfce]/70">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Teacher notes</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm leading-6 text-neutral-600">
-              <div className="border-l-2 border-[#d6a856] pl-3">Keep the display comfortable for how you like to read Chinese.</div>
-              <div className="border-l-2 border-[#d6a856] pl-3">Use sync when you want your practice to follow you to another device.</div>
-            </CardContent>
-          </Card>
+        <div className="space-y-5 text-sm">
+          <section className="border-l-2 border-[#d6a856] bg-[#fffaf3]/45 py-1 pl-4">
+            <h3 className="font-semibold text-[#201a16]">Teacher notes</h3>
+            <div className="mt-3 space-y-3 leading-6 text-neutral-600">
+              <p>Keep the display comfortable for how you like to read Chinese.</p>
+              <p>Use sync when you want this practice record to follow you to another device.</p>
+            </div>
+          </section>
         </div>
       );
     }
