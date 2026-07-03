@@ -2158,32 +2158,47 @@ export default function ChapterUIPrototype() {
       const pathItems = chapterOverview.filter((item) => item.chapter.id !== recommendedPractice?.chapter.id);
       const RecommendedIcon = recommendedPractice?.chapter.icon || Compass;
       const recommendedPrimary = recommendedPractice?.action !== 'Review';
+      const nextNodeIndex = recommendedPractice
+        ? recommendedPractice.chapter.nodes.findIndex((_, nodeIndex) => !nodeSelections[makeNodeKey(recommendedPractice.index, nodeIndex)])
+        : -1;
+      const recommendedNode = recommendedPractice
+        ? recommendedPractice.chapter.nodes[nextNodeIndex >= 0 ? nextNodeIndex : 0]
+        : null;
       return (
-        <div className="space-y-7 md:space-y-8">
-          <section className="rounded-[30px] bg-[#201a16] p-5 text-white shadow-[0_22px_60px_rgba(32,26,22,0.18)] md:rounded-[34px] md:p-7">
-            <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_280px] md:items-end">
+        <div className="space-y-8 md:space-y-10">
+          <section className="overflow-hidden rounded-[34px] bg-[#201a16] text-white shadow-[0_22px_60px_rgba(32,26,22,0.16)]">
+            <div className="grid gap-0 md:grid-cols-[minmax(0,1fr)_300px]">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.22em] text-[#d6a856]">Mandarin practice studio</div>
-                <h2 className="mt-3 max-w-2xl text-3xl font-semibold leading-tight md:text-4xl">Continue your Mandarin practice</h2>
-                <p className="mt-3 max-w-2xl text-sm leading-6 text-white/72 md:text-base">
-                  Pick up where you left off, listen for what sounds natural, and save the phrases you would actually say.
-                </p>
-              </div>
-              <div className="rounded-[24px] bg-white/10 p-4 ring-1 ring-white/12">
-                <div className="mb-2 flex items-center justify-between text-xs text-white/62">
-                  <span>Practice path</span>
-                  <span>{currentChapterIndex + 1}/{chapters.length}</span>
+                <div className="p-5 md:p-7">
+                  <div className="text-xs font-semibold uppercase tracking-[0.22em] text-[#d6a856]">Mandarin practice studio</div>
+                  <h2 className="mt-3 max-w-2xl text-3xl font-semibold leading-tight md:text-4xl">Step into today's Mandarin practice</h2>
+                  <p className="mt-3 max-w-2xl text-sm leading-6 text-white/72 md:text-base">
+                    Start with one real scene, listen for what feels natural, and keep the phrases you can imagine saying.
+                  </p>
+                  {recommendedNode && (
+                    <div className="mt-6 border-l-2 border-[#d6a856] pl-4">
+                      <div className="text-xs font-medium uppercase tracking-[0.18em] text-white/45">Next line to work with</div>
+                      <div className="mt-2 text-3xl font-semibold leading-snug md:text-4xl">{recommendedNode.npcLineZh}</div>
+                      <div className="mt-2 max-w-2xl text-sm leading-6 text-white/58">{recommendedNode.mission}</div>
+                    </div>
+                  )}
                 </div>
-                <Progress value={overallProgress} className="h-2 bg-white/15" />
-                <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <div className="text-2xl font-semibold">{collected.length}</div>
-                    <div className="text-white/62">saved notes</div>
+              </div>
+              <div className="bg-white/[0.07] p-5 ring-1 ring-white/10 md:p-6">
+                <div className="text-sm font-semibold text-white">Your place</div>
+                <div className="mt-3 text-sm leading-6 text-white/68">
+                  {currentChapter.label}: {currentChapter.shortTitle}
+                </div>
+                <div className="mt-4">
+                  <div className="mb-2 flex items-center justify-between text-xs text-white/58">
+                    <span>Practice path</span>
+                    <span>{currentChapterIndex + 1}/{chapters.length}</span>
                   </div>
-                  <div>
-                    <div className="text-2xl font-semibold">{reviewItems.length}</div>
-                    <div className="text-white/62">to revisit</div>
-                  </div>
+                  <Progress value={overallProgress} className="h-2 bg-white/15" />
+                </div>
+                <div className="mt-5 space-y-2 text-sm text-white/64">
+                  <div>{collected.length} saved language notes</div>
+                  <div>{reviewItems.length} replies ready to revisit</div>
                 </div>
               </div>
             </div>
@@ -2197,7 +2212,7 @@ export default function ChapterUIPrototype() {
                     <RecommendedIcon className="h-6 w-6 text-[#6f4f18]" />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-sm font-medium text-[#8a6a28]">Recommended next</div>
+                    <div className="text-sm font-medium text-[#8a6a28]">Pick up here</div>
                     <h3 className="mt-1 text-2xl font-semibold leading-tight text-[#201a16]">{recommendedPractice.chapter.title}</h3>
                     <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">{recommendedPractice.chapter.subtitle}</p>
                     <div className="mt-4 max-w-md">
@@ -2222,18 +2237,18 @@ export default function ChapterUIPrototype() {
 
           <section>
             <div className="mb-3 px-1 md:px-0">
-              <h3 className="text-lg font-semibold">Practice path</h3>
-              <p className="mt-1 text-sm text-neutral-500">Choose another scene when you want a different kind of conversation practice.</p>
+              <h3 className="text-lg font-semibold">Choose a practice scene</h3>
+              <p className="mt-1 text-sm text-neutral-500">Each scene is a short lesson in how Mandarin sounds in real social moments.</p>
             </div>
-            <div className="divide-y divide-[#e7dccd] rounded-[28px] bg-[#fffaf3]/70 ring-1 ring-[#eadfce]">
+            <div className="divide-y divide-[#e7dccd] border-y border-[#eadfce] bg-[#fffaf3]/45">
               {pathItems.map(({ chapter, index, completed, total, status, action }) => {
                 const Icon = chapter.icon;
                 const primaryAction = action !== 'Review';
                 return (
-                  <div key={chapter.id} className="p-4 md:p-5">
+                  <div key={chapter.id} className="py-4 md:px-2 md:py-5">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex min-w-0 items-start gap-3">
-                        <div className="rounded-2xl bg-[#f3eadf] p-2">
+                        <div className="rounded-2xl bg-[#f3eadf]/80 p-2">
                           <Icon className="h-5 w-5 text-[#6f6257]" />
                         </div>
                         <div className="min-w-0">
@@ -2259,16 +2274,17 @@ export default function ChapterUIPrototype() {
 
           <section>
             <div className="mb-3 px-1 md:px-0">
-              <h3 className="text-lg font-semibold">Recent language notes</h3>
+              <h3 className="text-lg font-semibold">Recent saved phrases</h3>
+              <p className="mt-1 text-sm text-neutral-500">A few phrases from your notebook, ready to hear again.</p>
             </div>
-            <div className="grid gap-3 lg:grid-cols-2">
+            <div className="grid gap-4 lg:grid-cols-2">
               {recentCollected.length === 0 ? (
-                <div className="rounded-[24px] border border-dashed border-[#d8cbb8] bg-[#fffaf3]/60 p-6 text-sm leading-6 text-neutral-500 lg:col-span-2">
-                  No saved language notes yet. When a phrase sounds useful, keep it here for later.
+                <div className="border-l-2 border-[#d6a856] bg-[#fffaf3]/60 py-4 pl-4 pr-3 text-sm leading-6 text-neutral-500 lg:col-span-2">
+                  No saved phrases yet. During practice, save language that sounds useful enough to try in your own speech.
                 </div>
               ) : (
                 recentCollected.map((item) => (
-                  <article key={item.id} className="border-l-2 border-[#d6a856] bg-[#fffaf3]/70 py-3 pl-4 pr-3">
+                  <article key={item.id} className="border-l-2 border-[#d6a856] bg-[#fffaf3]/65 py-4 pl-4 pr-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1 text-xl font-semibold leading-snug">{item.expression}</div>
                       <AudioButton audioId={item.audioId} text={item.expression} small />
@@ -2903,25 +2919,19 @@ export default function ChapterUIPrototype() {
   const renderRightPanel = () => {
     if (currentView === 'home') {
       return (
-        <div className="space-y-4 text-sm">
-          <Card className="rounded-3xl border-0 bg-[#fffaf3]/60 shadow-none ring-1 ring-[#eadfce]/70">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Teacher notes</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm leading-6 text-neutral-600">
-              <div className="border-l-2 border-[#d6a856] pl-3">Start with a scene, listen for tone, and choose the reply that feels most natural.</div>
-              <div className="border-l-2 border-[#d6a856] pl-3">Save phrases you would actually want to say again.</div>
-              <div className="border-l-2 border-[#d6a856] pl-3">Review helps you revisit choices that sounded stiff, awkward, or unclear.</div>
-            </CardContent>
-          </Card>
-          <Card className="rounded-3xl border-0 bg-[#fffaf3]/45 shadow-none ring-1 ring-[#eadfce]/60">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Keep your place</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm leading-6 text-neutral-600">
-              Your progress can stay on this device or sync with your account when you sign in.
-            </CardContent>
-          </Card>
+        <div className="space-y-5 text-sm">
+          <section className="border-l-2 border-[#d6a856] bg-[#fffaf3]/45 py-1 pl-4">
+            <h3 className="font-semibold text-[#201a16]">Teacher notes</h3>
+            <div className="mt-3 space-y-3 leading-6 text-neutral-600">
+              <p>Begin with one scene. Listen for tone before you decide which reply sounds natural.</p>
+              <p>Save only the phrases you can imagine saying again.</p>
+              <p>Review is for hearing a better shape, not for feeling wrong.</p>
+            </div>
+          </section>
+          <section className="border-t border-[#eadfce] pt-4 leading-6 text-neutral-600">
+            <h3 className="font-semibold text-[#201a16]">Keep your place</h3>
+            <p className="mt-2">Your practice can stay on this device or sync with your account when you sign in.</p>
+          </section>
         </div>
       );
     }
