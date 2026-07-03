@@ -512,20 +512,6 @@ const chapters = [
           { zh: '他汉语说得怎么样？', py: 'Tā Hànyǔ shuō de zěnmeyàng?', en: 'How well does he speak Chinese?' },
         ],
       },
-      {
-        id: 'speak-language',
-        title: 'Why can 中文 go after 说?',
-        short: 'Chinese normally uses 说 + language.',
-        body: [
-          'Chinese treats a language name as the object after 说 in expressions like 说中文, 说英语, 说法语.',
-          'A simple learner rule is: 说 + language.',
-          'That does not mean every noun can go after 说. 中文 works because it names a language.',
-        ],
-        examples: [
-          { zh: '我会说中文。', py: 'Wǒ huì shuō Zhōngwén.', en: 'I can speak Chinese.' },
-          { zh: '他说英语说得很好。', py: 'Tā shuō Yīngyǔ shuō de hěn hǎo.', en: 'He speaks English very well.' },
-        ],
-      },
     ],
     nodes: [
       {
