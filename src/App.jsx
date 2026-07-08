@@ -455,6 +455,9 @@ const glossary = {
     examples: [
       { zh: '请问，地铁站怎么走？', py: 'Qǐngwèn, dìtiězhàn zěnme zǒu?', en: 'Excuse me, how do I get to the subway station?' },
       { zh: '请问，洗手间在哪儿？', py: 'Qǐngwèn, xǐshǒujiān zài nǎr?', en: 'Excuse me, where is the restroom?' },
+      { zh: '请问，前面是地铁站吗？', py: 'Qǐngwèn, qiánmiàn shì dìtiězhàn ma?', en: 'Excuse me, is the subway station ahead?' },
+      { zh: '请问，这里到地铁站远吗？', py: 'Qǐngwèn, zhèlǐ dào dìtiězhàn yuǎn ma?', en: 'Excuse me, is it far from here to the subway station?' },
+      { zh: '请问，可以再说一遍吗？', py: 'Qǐngwèn, kěyǐ zài shuō yí biàn ma?', en: 'Excuse me, could you say it again?' },
     ],
   },
   '地铁站': {
@@ -465,6 +468,9 @@ const glossary = {
     examples: [
       { zh: '地铁站在哪儿？', py: 'Dìtiězhàn zài nǎr?', en: 'Where is the subway station?' },
       { zh: '我想去地铁站。', py: 'Wǒ xiǎng qù dìtiězhàn.', en: 'I want to go to the subway station.' },
+      { zh: '地铁站不远。', py: 'Dìtiězhàn bù yuǎn.', en: 'The subway station is not far.' },
+      { zh: '地铁站在前面。', py: 'Dìtiězhàn zài qiánmiàn.', en: 'The subway station is ahead.' },
+      { zh: '请问，怎么去地铁站？', py: 'Qǐngwèn, zěnme qù dìtiězhàn?', en: 'Excuse me, how do I get to the subway station?' },
     ],
   },
   '怎么走': {
@@ -475,6 +481,9 @@ const glossary = {
     examples: [
       { zh: '去地铁站怎么走？', py: 'Qù dìtiězhàn zěnme zǒu?', en: 'How do I get to the subway station?' },
       { zh: '请问，去学校怎么走？', py: 'Qǐngwèn, qù xuéxiào zěnme zǒu?', en: 'Excuse me, how do I get to the school?' },
+      { zh: '到地铁站怎么走？', py: 'Dào dìtiězhàn zěnme zǒu?', en: 'How do I get to the subway station?' },
+      { zh: '请问，去路口怎么走？', py: 'Qǐngwèn, qù lùkǒu zěnme zǒu?', en: 'Excuse me, how do I get to the intersection?' },
+      { zh: '这里到地铁站怎么走？', py: 'Zhèlǐ dào dìtiězhàn zěnme zǒu?', en: 'How do I get from here to the subway station?' },
     ],
   },
   '不远': {
@@ -485,6 +494,9 @@ const glossary = {
     examples: [
       { zh: '地铁站不远。', py: 'Dìtiězhàn bù yuǎn.', en: 'The subway station is not far.' },
       { zh: '学校离这儿不远。', py: 'Xuéxiào lí zhèr bù yuǎn.', en: 'The school is not far from here.' },
+      { zh: '路口不远。', py: 'Lùkǒu bù yuǎn.', en: 'The intersection is not far.' },
+      { zh: '这里到地铁站不远。', py: 'Zhèlǐ dào dìtiězhàn bù yuǎn.', en: 'It is not far from here to the subway station.' },
+      { zh: '你一直走，不远。', py: 'Nǐ yìzhí zǒu, bù yuǎn.', en: 'Keep going straight. It is not far.' },
     ],
   },
   '一直走': {
@@ -495,6 +507,9 @@ const glossary = {
     examples: [
       { zh: '你一直走。', py: 'Nǐ yìzhí zǒu.', en: 'Keep going straight.' },
       { zh: '一直走，然后左转。', py: 'Yìzhí zǒu, ránhòu zuǒ zhuǎn.', en: 'Go straight, then turn left.' },
+      { zh: '我先一直走。', py: 'Wǒ xiān yìzhí zǒu.', en: 'I will go straight first.' },
+      { zh: '一直走，地铁站在前面。', py: 'Yìzhí zǒu, dìtiězhàn zài qiánmiàn.', en: 'Go straight. The subway station is ahead.' },
+      { zh: '你一直走，到路口左转。', py: 'Nǐ yìzhí zǒu, dào lùkǒu zuǒ zhuǎn.', en: 'Go straight, then turn left at the intersection.' },
     ],
   },
   '左转': {
@@ -505,6 +520,9 @@ const glossary = {
     examples: [
       { zh: '前面左转。', py: 'Qiánmiàn zuǒ zhuǎn.', en: 'Turn left ahead.' },
       { zh: '一直走，然后左转。', py: 'Yìzhí zǒu, ránhòu zuǒ zhuǎn.', en: 'Go straight, then turn left.' },
+      { zh: '到路口左转。', py: 'Dào lùkǒu zuǒ zhuǎn.', en: 'Turn left at the intersection.' },
+      { zh: '左转以后就到了。', py: 'Zuǒ zhuǎn yǐhòu jiù dào le.', en: 'After you turn left, you’ll be there.' },
+      { zh: '我先一直走，然后左转。', py: 'Wǒ xiān yìzhí zǒu, ránhòu zuǒ zhuǎn.', en: 'I will go straight first, then turn left.' },
     ],
   },
   '右转': {
@@ -515,6 +533,9 @@ const glossary = {
     examples: [
       { zh: '前面右转。', py: 'Qiánmiàn yòu zhuǎn.', en: 'Turn right ahead.' },
       { zh: '到路口右转。', py: 'Dào lùkǒu yòu zhuǎn.', en: 'Turn right at the intersection.' },
+      { zh: '一直走，然后右转。', py: 'Yìzhí zǒu, ránhòu yòu zhuǎn.', en: 'Go straight, then turn right.' },
+      { zh: '你到路口以后右转。', py: 'Nǐ dào lùkǒu yǐhòu yòu zhuǎn.', en: 'After you reach the intersection, turn right.' },
+      { zh: '右转以后，地铁站在前面。', py: 'Yòu zhuǎn yǐhòu, dìtiězhàn zài qiánmiàn.', en: 'After you turn right, the subway station is ahead.' },
     ],
   },
   '没听清楚': {
@@ -525,6 +546,9 @@ const glossary = {
     examples: [
       { zh: '不好意思，我没听清楚。', py: 'Bù hǎoyìsi, wǒ méi tīng qīngchu.', en: 'Sorry, I did not hear clearly.' },
       { zh: '我刚才没听清楚。', py: 'Wǒ gāngcái méi tīng qīngchu.', en: 'I did not hear clearly just now.' },
+      { zh: '对不起，我没听清楚。', py: 'Duìbuqǐ, wǒ méi tīng qīngchu.', en: 'Sorry, I did not hear clearly.' },
+      { zh: '你说得太快，我没听清楚。', py: 'Nǐ shuō de tài kuài, wǒ méi tīng qīngchu.', en: 'You spoke too fast, so I did not hear clearly.' },
+      { zh: '不好意思，前面那句我没听清楚。', py: 'Bù hǎoyìsi, qiánmiàn nà jù wǒ méi tīng qīngchu.', en: 'Sorry, I did not hear that earlier sentence clearly.' },
     ],
   },
   '再说一遍': {
@@ -535,6 +559,87 @@ const glossary = {
     examples: [
       { zh: '可以再说一遍吗？', py: 'Kěyǐ zài shuō yí biàn ma?', en: 'Could you say it again?' },
       { zh: '请再说一遍。', py: 'Qǐng zài shuō yí biàn.', en: 'Please say it again.' },
+      { zh: '不好意思，可以再说一遍吗？', py: 'Bù hǎoyìsi, kěyǐ zài shuō yí biàn ma?', en: 'Sorry, could you say it again?' },
+      { zh: '你可以再说一遍吗？', py: 'Nǐ kěyǐ zài shuō yí biàn ma?', en: 'Could you say it again?' },
+      { zh: '请把方向再说一遍。', py: 'Qǐng bǎ fāngxiàng zài shuō yí biàn.', en: 'Please say the directions again.' },
+    ],
+  },
+  '看起来': {
+    title: '看起来',
+    pinyin: 'kàn qǐlái',
+    translation: 'looks / seems',
+    explanation: '看起来 is used when you make a guess from what you see. It often means “looks like” or “seems.” The pattern is: person / thing + 看起来 + adjective or state.',
+    examples: [
+      { zh: '你看起来很累。', py: 'Nǐ kàn qǐlái hěn lèi.', en: 'You look tired.' },
+      { zh: '他看起来很忙。', py: 'Tā kàn qǐlái hěn máng.', en: 'He looks busy.' },
+      { zh: '你看起来不太舒服。', py: 'Nǐ kàn qǐlái bú tài shūfu.', en: 'You do not look very well.' },
+      { zh: '这个地方看起来很安静。', py: 'Zhège dìfang kàn qǐlái hěn ānjìng.', en: 'This place looks very quiet.' },
+      { zh: '你看起来迷路了。', py: 'Nǐ kàn qǐlái mílù le.', en: 'You look lost.' },
+    ],
+  },
+  '迷路了': {
+    title: '迷路了',
+    pinyin: 'mílù le',
+    translation: 'got lost / be lost',
+    explanation: '迷路 means to lose the way. 迷路了 means the person has become lost or is now lost. The 了 shows a changed situation.',
+    examples: [
+      { zh: '我迷路了。', py: 'Wǒ mílù le.', en: 'I am lost.' },
+      { zh: '你迷路了吗？', py: 'Nǐ mílù le ma?', en: 'Are you lost?' },
+      { zh: '他去地铁站的时候迷路了。', py: 'Tā qù dìtiězhàn de shíhou mílù le.', en: 'He got lost while going to the subway station.' },
+      { zh: '不好意思，我好像迷路了。', py: 'Bù hǎoyìsi, wǒ hǎoxiàng mílù le.', en: 'Sorry, I think I am lost.' },
+      { zh: '你看起来迷路了。', py: 'Nǐ kàn qǐlái mílù le.', en: 'You look lost.' },
+    ],
+  },
+  '以后': {
+    title: '以后',
+    pinyin: 'yǐhòu',
+    translation: 'after / after that / later',
+    explanation: '以后 can mean “after” when it comes after an action, or “later / in the future” in other contexts. In directions, Action + 以后 often means “after you do this step.”',
+    examples: [
+      { zh: '左转以后，就到了。', py: 'Zuǒ zhuǎn yǐhòu, jiù dào le.', en: 'After you turn left, you will be there.' },
+      { zh: '吃饭以后，我回家。', py: 'Chīfàn yǐhòu, wǒ huí jiā.', en: 'After eating, I go home.' },
+      { zh: '下课以后，我去地铁站。', py: 'Xiàkè yǐhòu, wǒ qù dìtiězhàn.', en: 'After class, I go to the subway station.' },
+      { zh: '到路口以后，右转。', py: 'Dào lùkǒu yǐhòu, yòu zhuǎn.', en: 'After you reach the intersection, turn right.' },
+      { zh: '以后我想学更多中文。', py: 'Yǐhòu wǒ xiǎng xué gèng duō Zhōngwén.', en: 'In the future, I want to learn more Chinese.' },
+    ],
+  },
+  '路口': {
+    title: '路口',
+    pinyin: 'lùkǒu',
+    translation: 'intersection / street corner',
+    explanation: '路口 means the place where roads meet. In directions, 到路口 means “when you reach the intersection.”',
+    examples: [
+      { zh: '到路口右转。', py: 'Dào lùkǒu yòu zhuǎn.', en: 'Turn right at the intersection.' },
+      { zh: '前面有一个路口。', py: 'Qiánmiàn yǒu yí ge lùkǒu.', en: 'There is an intersection ahead.' },
+      { zh: '你到路口以后左转。', py: 'Nǐ dào lùkǒu yǐhòu zuǒ zhuǎn.', en: 'After you reach the intersection, turn left.' },
+      { zh: '地铁站在前面的路口。', py: 'Dìtiězhàn zài qiánmiàn de lùkǒu.', en: 'The subway station is at the intersection ahead.' },
+      { zh: '我们在路口见面吧。', py: 'Wǒmen zài lùkǒu jiànmiàn ba.', en: 'Let’s meet at the intersection.' },
+    ],
+  },
+  '前面': {
+    title: '前面',
+    pinyin: 'qiánmiàn',
+    translation: 'ahead / in front',
+    explanation: '前面 means “ahead” or “in front.” In directions, 在前面 often means “up ahead.”',
+    examples: [
+      { zh: '地铁站在前面。', py: 'Dìtiězhàn zài qiánmiàn.', en: 'The subway station is ahead.' },
+      { zh: '前面左转。', py: 'Qiánmiàn zuǒ zhuǎn.', en: 'Turn left ahead.' },
+      { zh: '前面有一个路口。', py: 'Qiánmiàn yǒu yí ge lùkǒu.', en: 'There is an intersection ahead.' },
+      { zh: '你一直走，地铁站就在前面。', py: 'Nǐ yìzhí zǒu, dìtiězhàn jiù zài qiánmiàn.', en: 'Go straight, and the subway station is just ahead.' },
+      { zh: '我在前面等你。', py: 'Wǒ zài qiánmiàn děng nǐ.', en: 'I will wait for you up ahead.' },
+    ],
+  },
+  '到': {
+    title: '到',
+    pinyin: 'dào',
+    translation: 'to arrive / reach / to',
+    explanation: '到 can mean “to arrive” or “to reach a place.” In 到了, 了 shows that the result of arriving is reached. In directions, 就到了 is a useful chunk meaning “then you’ll be there.”',
+    examples: [
+      { zh: '我到了。', py: 'Wǒ dào le.', en: 'I have arrived.' },
+      { zh: '你到了吗？', py: 'Nǐ dào le ma?', en: 'Have you arrived?' },
+      { zh: '左转以后就到了。', py: 'Zuǒ zhuǎn yǐhòu jiù dào le.', en: 'After you turn left, you’ll be there.' },
+      { zh: '到路口右转。', py: 'Dào lùkǒu yòu zhuǎn.', en: 'Turn right when you reach the intersection.' },
+      { zh: '我想早点儿到。', py: 'Wǒ xiǎng zǎodiǎnr dào.', en: 'I want to arrive a little earlier.' },
     ],
   },
 };
@@ -1291,17 +1396,17 @@ const chapters = [
     ],
     grammarNotes: [
       {
-        id: 'qingwen-directions',
-        title: 'Why start with 请问?',
-        short: '请问 makes a question sound polite when asking a stranger.',
+        id: 'kanqilai-state',
+        title: 'How 看起来 works',
+        short: '看起来 means “looks / seems” when you guess from what you see.',
         body: [
-          '请问 is a polite opener before a question.',
-          'It is useful when asking staff, strangers, or someone you do not know well.',
-          'In directions, 请问 helps the sentence sound less direct and more socially comfortable.',
+          '看起来 is used when you judge from appearance.',
+          'The common pattern is: person / thing + 看起来 + adjective or state.',
+          'In 你看起来迷路了, the speaker sees the situation and guesses “you look lost.”',
         ],
         examples: [
-          { zh: '请问，地铁站怎么走？', py: 'Qǐngwèn, dìtiězhàn zěnme zǒu?', en: 'Excuse me, how do I get to the subway station?' },
-          { zh: '请问，洗手间在哪儿？', py: 'Qǐngwèn, xǐshǒujiān zài nǎr?', en: 'Excuse me, where is the restroom?' },
+          { zh: '你看起来很累。', py: 'Nǐ kàn qǐlái hěn lèi.', en: 'You look tired.' },
+          { zh: '你看起来迷路了。', py: 'Nǐ kàn qǐlái mílù le.', en: 'You look lost.' },
         ],
       },
       {
@@ -1319,8 +1424,24 @@ const chapters = [
         ],
       },
       {
+        id: 'yihou-jiu-result',
+        title: 'How 以后就…… works in directions',
+        short: 'Action + 以后 + 就 + result means after one step, the result happens.',
+        body: [
+          '以后 means “after” when it comes after an action.',
+          '就 often marks the next expected result.',
+          'In directions, Action + 以后 + 就 + result means “after you do this, then you will reach the result.”',
+          '左转以后就到了 means “After you turn left, you’ll be there.”',
+          'Do not over-explain 了 here. For learners, treat 就到了 as a useful chunk meaning “then you’ll be there.”',
+        ],
+        examples: [
+          { zh: '左转以后就到了。', py: 'Zuǒ zhuǎn yǐhòu jiù dào le.', en: 'After you turn left, you’ll be there.' },
+          { zh: '到路口以后，就右转。', py: 'Dào lùkǒu yǐhòu, jiù yòu zhuǎn.', en: 'After you reach the intersection, then turn right.' },
+        ],
+      },
+      {
         id: 'confirm-directions',
-        title: 'How to confirm when you did not hear clearly',
+        title: 'How to ask someone to repeat directions',
         short: '不好意思，我没听清楚。可以再说一遍吗？ is polite and useful.',
         body: [
           'When you do not understand directions, do not just say 听不懂.',
@@ -1342,7 +1463,7 @@ const chapters = [
         npcLineZh: '你好，你看起来迷路了。需要帮忙吗？',
         npcLinePy: 'Nǐ hǎo, nǐ kàn qǐlái mílù le. Xūyào bāngmáng ma?',
         npcLineEn: 'Hi, you look lost. Do you need help?',
-        npcGlossary: [],
+        npcGlossary: ['看起来', '迷路了'],
         options: [
           {
             id: 'A',
@@ -1401,7 +1522,7 @@ const chapters = [
         npcLineZh: '地铁站不远。你一直走，然后在前面左转。',
         npcLinePy: 'Dìtiězhàn bù yuǎn. Nǐ yìzhí zǒu, ránhòu zài qiánmiàn zuǒ zhuǎn.',
         npcLineEn: 'The subway station is not far. Go straight, then turn left ahead.',
-        npcGlossary: ['地铁站', '不远', '一直走', '左转'],
+        npcGlossary: ['地铁站', '不远', '一直走', '前面', '左转'],
         options: [
           {
             id: 'A',
@@ -1460,7 +1581,7 @@ const chapters = [
         npcLineZh: '一直走，左转以后就到了。',
         npcLinePy: 'Yìzhí zǒu, zuǒ zhuǎn yǐhòu jiù dào le.',
         npcLineEn: 'Go straight. After you turn left, you’ll be there.',
-        npcGlossary: ['一直走', '左转'],
+        npcGlossary: ['一直走', '左转', '以后', '到'],
         options: [
           {
             id: 'A',
@@ -1508,7 +1629,7 @@ const chapters = [
             relationship: -10,
             explanation: 'This repeats the directions back with 你, so it sounds like you are giving directions to the other person.',
             correction: '我先一直走，然后左转。谢谢你！',
-            glossary: ['一直走', '左转'],
+            glossary: ['一直走', '左转', '以后', '到'],
           },
         ],
       },
