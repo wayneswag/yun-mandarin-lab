@@ -473,17 +473,30 @@ const glossary = {
       { zh: '这个没有打折。', py: 'Zhège méiyǒu dǎzhé.', en: 'This one is not discounted.' },
     ],
   },
+  '有点儿': {
+    title: '有点儿',
+    pinyin: 'yǒudiǎnr',
+    translation: 'a little / somewhat',
+    explanation: '有点儿 usually comes before an adjective. It often softens a negative or inconvenient feeling, such as expensive, far, tired, busy, or uncomfortable. The pattern is 有点儿 + adjective.',
+    examples: [
+      { zh: '有点儿贵。', py: 'Yǒudiǎnr guì.', en: 'It is a little expensive.' },
+      { zh: '今天有点儿冷。', py: 'Jīntiān yǒudiǎnr lěng.', en: 'Today is a little cold.' },
+      { zh: '我有点儿累。', py: 'Wǒ yǒudiǎnr lèi.', en: 'I am a little tired.' },
+      { zh: '这个地方有点儿远。', py: 'Zhège dìfang yǒudiǎnr yuǎn.', en: 'This place is a little far.' },
+      { zh: '我有点儿不舒服。', py: 'Wǒ yǒudiǎnr bù shūfu.', en: 'I feel a little unwell.' },
+    ],
+  },
   '太贵了': {
     title: '太贵了',
     pinyin: 'tài guì le',
     translation: 'too expensive',
-    explanation: '太贵了 means the price is more expensive than you expected or can accept. The 了 shows your reaction to the situation.',
+    explanation: '太 + Adj + 了 means “too Adj.” It shows the speaker feels something is beyond a normal or acceptable level. In shopping, 太贵了 can sound direct if used alone. Softer alternatives include 有点儿贵 or 太贵了，我想看看别的.',
     examples: [
       { zh: '这个太贵了。', py: 'Zhège tài guì le.', en: 'This is too expensive.' },
       { zh: '三百八十块太贵了。', py: 'Sānbǎi bāshí kuài tài guì le.', en: '380 yuan is too expensive.' },
-      { zh: '有点儿太贵了。', py: 'Yǒudiǎnr tài guì le.', en: 'It is a bit too expensive.' },
       { zh: '这个包太贵了。', py: 'Zhège bāo tài guì le.', en: 'This bag is too expensive.' },
       { zh: '太贵了，我想看看别的。', py: 'Tài guì le, wǒ xiǎng kànkan bié de.', en: 'It is too expensive. I want to look at something else.' },
+      { zh: '有点儿贵，我想看看别的。', py: 'Yǒudiǎnr guì, wǒ xiǎng kànkan bié de.', en: 'It is a little expensive. I want to look at something else.' },
     ],
   },
   '便宜一点': {
@@ -1757,18 +1770,20 @@ const chapters = [
         ],
       },
       {
-        id: 'tai-gui-le',
-        title: 'How 太贵了 sounds',
-        short: '太贵了 means the price feels too high.',
+        id: 'yidianr-shopping',
+        title: '有点儿贵 vs 便宜一点',
+        short: '有点儿 + Adj describes a feeling; Adj + 一点儿 asks for or compares a small change.',
         body: [
-          '太 + adjective + 了 often shows that the speaker feels something is beyond a normal or acceptable level.',
-          '太贵了 means “too expensive.”',
-          'In shopping, 太贵了 can be direct, so it often sounds better with a softer next step.',
-          '太贵了，我想看看别的 is more useful than only saying 太贵了.',
+          '有点儿 + adjective describes how something feels now.',
+          '有点儿贵 means “it is a little expensive.”',
+          '太 + adjective + 了 is stronger. 太贵了 means “too expensive.”',
+          'Adjective + 一点儿 means “a little more in that direction.”',
+          '便宜一点 means “a little cheaper,” often used when asking for a lower price or comparing options.',
+          'Do not teach 有点儿太贵了 as the main learner pattern. It can appear in casual speech, but 有点儿贵 or 太贵了 is clearer for learners.',
         ],
         examples: [
-          { zh: '这个太贵了。', py: 'Zhège tài guì le.', en: 'This is too expensive.' },
-          { zh: '太贵了，我想看看别的。', py: 'Tài guì le, wǒ xiǎng kànkan bié de.', en: 'It is too expensive. I want to look at something else.' },
+          { zh: '有点儿贵，我想看看别的。', py: 'Yǒudiǎnr guì, wǒ xiǎng kànkan bié de.', en: 'It is a little expensive. I want to look at something else.' },
+          { zh: '可以便宜一点吗？', py: 'Kěyǐ piányi yìdiǎn ma?', en: 'Can it be a little cheaper?' },
         ],
       },
       {
@@ -1872,15 +1887,15 @@ const chapters = [
         options: [
           {
             id: 'A',
-            zh: '有点儿太贵了。我想看看别的。',
-            py: 'Yǒudiǎnr tài guì le. Wǒ xiǎng kànkan bié de.',
-            en: 'It is a bit too expensive. I want to look at something else.',
+            zh: '有点儿贵，我想看看别的。',
+            py: 'Yǒudiǎnr guì, wǒ xiǎng kànkan bié de.',
+            en: 'It is a little expensive. I want to look at something else.',
             rating: 'Natural',
             score: 3,
             relationship: 13,
-            explanation: 'Natural and socially comfortable. It gives your reaction and moves to another option politely.',
+            explanation: 'Natural and socially comfortable. 有点儿贵 sounds softer than 太贵了, and 我想看看别的 moves to another option politely.',
             correction: null,
-            glossary: ['太贵了', '看看别的'],
+            glossary: ['有点儿', '看看别的'],
           },
           {
             id: 'B',
@@ -1890,8 +1905,8 @@ const chapters = [
             rating: 'Stiff',
             score: 2,
             relationship: 2,
-            explanation: 'Correct, but blunt. Adding 我想看看别的 makes the conversation smoother.',
-            correction: '太贵了，我想看看别的。',
+            explanation: 'Correct, but blunt if said by itself. 太贵了 sounds like a strong reaction, so adding a softer next step sounds better.',
+            correction: '有点儿贵，我想看看别的。',
             glossary: ['太贵了', '看看别的'],
           },
           {
@@ -1903,7 +1918,7 @@ const chapters = [
             score: 1,
             relationship: -5,
             explanation: 'The listener can understand, but it sounds patched together and too direct.',
-            correction: '有点儿太贵了。我想看看别的。',
+            correction: '有点儿贵，我想看看别的。',
             glossary: [],
           },
           {
@@ -1913,9 +1928,9 @@ const chapters = [
             en: 'How much is this?',
             rating: 'Incorrect',
             score: 0,
-            relationship: -6,
+            relationship: -8,
             explanation: 'The seller already told you the price. Now you need to respond to the price.',
-            correction: '有点儿太贵了。我想看看别的。',
+            correction: '有点儿贵，我想看看别的。',
             glossary: ['多少钱'],
           },
         ],
@@ -4021,7 +4036,7 @@ export default function ChapterUIPrototype() {
                 <Heart className="h-4 w-4" /> Social comfort
               </div>
               <Progress value={trust} className="h-2" />
-              <p className="mt-2 text-xs text-neutral-500">Good Chinese should feel socially safe, not just grammatically correct.</p>
+              <p className="mt-2 text-xs text-neutral-500">How polite, safe, and smooth your reply feels in the situation.</p>
             </div>
 
             <div className="rounded-2xl bg-[#f3eadf]/70 p-4">
@@ -4029,7 +4044,7 @@ export default function ChapterUIPrototype() {
                 <Sparkles className="h-4 w-4" /> Naturalness mastery
               </div>
               <Progress value={mastery} className="h-2" />
-              <p className="mt-2 text-xs text-neutral-500">The target is not only correct. The target is something a real person would say.</p>
+              <p className="mt-2 text-xs text-neutral-500">How close your Chinese is to something a real person would naturally say.</p>
             </div>
 
             <div className="rounded-2xl border border-dashed border-[#d8cbb8] bg-[#fffaf3]/70 p-4">
