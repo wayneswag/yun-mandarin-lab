@@ -1892,7 +1892,7 @@ const chapters = [
             en: 'It is a little expensive. I want to look at something else.',
             rating: 'Natural',
             score: 3,
-            relationship: 14,
+            relationship: 13,
             explanation: 'Natural and socially comfortable. 有点儿贵 sounds softer than 太贵了, and 我想看看别的 moves to another option politely.',
             correction: null,
             glossary: ['有点儿', '看看别的'],
