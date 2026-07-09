@@ -79,13 +79,13 @@ function DisplayToggleButton({ active, label, onClick, compact = false }) {
         compact ? 'min-h-11 px-3 py-2 text-sm' : 'min-h-12 px-4 py-2 text-base'
       } ${
         active
-          ? 'border-[#1f2723] bg-[#1f2723] text-white shadow-[0_10px_24px_rgba(31,39,35,0.16)]'
-          : 'border-[#c8d5cc] bg-white/75 text-[#52615a] hover:border-[#4f7f69] hover:bg-[#f7f4ec]'
+          ? 'border-[#2b241f] bg-[#2b241f] text-white shadow-[0_10px_24px_rgba(43,36,31,0.16)]'
+          : 'border-[#d8cbb8] bg-white/75 text-[#6f6257] hover:border-[#d6a856] hover:bg-[#fffaf3]'
       }`}
       aria-pressed={active}
     >
       <span className="min-w-0 text-left leading-tight">{label}</span>
-      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${active ? 'bg-white/20 text-white' : 'bg-[#e8f0ea] text-[#52615a]'}`}>
+      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${active ? 'bg-white/20 text-white' : 'bg-[#f3eadf] text-[#6f6257]'}`}>
         {active ? 'On' : 'Off'}
       </span>
     </button>
@@ -2591,7 +2591,7 @@ function AnnotatedText({ text, glossaryKeys = [], onOpen, className = '' }) {
               e.stopPropagation();
               onOpen(part.value);
             }}
-            className="rounded-md bg-[#dfeee6] px-1 py-0.5 font-semibold text-[#245747] underline decoration-dotted underline-offset-4 transition hover:bg-[#cfe5da]"
+            className="rounded-md bg-[#dbe8f6] px-1 py-0.5 font-semibold text-[#1f4e79] underline decoration-dotted underline-offset-4 transition hover:bg-[#c9dced]"
           >
             {part.value}
           </button>
@@ -2609,16 +2609,16 @@ function AppSectionButton({ active, icon: Icon, title, subtitle, onClick }) {
       onClick={onClick}
       className={`w-full rounded-full px-4 py-3 text-left transition ${
         active
-          ? 'bg-[#1f2723] text-white shadow-sm'
-          : 'text-[#52615a] hover:bg-[#e8f0ea] hover:text-[#1f2723]'
+          ? 'bg-[#2b241f] text-white shadow-sm'
+          : 'text-[#6f6257] hover:bg-[#f3eadf] hover:text-[#2b241f]'
       }`}
     >
       <div className="flex items-center gap-3">
-        <div className={`rounded-full p-2 ${active ? 'bg-white/15' : 'bg-[#fbfaf5]'}`}>
-          <Icon className={`h-4 w-4 ${active ? 'text-white' : 'text-[#52615a]'}`} />
+        <div className={`rounded-full p-2 ${active ? 'bg-white/15' : 'bg-[#fffaf3]'}`}>
+          <Icon className={`h-4 w-4 ${active ? 'text-white' : 'text-[#6f6257]'}`} />
         </div>
         <div className="min-w-0">
-          <div className={`text-sm font-semibold ${active ? 'text-white' : 'text-[#1f2723]'}`}>{title}</div>
+          <div className={`text-sm font-semibold ${active ? 'text-white' : 'text-[#2b241f]'}`}>{title}</div>
           <div className={`mt-1 text-xs ${active ? 'text-white/80' : 'text-neutral-600'}`}>{subtitle}</div>
         </div>
       </div>
@@ -2631,8 +2631,8 @@ function MobileTabButton({ active, icon: Icon, label, onClick }) {
       onClick={onClick}
       className={`flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[20px] px-1.5 py-2.5 text-xs transition active:scale-95 ${
         active
-          ? 'bg-[#1f2723] text-white shadow-[0_10px_24px_rgba(31,39,35,0.25)]'
-          : 'text-[#5b6a63] hover:bg-[#e8f0ea]'
+          ? 'bg-[#2b241f] text-white shadow-[0_10px_24px_rgba(43,36,31,0.25)]'
+          : 'text-[#7a6d61] hover:bg-[#f3eadf]'
       }`}
     >
       <Icon className="h-5 w-5 shrink-0" />
@@ -3365,17 +3365,17 @@ export default function ChapterUIPrototype() {
         : null;
       return (
         <div className="space-y-6 md:space-y-10">
-          <section className="overflow-hidden rounded-[28px] bg-[#1f2723] text-white shadow-[0_22px_60px_rgba(31,39,35,0.16)] md:rounded-[34px]">
+          <section className="overflow-hidden rounded-[28px] bg-[#2b241f] text-white shadow-[0_22px_60px_rgba(43,36,31,0.16)] md:rounded-[34px]">
             <div className="grid gap-0 md:grid-cols-[minmax(0,1fr)_300px]">
               <div>
                 <div className="p-4 sm:p-5 md:p-7">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9bc3b0] sm:text-xs sm:tracking-[0.22em]">Mandarin practice studio</div>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d6a856] sm:text-xs sm:tracking-[0.22em]">Mandarin practice studio</div>
                   <h2 className="mt-3 max-w-2xl text-2xl font-semibold leading-tight sm:text-3xl md:text-4xl">Step into today's Mandarin practice</h2>
                   <p className="mt-3 max-w-2xl text-sm leading-6 text-white/72 md:text-base">
                     Start with one real scene, listen for what feels natural, and keep the phrases you can imagine saying.
                   </p>
                   {recommendedNode && (
-                    <div className="mt-5 border-l-2 border-[#9bc3b0] pl-3 sm:pl-4 md:mt-6">
+                    <div className="mt-5 border-l-2 border-[#d6a856] pl-3 sm:pl-4 md:mt-6">
                       <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-white/45 sm:text-xs">Next line to work with</div>
                       <div className="mt-2 text-2xl font-semibold leading-snug sm:text-3xl md:text-4xl">{recommendedNode.npcLineZh}</div>
                       <div className="mt-2 max-w-2xl text-sm leading-6 text-white/58">{recommendedNode.mission}</div>
@@ -3404,15 +3404,15 @@ export default function ChapterUIPrototype() {
           </section>
 
           {recommendedPractice && (
-            <section className="rounded-[26px] bg-[#fbfaf5] p-4 shadow-sm ring-1 ring-[#dbe5dc] sm:p-5 md:rounded-[30px] md:p-6">
+            <section className="rounded-[26px] bg-[#fffaf3] p-4 shadow-sm ring-1 ring-[#eadfce] sm:p-5 md:rounded-[30px] md:p-6">
               <div className="grid gap-5 md:grid-cols-[1fr_auto] md:items-center">
                 <div className="flex items-start gap-3 sm:gap-4">
-                  <div className="rounded-[18px] bg-[#e8f0ea] p-2.5 sm:rounded-[22px] sm:p-3">
+                  <div className="rounded-[18px] bg-[#f3eadf] p-2.5 sm:rounded-[22px] sm:p-3">
                     <RecommendedIcon className="h-6 w-6 text-[#6f4f18]" />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-sm font-medium text-[#3d6b59]">Pick up here</div>
-                    <h3 className="mt-1 text-xl font-semibold leading-tight text-[#1f2723] sm:text-2xl">{recommendedPractice.chapter.title}</h3>
+                    <div className="text-sm font-medium text-[#8a6a28]">Pick up here</div>
+                    <h3 className="mt-1 text-xl font-semibold leading-tight text-[#2b241f] sm:text-2xl">{recommendedPractice.chapter.title}</h3>
                     <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">{recommendedPractice.chapter.subtitle}</p>
                     <div className="mt-4 max-w-md">
                       <div className="mb-2 flex items-center justify-between text-sm">
@@ -3439,7 +3439,7 @@ export default function ChapterUIPrototype() {
               <h3 className="text-lg font-semibold">Choose a practice scene</h3>
               <p className="mt-1 text-sm text-neutral-500">Each scene is a short lesson in how Mandarin sounds in real social moments.</p>
             </div>
-            <div className="divide-y divide-[#d9e2da] border-y border-[#dbe5dc] bg-[#fbfaf5]/55">
+            <div className="divide-y divide-[#e7dccd] border-y border-[#eadfce] bg-[#fffaf3]/50">
               {pathItems.map(({ chapter, index, completed, total, status, action }) => {
                 const Icon = chapter.icon;
                 const primaryAction = action !== 'Review';
@@ -3447,8 +3447,8 @@ export default function ChapterUIPrototype() {
                   <div key={chapter.id} className="py-4 md:px-2 md:py-5">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex min-w-0 items-start gap-3">
-                        <div className="rounded-2xl bg-[#e8f0ea]/85 p-2">
-                          <Icon className="h-5 w-5 text-[#52615a]" />
+                        <div className="rounded-2xl bg-[#f3eadf]/85 p-2">
+                          <Icon className="h-5 w-5 text-[#6f6257]" />
                         </div>
                         <div className="min-w-0">
                           <div className="text-xs font-medium uppercase tracking-[0.16em] text-neutral-500">{chapter.label}</div>
@@ -3478,12 +3478,12 @@ export default function ChapterUIPrototype() {
             </div>
             <div className="grid gap-4 lg:grid-cols-2">
               {recentCollected.length === 0 ? (
-                <div className="border-l-2 border-[#4f7f69] bg-[#fbfaf5]/65 py-4 pl-4 pr-3 text-sm leading-6 text-neutral-500 lg:col-span-2">
+                <div className="border-l-2 border-[#d6a856] bg-[#fffaf3]/65 py-4 pl-4 pr-3 text-sm leading-6 text-neutral-500 lg:col-span-2">
                   No saved phrases yet. During practice, save language that sounds useful enough to try in your own speech.
                 </div>
               ) : (
                 recentCollected.map((item) => (
-                  <article key={item.id} className="border-l-2 border-[#4f7f69] bg-[#fbfaf5]/70 py-4 pl-4 pr-3">
+                  <article key={item.id} className="border-l-2 border-[#d6a856] bg-[#fffaf3]/70 py-4 pl-4 pr-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1 text-xl font-semibold leading-snug">{item.expression}</div>
                       <AudioButton audioId={item.audioId} text={item.expression} small />
@@ -3509,7 +3509,7 @@ export default function ChapterUIPrototype() {
         <div className="space-y-5 pb-8 md:space-y-7 md:pb-0">
           <section className="px-1 md:px-0">
             <div className="max-w-3xl">
-              <div className="text-sm font-medium text-[#3d6b59]">Phrase notebook</div>
+              <div className="text-sm font-medium text-[#8a6a28]">Phrase notebook</div>
               <h2 className="mt-1 text-2xl font-semibold leading-tight sm:text-3xl md:text-4xl">Your Mandarin phrase notebook</h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">
                 A quiet place for phrases you want to hear again, say aloud, and bring back into real conversation.
@@ -3520,17 +3520,17 @@ export default function ChapterUIPrototype() {
           <section>
             <div className="space-y-4">
               {collected.length === 0 ? (
-                <div className="rounded-[28px] border border-dashed border-[#c8d5cc] bg-[#fbfaf5]/75 p-6 text-sm leading-6 text-neutral-500 md:p-8">
+                <div className="rounded-[28px] border border-dashed border-[#d8cbb8] bg-[#fffaf3]/75 p-6 text-sm leading-6 text-neutral-500 md:p-8">
                   No saved phrases yet. During practice, save anything that sounds useful, natural, or worth trying in your own speech.
                 </div>
               ) : (
                 collected.map((item) => (
-                  <article key={item.id} className="border-l-2 border-[#4f7f69] bg-[#fbfaf5]/78 px-3 py-4 sm:px-4 sm:py-5 md:rounded-r-[28px] md:px-5">
+                  <article key={item.id} className="border-l-2 border-[#d6a856] bg-[#fffaf3]/78 px-3 py-4 sm:px-4 sm:py-5 md:rounded-r-[28px] md:px-5">
                     <div className="flex items-start justify-between gap-3 sm:gap-4">
                       <div className="min-w-0 flex-1 space-y-2">
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-                          <div className="min-w-0 flex-1 text-2xl font-semibold leading-tight text-[#1f2723] sm:text-3xl md:text-4xl">{item.expression}</div>
-                          <div className="flex shrink-0 items-center gap-2 self-start rounded-full bg-[#e8f0ea] px-3 py-1.5 text-xs font-medium text-[#52615a]">
+                          <div className="min-w-0 flex-1 text-2xl font-semibold leading-tight text-[#2b241f] sm:text-3xl md:text-4xl">{item.expression}</div>
+                          <div className="flex shrink-0 items-center gap-2 self-start rounded-full bg-[#f3eadf] px-3 py-1.5 text-xs font-medium text-[#6f6257]">
                             <span className="hidden sm:inline">Listen</span>
                             <AudioButton audioId={item.audioId} text={item.expression} small />
                           </div>
@@ -3541,7 +3541,7 @@ export default function ChapterUIPrototype() {
                       <button
                         type="button"
                         onClick={() => toggleCollected(item)}
-                        className="rounded-full p-2 text-neutral-400 transition hover:bg-[#e8f0ea] hover:text-neutral-700"
+                        className="rounded-full p-2 text-neutral-400 transition hover:bg-[#f3eadf] hover:text-neutral-700"
                         aria-label="Remove saved phrase"
                         title="Remove saved phrase"
                       >
@@ -3549,10 +3549,10 @@ export default function ChapterUIPrototype() {
                       </button>
                     </div>
                     <div className="mt-4 flex flex-wrap items-center gap-2 text-xs leading-5 text-neutral-500">
-                      <span className="rounded-full bg-[#e8f0ea]/85 px-2.5 py-1">{item.type}</span>
+                      <span className="rounded-full bg-[#f3eadf]/85 px-2.5 py-1">{item.type}</span>
                       <span>{item.source || item.chapter}</span>
                     </div>
-                    {item.mission && <div className="mt-2 border-l border-[#c8d5cc] pl-3 text-sm leading-6 text-neutral-600">{item.mission}</div>}
+                    {item.mission && <div className="mt-2 border-l border-[#d8cbb8] pl-3 text-sm leading-6 text-neutral-600">{item.mission}</div>}
                   </article>
                 ))
               )}
@@ -3565,7 +3565,7 @@ export default function ChapterUIPrototype() {
     if (currentView === 'review') {
       return (
         <div className="space-y-5 md:space-y-6">
-          <Card className="overflow-hidden rounded-[28px] border-0 bg-[#fbfaf5]/95 shadow-sm ring-1 ring-[#dbe5dc] md:rounded-3xl">
+          <Card className="overflow-hidden rounded-[28px] border-0 bg-[#fffaf3]/95 shadow-sm ring-1 ring-[#eadfce] md:rounded-3xl">
             <CardHeader className="px-4 py-5 md:p-6">
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div>
@@ -3593,14 +3593,14 @@ export default function ChapterUIPrototype() {
                   const correctionPinyin = item.betterPinyin || item.correctionPinyin || item.improvedPinyin || item.naturalPinyin || correctionSourceOption?.py || '';
                   const correctionEnglish = item.betterEnglish || item.correctionEnglish || item.improvedEnglish || item.naturalEnglish || correctionSourceOption?.en || '';
                   return (
-                  <div key={`${item.selected}-${idx}`} className="rounded-2xl border border-[#dbe5dc] bg-white/74 p-3 sm:p-4">
+                  <div key={`${item.selected}-${idx}`} className="rounded-2xl border border-[#eadfce] bg-white/74 p-3 sm:p-4">
                     <div className="flex flex-wrap items-center gap-2">
                       <RatingBadge rating={item.rating} />
                       <span className="text-xs text-neutral-500">{item.chapter}</span>
                     </div>
                     <div className="mt-3 flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
-                        <div className="text-xl font-semibold leading-snug text-[#1f2723] sm:text-2xl">{item.selected}</div>
+                        <div className="text-xl font-semibold leading-snug text-[#2b241f] sm:text-2xl">{item.selected}</div>
                         {reviewShowPinyin && reviewPinyin && <div className="mt-2 text-sm leading-5 text-neutral-500">{reviewPinyin}</div>}
                         {reviewShowEnglish && reviewEnglish && <div className="mt-1 text-sm leading-5 text-neutral-700">{reviewEnglish}</div>}
                       </div>
@@ -3609,12 +3609,12 @@ export default function ChapterUIPrototype() {
                     {reviewShowEnglish && item.mission && <div className="mt-2 text-sm text-neutral-600">{item.mission}</div>}
                     {reviewShowEnglish && reviewExplanation && <div className="mt-2 text-sm leading-6 text-neutral-700">{reviewExplanation}</div>}
                     {item.correction && (
-                      <div className="mt-3 rounded-xl bg-[#e8f0ea]/75 p-3 text-sm">
+                      <div className="mt-3 rounded-xl bg-[#f3eadf]/75 p-3 text-sm">
                         <div className="flex items-center justify-between gap-2 font-medium">
                         <span>Better version</span>
                         <AudioButton audioId={item.correctionAudioId} text={item.correction} small />
                       </div>
-                      <div className="mt-1 text-base font-medium leading-snug text-[#1f2723]">{item.correction}</div>
+                      <div className="mt-1 text-base font-medium leading-snug text-[#2b241f]">{item.correction}</div>
                       {reviewShowPinyin && correctionPinyin && <div className="mt-1 text-sm leading-5 text-neutral-500">{correctionPinyin}</div>}
                       {reviewShowEnglish && correctionEnglish && <div className="mt-1 text-sm leading-5 text-neutral-700">{correctionEnglish}</div>}
                       </div>
@@ -3634,7 +3634,7 @@ export default function ChapterUIPrototype() {
         <div className="space-y-6 pb-8 md:space-y-8 md:pb-0">
           <section className="px-1 md:px-0">
             <div className="max-w-2xl">
-              <div className="text-sm font-medium text-[#3d6b59]">Your practice space</div>
+              <div className="text-sm font-medium text-[#8a6a28]">Your practice space</div>
               <h2 className="mt-1 text-2xl font-semibold leading-tight sm:text-3xl">Settings</h2>
               <p className="mt-2 text-sm leading-6 text-neutral-500">
                 {session?.user ? 'Progress is syncing with your account.' : 'Guest progress stays on this device. Sign in to sync across devices.'}
@@ -3643,19 +3643,19 @@ export default function ChapterUIPrototype() {
           </section>
 
           <section className="space-y-6">
-              <div className="border-t border-[#dbe5dc] pt-5">
+              <div className="border-t border-[#eadfce] pt-5">
                 <div className="mb-4">
                   <div className="font-semibold">Account and sync</div>
                   <p className="mt-1 text-sm leading-6 text-neutral-500">Keep your practice available here, or carry it to another device when you sign in.</p>
                 </div>
                 {session?.user ? (
                   <div className="mt-3 space-y-3">
-                    <div className="min-w-0 border-l-2 border-[#4f7f69] bg-[#fbfaf5]/70 py-3 pl-3 pr-2 text-sm">
+                    <div className="min-w-0 border-l-2 border-[#d6a856] bg-[#fffaf3]/70 py-3 pl-3 pr-2 text-sm">
                       <div className="text-neutral-500">Signed in as</div>
                       <div className="mt-1 break-words font-medium text-neutral-900">{session.user.email}</div>
                     </div>
                     {passwordRecovery && (
-                      <div className="rounded-[24px] bg-[#fbfaf5]/78 p-4 text-sm ring-1 ring-[#dbe5dc]/85">
+                      <div className="rounded-[24px] bg-[#fffaf3]/78 p-4 text-sm ring-1 ring-[#eadfce]/85">
                         <div className="font-medium text-neutral-900">Set new password</div>
                         <p className="mt-1 text-sm leading-6 text-neutral-500">Choose a new password for this account.</p>
                         <div className="mt-3 grid gap-3 md:grid-cols-2">
@@ -3682,7 +3682,7 @@ export default function ChapterUIPrototype() {
                         </Button>
                       </div>
                     )}
-                    <div className="rounded-[24px] bg-[#fbfaf5]/78 p-4 text-sm ring-1 ring-[#dbe5dc]/85">
+                    <div className="rounded-[24px] bg-[#fffaf3]/78 p-4 text-sm ring-1 ring-[#eadfce]/85">
                       <button
                         type="button"
                         onClick={() => setShowChangePassword((value) => !value)}
@@ -3723,7 +3723,7 @@ export default function ChapterUIPrototype() {
                       )}
                     </div>
                     {pendingCloudState && (
-                      <div className="rounded-[24px] bg-[#fbfaf5]/78 p-4 text-sm ring-1 ring-[#dbe5dc]/85">
+                      <div className="rounded-[24px] bg-[#fffaf3]/78 p-4 text-sm ring-1 ring-[#eadfce]/85">
                         <div className="font-medium text-neutral-900">Cloud progress found.</div>
                         <p className="mt-1 leading-6 text-neutral-500">Choose which practice record should become your account copy.</p>
                         <div className="mt-3 grid gap-2 sm:flex sm:flex-wrap">
@@ -3740,12 +3740,12 @@ export default function ChapterUIPrototype() {
                       <Button className="h-11 w-full rounded-2xl px-4 text-sm font-semibold sm:w-auto md:h-9" onClick={handleSyncNow} disabled={authLoading}>
                         Sync now
                       </Button>
-                      <Button variant="outline" className="h-11 w-full rounded-2xl border-[#c8d5cc] bg-transparent px-4 text-sm font-semibold text-neutral-700 sm:w-auto md:h-9" onClick={handleSignOut} disabled={authLoading}>
+                      <Button variant="outline" className="h-11 w-full rounded-2xl border-[#d8cbb8] bg-transparent px-4 text-sm font-semibold text-neutral-700 sm:w-auto md:h-9" onClick={handleSignOut} disabled={authLoading}>
                         Sign out
                       </Button>
                     </div>
                     {authMessage && <div className="text-sm leading-6 text-neutral-600">{authMessage}</div>}
-                    <div className="rounded-[22px] bg-[#e8f0ea]/70 p-3 text-sm">
+                    <div className="rounded-[22px] bg-[#f3eadf]/70 p-3 text-sm">
                       <div className="text-xs font-medium uppercase tracking-[0.16em] text-neutral-500">Sync status</div>
                       <div className="mt-1 font-medium leading-6 text-neutral-800">{syncStatus}</div>
                       <div className="mt-2 text-xs leading-5 text-neutral-500">Use Sync now before switching devices if you want to save immediately.</div>
@@ -3781,12 +3781,12 @@ export default function ChapterUIPrototype() {
                       <Button className="h-11 w-full rounded-2xl px-4 text-sm font-semibold sm:w-auto" onClick={() => handleAuthSubmit('signin')} disabled={authLoading}>
                         Sign in
                       </Button>
-                      <Button variant="outline" className="h-11 w-full rounded-2xl border-[#c8d5cc] bg-transparent px-4 text-sm font-semibold text-neutral-700 sm:w-auto" onClick={() => handleAuthSubmit('signup')} disabled={authLoading}>
+                      <Button variant="outline" className="h-11 w-full rounded-2xl border-[#d8cbb8] bg-transparent px-4 text-sm font-semibold text-neutral-700 sm:w-auto" onClick={() => handleAuthSubmit('signup')} disabled={authLoading}>
                         Sign up
                       </Button>
                       <Button
                         variant="outline"
-                        className="h-11 w-full rounded-2xl border-[#c8d5cc] bg-transparent px-4 text-sm font-semibold text-neutral-700 sm:w-auto"
+                        className="h-11 w-full rounded-2xl border-[#d8cbb8] bg-transparent px-4 text-sm font-semibold text-neutral-700 sm:w-auto"
                         onClick={() => {
                           setResetEmail(authEmail);
                           setShowPasswordReset((value) => !value);
@@ -3797,7 +3797,7 @@ export default function ChapterUIPrototype() {
                       </Button>
                     </div>
                     {showPasswordReset && (
-                      <div className="rounded-[24px] bg-[#fbfaf5]/78 p-4 text-sm ring-1 ring-[#dbe5dc]/85">
+                      <div className="rounded-[24px] bg-[#fffaf3]/78 p-4 text-sm ring-1 ring-[#eadfce]/85">
                         <div className="font-medium text-neutral-900">Reset password</div>
                         <p className="mt-1 leading-6 text-neutral-500">Send a recovery link to your email, then return here to set a new password.</p>
                         <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto]">
@@ -3815,36 +3815,36 @@ export default function ChapterUIPrototype() {
                       </div>
                     )}
                     {authMessage && <div className="text-sm leading-6 text-neutral-600">{authMessage}</div>}
-                    <div className="rounded-[22px] bg-[#e8f0ea]/70 p-3 text-sm">
+                    <div className="rounded-[22px] bg-[#f3eadf]/70 p-3 text-sm">
                       <div className="text-xs font-medium uppercase tracking-[0.16em] text-neutral-500">Sync status</div>
                       <div className="mt-1 font-medium leading-6 text-neutral-800">{syncStatus}</div>
                     </div>
                   </div>
                 )}
               </div>
-              <div className="border-t border-[#dbe5dc] pt-5">
+              <div className="border-t border-[#eadfce] pt-5">
                 <div className="mb-4">
                   <div className="font-semibold">Device and progress</div>
                   <p className="mt-1 text-sm leading-6 text-neutral-500">A quick check before you sync or switch devices.</p>
                 </div>
                 <div className="grid gap-3 text-sm md:grid-cols-3">
-                  <div className="min-w-0 border-l-2 border-[#4f7f69] bg-[#fbfaf5]/65 py-3 pl-3 pr-2">
+                  <div className="min-w-0 border-l-2 border-[#d6a856] bg-[#fffaf3]/65 py-3 pl-3 pr-2">
                     <div className="text-neutral-500">Current device</div>
                     <div className="mt-1 break-words font-medium text-neutral-900">{currentDeviceLabel}</div>
                   </div>
-                  <div className="min-w-0 border-l-2 border-[#4f7f69] bg-[#fbfaf5]/65 py-3 pl-3 pr-2">
+                  <div className="min-w-0 border-l-2 border-[#d6a856] bg-[#fffaf3]/65 py-3 pl-3 pr-2">
                     <div className="text-neutral-500">Current progress</div>
                     <div className="mt-1 break-words font-medium text-neutral-900">Chapter {currentChapterIndex + 1} &middot; {currentChapter.shortTitle}</div>
                     <div className="mt-1 text-neutral-600">Question {currentNodeIndex + 1}</div>
                   </div>
-                  <div className="min-w-0 border-l-2 border-[#4f7f69] bg-[#fbfaf5]/65 py-3 pl-3 pr-2">
+                  <div className="min-w-0 border-l-2 border-[#d6a856] bg-[#fffaf3]/65 py-3 pl-3 pr-2">
                     <div className="text-neutral-500">Last synced</div>
                     <div className="mt-1 font-medium text-neutral-900">Not yet</div>
                   </div>
                 </div>
                 <div className="mt-3 text-xs leading-5 text-neutral-500">This helps you check which device progress you are about to sync.</div>
               </div>
-              <div className="border-t border-[#dbe5dc] pt-5">
+              <div className="border-t border-[#eadfce] pt-5">
                 <div className="font-semibold">Reading support</div>
                 <p className="mt-1 text-sm leading-6 text-neutral-500">Choose what helps you read during practice.</p>
                 <div className="mt-3 grid grid-cols-2 gap-2 sm:flex">
@@ -3852,7 +3852,7 @@ export default function ChapterUIPrototype() {
                   <DisplayToggleButton active={showEnglish} label="English" onClick={() => setShowEnglish((v) => !v)} compact />
                 </div>
               </div>
-              <div className="border-t border-[#dbe5dc] pt-5">
+              <div className="border-t border-[#eadfce] pt-5">
                 <div className="font-semibold">Example notes</div>
                 <p className="mt-1 text-sm leading-6 text-neutral-500">Control how much support appears in quick examples.</p>
                 <div className="mt-3 grid grid-cols-2 gap-2 sm:flex">
@@ -3860,7 +3860,7 @@ export default function ChapterUIPrototype() {
                   <DisplayToggleButton active={quickExamplesShowEnglish} label="Quick English" onClick={() => setQuickExamplesShowEnglish((v) => !v)} compact />
                 </div>
               </div>
-              <div className="border-t border-[#dbe5dc] pt-5">
+              <div className="border-t border-[#eadfce] pt-5">
                 <div className="font-semibold">Audio speed</div>
                 <p className="mt-1 text-sm text-neutral-600">Choose the playback speed for all Chinese audio in the app.</p>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -3876,7 +3876,7 @@ export default function ChapterUIPrototype() {
                   ))}
                 </div>
               </div>
-              <div className="border-t border-[#dbe5dc] pt-5">
+              <div className="border-t border-[#eadfce] pt-5">
                 <div className="font-semibold">Chinese text size</div>
                 <p className="mt-1 text-sm text-neutral-600">Adjust the Chinese text size for easier reading.</p>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -3909,7 +3909,7 @@ export default function ChapterUIPrototype() {
     return (
       <div className="space-y-4 pb-8 md:space-y-6 md:pb-0">
         <Card className="hidden overflow-hidden rounded-3xl border-0 shadow-sm md:block">
-          <div className="h-56 bg-[radial-gradient(circle_at_top_left,_#dbeafe,_#e5e7eb_55%,_#fafafa)] p-6">
+          <div className="h-56 bg-[radial-gradient(circle_at_top_left,_#fff4e0,_#f1e6d8_58%,_#fffaf3)] p-6">
             <div className="flex h-full flex-col justify-between">
               <div className="flex items-center justify-between">
                 <Badge className="rounded-full bg-white/80 text-neutral-800">{currentChapter.scene}</Badge>
@@ -3924,11 +3924,11 @@ export default function ChapterUIPrototype() {
           </div>
         </Card>
 
-        <Card className="rounded-[26px] border-0 bg-[#fbfaf5]/95 shadow-sm ring-1 ring-[#dbe5dc] md:rounded-3xl md:bg-white md:ring-0">
+        <Card className="rounded-[26px] border-0 bg-[#fffaf3]/95 shadow-sm ring-1 ring-[#eadfce] md:rounded-3xl md:bg-white md:ring-0">
           <CardContent className="px-4 py-5 md:p-7">
-            <div className="mb-5 flex flex-col gap-4 border-b border-[#d9e2da] pb-5 md:flex-row md:items-start md:justify-between">
+            <div className="mb-5 flex flex-col gap-4 border-b border-[#e7dccd] pb-5 md:flex-row md:items-start md:justify-between">
               <div className="min-w-0 w-full md:w-auto">
-                <p className="text-sm font-medium text-[#3d6b59]">Practice focus</p>
+                <p className="text-sm font-medium text-[#8a6a28]">Practice focus</p>
                 <h3 className="mt-1 max-w-2xl text-xl font-semibold leading-snug md:text-2xl">{currentNode.mission}</h3>
               </div>
               <div className="grid w-full grid-cols-2 gap-3 md:w-auto md:flex md:items-center">
@@ -3943,19 +3943,19 @@ export default function ChapterUIPrototype() {
             </div>
             <Progress value={chapterProgress} className="h-2" />
 
-            <motion.div layout className="mt-5 rounded-[24px] bg-[#e8f0ea]/85 p-4 sm:p-5 md:mt-6 md:rounded-[28px] md:p-6">
+            <motion.div layout className="mt-5 rounded-[24px] bg-[#f3eadf]/85 p-4 sm:p-5 md:mt-6 md:rounded-[28px] md:p-6">
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3 text-sm text-neutral-600">
                 <div className="flex items-center gap-2">
-                  <MessageSquareQuote className="h-4 w-4 text-[#3d6b59]" />
+                  <MessageSquareQuote className="h-4 w-4 text-[#8a6a28]" />
                   <span>Listen to {currentNode.npc}</span>
                 </div>
-                <div className="flex items-center gap-2 rounded-full bg-[#fbfaf5]/85 px-3 py-1.5 text-xs font-medium text-[#52615a]">
+                <div className="flex items-center gap-2 rounded-full bg-[#fffaf3]/85 px-3 py-1.5 text-xs font-medium text-[#6f6257]">
                   <span>Play line</span>
                   <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.npc`} text={currentNode.npcLineZh} />
                 </div>
               </div>
               <div className="space-y-3">
-                <div className={`${fontScale === 'sm' ? 'text-2xl sm:text-3xl' : fontScale === 'lg' ? 'text-4xl sm:text-5xl' : 'text-3xl sm:text-4xl'} font-semibold leading-tight tracking-tight text-[#1f2723]`}>
+                <div className={`${fontScale === 'sm' ? 'text-2xl sm:text-3xl' : fontScale === 'lg' ? 'text-4xl sm:text-5xl' : 'text-3xl sm:text-4xl'} font-semibold leading-tight tracking-tight text-[#2b241f]`}>
                   <AnnotatedText text={currentNode.npcLineZh} glossaryKeys={currentNode.npcGlossary} onOpen={setSelectedGlossaryKey} />
                 </div>
                 {showPinyin && <p className="text-sm leading-6 text-neutral-500 md:text-base">{currentNode.npcLinePy}</p>}
@@ -3965,7 +3965,7 @@ export default function ChapterUIPrototype() {
 
             <div className="mt-6 grid gap-3 md:mt-7">
               <div>
-                <div className="text-sm font-medium text-[#3d6b59]">Your turn</div>
+                <div className="text-sm font-medium text-[#8a6a28]">Your turn</div>
                 <p className="mt-1 text-sm text-neutral-500">Pick the reply you would actually say in this moment.</p>
               </div>
               {displayOptions.map((option) => {
@@ -3988,8 +3988,8 @@ export default function ChapterUIPrototype() {
                     onClick={() => handleSelectOption(option.id)}
                     className={`rounded-[22px] border p-3.5 text-left transition active:scale-[0.99] sm:p-4 md:rounded-[26px] md:p-5 ${
                       active
-                        ? 'border-[#1f2723] bg-[#1f2723] text-white shadow-[0_16px_35px_rgba(31,39,35,0.18)]'
-                        : 'border-[#dbe5dc] bg-white/82 hover:border-[#4f7f69] hover:bg-white'
+                        ? 'border-[#8a6a28] bg-[#5a3f30] text-white shadow-[0_16px_35px_rgba(90,63,48,0.18)]'
+                        : 'border-[#eadfce] bg-white/82 hover:border-[#d6a856] hover:bg-white'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -4021,8 +4021,8 @@ export default function ChapterUIPrototype() {
               })}
             </div>
 
-            <div className="mt-7 space-y-3 border-t border-[#d9e2da] pt-5">
-              <div className="flex w-full items-center gap-2 rounded-2xl bg-[#edf4ef] px-4 py-3 text-left text-sm leading-5 text-[#52615a]">
+            <div className="mt-7 space-y-3 border-t border-[#e7dccd] pt-5">
+              <div className="flex w-full items-center gap-2 rounded-2xl bg-[#fff8ef] px-4 py-3 text-left text-sm leading-5 text-[#6f6257]">
                 <BrainCircuit className="h-4 w-4 shrink-0" />
                 <span className="min-w-0">Natural Chinese is about the relationship, not just the words.</span>
               </div>
@@ -4048,7 +4048,7 @@ export default function ChapterUIPrototype() {
               </div>
 
               <Button
-                className="h-14 w-full rounded-[22px] bg-[#1f2723] text-base font-semibold shadow-[0_14px_30px_rgba(31,39,35,0.20)]"
+                className="h-14 w-full rounded-[22px] bg-[#2b241f] text-base font-semibold shadow-[0_14px_30px_rgba(43,36,31,0.20)]"
                 disabled={!selectedOption}
                 onClick={handleSubmit}
               >
@@ -4057,9 +4057,9 @@ export default function ChapterUIPrototype() {
             </div>
           </CardContent>
         </Card>
-        <section className="space-y-5 rounded-[24px] bg-[#fbfaf5]/90 p-4 ring-1 ring-[#dbe5dc] lg:hidden">
+        <section className="space-y-5 rounded-[24px] bg-[#fffaf3]/90 p-4 ring-1 ring-[#eadfce] lg:hidden">
           <div>
-            <div className="text-sm font-medium text-[#3d6b59]">Teacher notes</div>
+            <div className="text-sm font-medium text-[#8a6a28]">Teacher notes</div>
             <p className="mt-1 text-sm leading-6 text-neutral-600">Use these notes after the main practice when you want a little more support.</p>
           </div>
 
@@ -4070,8 +4070,8 @@ export default function ChapterUIPrototype() {
                 onClick={() => setActiveNoteId(note.id)}
                 className={`rounded-2xl border px-3 py-2 text-left text-sm transition ${
                   activeNote.id === note.id
-                    ? 'border-[#4f7f69] bg-[#e8f0ea] text-[#1f2723]'
-                    : 'border-[#dbe5dc] bg-[#fbfaf5]/75 text-neutral-600 hover:border-[#4f7f69]'
+                    ? 'border-[#d6a856] bg-[#f3eadf] text-[#2b241f]'
+                    : 'border-[#eadfce] bg-[#fffaf3]/75 text-neutral-600 hover:border-[#d6a856]'
                 }`}
               >
                 {note.title}
@@ -4079,7 +4079,7 @@ export default function ChapterUIPrototype() {
             ))}
           </div>
 
-          <div className="border-l-2 border-[#4f7f69] bg-white/60 py-3 pl-4 pr-3">
+          <div className="border-l-2 border-[#d6a856] bg-white/60 py-3 pl-4 pr-3">
             <h4 className="font-semibold">{activeNote.title}</h4>
             <p className="mt-1 text-sm leading-6 text-neutral-600">{activeNote.short}</p>
           </div>
@@ -4112,9 +4112,9 @@ export default function ChapterUIPrototype() {
                 });
                 const quickSaved = isCollected(quickExampleItem.id);
                 return (
-                  <div key={example.zh} className="rounded-2xl border border-[#dbe5dc] bg-white/70 p-3 text-sm">
+                  <div key={example.zh} className="rounded-2xl border border-[#eadfce] bg-white/70 p-3 text-sm">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="font-semibold leading-snug text-[#1f2723]">{example.zh}</div>
+                      <div className="font-semibold leading-snug text-[#2b241f]">{example.zh}</div>
                       <div className="flex shrink-0 items-center gap-1">
                         <AudioButton audioId={`${currentChapter.id}.grammar.${activeNote.id}.ex${index + 1}`} text={example.zh} small />
                         <SaveButton saved={quickSaved} onClick={() => toggleCollected(quickExampleItem)} />
@@ -4136,16 +4136,16 @@ export default function ChapterUIPrototype() {
     if (currentView === 'home') {
       return (
         <div className="space-y-5 text-sm">
-          <section className="border-l-2 border-[#4f7f69] bg-[#fbfaf5]/55 py-1 pl-4">
-            <h3 className="font-semibold text-[#1f2723]">Teacher notes</h3>
+          <section className="border-l-2 border-[#d6a856] bg-[#fffaf3]/55 py-1 pl-4">
+            <h3 className="font-semibold text-[#2b241f]">Teacher notes</h3>
             <div className="mt-3 space-y-3 leading-6 text-neutral-600">
               <p>Begin with one scene. Listen for tone before you decide which reply sounds natural.</p>
               <p>Save only the phrases you can imagine saying again.</p>
               <p>Review is for hearing a better shape, not for feeling wrong.</p>
             </div>
           </section>
-          <section className="border-t border-[#dbe5dc] pt-4 leading-6 text-neutral-600">
-            <h3 className="font-semibold text-[#1f2723]">Keep your place</h3>
+          <section className="border-t border-[#eadfce] pt-4 leading-6 text-neutral-600">
+            <h3 className="font-semibold text-[#2b241f]">Keep your place</h3>
             <p className="mt-2">Your practice can stay on this device or sync with your account when you sign in.</p>
           </section>
         </div>
@@ -4155,13 +4155,13 @@ export default function ChapterUIPrototype() {
     if (currentView === 'favorites') {
       return (
         <div className="space-y-4 text-sm">
-          <Card className="rounded-3xl border-0 bg-[#fbfaf5]/70 shadow-none ring-1 ring-[#dbe5dc]/80">
+          <Card className="rounded-3xl border-0 bg-[#fffaf3]/70 shadow-none ring-1 ring-[#eadfce]/80">
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Saving phrases well</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm leading-6 text-neutral-600">
-              <div className="border-l-2 border-[#4f7f69] pl-3">Save phrases because you can imagine saying them, not because they look difficult.</div>
-              <div className="border-l-2 border-[#4f7f69] pl-3">Your notes become a small personal phrasebook for review.</div>
+              <div className="border-l-2 border-[#d6a856] pl-3">Save phrases because you can imagine saying them, not because they look difficult.</div>
+              <div className="border-l-2 border-[#d6a856] pl-3">Your notes become a small personal phrasebook for review.</div>
             </CardContent>
           </Card>
         </div>
@@ -4171,13 +4171,13 @@ export default function ChapterUIPrototype() {
     if (currentView === 'review') {
       return (
         <div className="space-y-4 text-sm">
-          <Card className="rounded-3xl border-0 bg-[#fbfaf5]/70 shadow-none ring-1 ring-[#dbe5dc]/80">
+          <Card className="rounded-3xl border-0 bg-[#fffaf3]/70 shadow-none ring-1 ring-[#eadfce]/80">
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Review gently</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm leading-6 text-neutral-600">
-              <div className="border-l-2 border-[#4f7f69] pl-3">Awkward answers are useful. They show you where a sentence needs a more natural shape.</div>
-              <div className="border-l-2 border-[#4f7f69] pl-3">Review is for listening again, not for feeling wrong.</div>
+              <div className="border-l-2 border-[#d6a856] pl-3">Awkward answers are useful. They show you where a sentence needs a more natural shape.</div>
+              <div className="border-l-2 border-[#d6a856] pl-3">Review is for listening again, not for feeling wrong.</div>
             </CardContent>
           </Card>
         </div>
@@ -4187,8 +4187,8 @@ export default function ChapterUIPrototype() {
     if (currentView === 'settings') {
       return (
         <div className="space-y-5 text-sm">
-          <section className="border-l-2 border-[#4f7f69] bg-[#fbfaf5]/55 py-1 pl-4">
-            <h3 className="font-semibold text-[#1f2723]">Teacher notes</h3>
+          <section className="border-l-2 border-[#d6a856] bg-[#fffaf3]/55 py-1 pl-4">
+            <h3 className="font-semibold text-[#2b241f]">Teacher notes</h3>
             <div className="mt-3 space-y-3 leading-6 text-neutral-600">
               <p>Keep the display comfortable for how you like to read Chinese.</p>
               <p>Use sync when you want this practice record to follow you to another device.</p>
@@ -4200,7 +4200,7 @@ export default function ChapterUIPrototype() {
 
     return (
       <div className="space-y-4 text-sm">
-        <Card className="rounded-3xl border-0 bg-[#fbfaf5]/70 shadow-none ring-1 ring-[#dbe5dc]/80">
+        <Card className="rounded-3xl border-0 bg-[#fffaf3]/70 shadow-none ring-1 ring-[#eadfce]/80">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Teacher notes</CardTitle>
             <p className="text-sm text-neutral-500">Grammar is explained where the learner is most likely to get stuck.</p>
@@ -4213,8 +4213,8 @@ export default function ChapterUIPrototype() {
                   onClick={() => setActiveNoteId(note.id)}
                   className={`rounded-2xl border px-3 py-2 text-left text-sm transition ${
                     activeNote.id === note.id
-                      ? 'border-[#4f7f69] bg-[#e8f0ea] text-[#1f2723]'
-                      : 'border-[#dbe5dc] bg-[#fbfaf5]/75 text-neutral-600 hover:border-[#4f7f69]'
+                      ? 'border-[#d6a856] bg-[#f3eadf] text-[#2b241f]'
+                      : 'border-[#eadfce] bg-[#fffaf3]/75 text-neutral-600 hover:border-[#d6a856]'
                   }`}
                 >
                   {note.title}
@@ -4222,7 +4222,7 @@ export default function ChapterUIPrototype() {
               ))}
             </div>
 
-            <div className="rounded-2xl bg-[#e8f0ea]/80 p-4">
+            <div className="rounded-2xl bg-[#f3eadf]/80 p-4">
               <h4 className="font-semibold">{activeNote.title}</h4>
               <p className="mt-1 text-sm text-neutral-600">{activeNote.short}</p>
             </div>
@@ -4272,20 +4272,20 @@ export default function ChapterUIPrototype() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-3xl border-0 bg-[#fbfaf5]/70 shadow-none ring-1 ring-[#dbe5dc]/80">
+        <Card className="rounded-3xl border-0 bg-[#fffaf3]/70 shadow-none ring-1 ring-[#eadfce]/80">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Practice rhythm</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm leading-6 text-neutral-600">
-            <div className="rounded-2xl bg-[#e8f0ea]/80 p-4">
+            <div className="rounded-2xl bg-[#f3eadf]/80 p-4">
               <div className="font-medium">1. Listen for naturalness</div>
               <p className="mt-1 text-neutral-600">The order changes, so the work is to hear which reply fits the social moment.</p>
             </div>
-            <div className="rounded-2xl bg-[#e8f0ea]/80 p-4">
+            <div className="rounded-2xl bg-[#f3eadf]/80 p-4">
               <div className="font-medium">2. Keep useful language</div>
               <p className="mt-1 text-neutral-600">Save the expressions you would want in your own speaking.</p>
             </div>
-            <div className="rounded-2xl bg-[#e8f0ea]/80 p-4">
+            <div className="rounded-2xl bg-[#f3eadf]/80 p-4">
               <div className="font-medium">3. Notice the social effect</div>
               <p className="mt-1 text-neutral-600">Each reply changes the mood of the conversation, not just a score.</p>
             </div>
@@ -4309,8 +4309,8 @@ export default function ChapterUIPrototype() {
   const glossaryTermSaved = glossaryTermItem ? isCollected(glossaryTermItem.id) : false;
 
   return (
-    <div className="min-h-screen bg-[#f4f1e8] bg-[radial-gradient(circle_at_top_left,_#fbfaf5_0,_#eef4ee_42%,_#e4ebe5_100%)] px-3 pb-44 pt-4 text-[#1f2723] md:p-6">
-      <div className="mx-auto mb-6 hidden max-w-[1440px] rounded-full bg-[#fbfaf5]/80 p-2 shadow-sm ring-1 ring-[#dbe5dc] md:grid md:grid-cols-5">
+    <div className="min-h-screen bg-[#f7f2ea] bg-[radial-gradient(circle_at_top_left,_#fffaf3_0,_#f7f2ea_42%,_#efe7db_100%)] px-3 pb-44 pt-4 text-[#2b241f] md:p-6">
+      <div className="mx-auto mb-6 hidden max-w-[1440px] rounded-full bg-[#fffaf3]/80 p-2 shadow-sm ring-1 ring-[#eadfce] md:grid md:grid-cols-5">
         <AppSectionButton active={currentView === 'home'} icon={House} title="Home" subtitle="Pick up practice" onClick={() => setCurrentView('home')} />
         <AppSectionButton active={currentView === 'story'} icon={Compass} title="Story" subtitle="Practice a scene" onClick={() => setCurrentView('story')} />
         <AppSectionButton active={currentView === 'favorites'} icon={Bookmark} title="Notes" subtitle="Saved phrases" onClick={() => setCurrentView('favorites')} />
@@ -4319,8 +4319,8 @@ export default function ChapterUIPrototype() {
       </div>
 
       <div className="mx-auto mb-4 max-w-7xl md:hidden">
-        <div className="relative overflow-hidden rounded-[34px] bg-[#1f2723] p-5 text-white shadow-[0_20px_50px_rgba(31,39,35,0.22)]">
-          <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-[#6fa58d]/25 blur-2xl" />
+        <div className="relative overflow-hidden rounded-[34px] bg-[#2b241f] p-5 text-white shadow-[0_20px_50px_rgba(43,36,31,0.22)]">
+          <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-[#d6a856]/25 blur-2xl" />
           <div className="absolute -bottom-16 left-8 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
 
           <div className="relative">
@@ -4328,7 +4328,7 @@ export default function ChapterUIPrototype() {
               <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">
                 Yun Mandarin Lab
               </div>
-              <div className="rounded-full bg-[#9bc3b0] px-3 py-1 text-xs font-semibold text-[#1f2723]">
+              <div className="rounded-full bg-[#d6a856] px-3 py-1 text-xs font-semibold text-[#2b241f]">
                 {currentChapter.level}
               </div>
             </div>
@@ -4343,7 +4343,7 @@ export default function ChapterUIPrototype() {
                 <span>{currentNodeIndex + 1}/{currentChapter.nodes.length}</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-white/15">
-                <div className="h-full rounded-full bg-[#9bc3b0]" style={{ width: `${chapterProgress}%` }} />
+                <div className="h-full rounded-full bg-[#d6a856]" style={{ width: `${chapterProgress}%` }} />
               </div>
             </div>
           </div>
@@ -4361,7 +4361,7 @@ export default function ChapterUIPrototype() {
             setShowFeedback(false);
             setActiveNoteId(chapters[nextIndex].grammarNotes[0].id);
           }}
-          className="w-full appearance-none rounded-[24px] border border-[#dbe5dc] bg-white/90 px-4 py-4 text-sm font-semibold text-[#1f2723] shadow-[0_10px_30px_rgba(31,39,35,0.08)] outline-none"
+          className="w-full appearance-none rounded-[24px] border border-[#eadfce] bg-white/90 px-4 py-4 text-sm font-semibold text-[#2b241f] shadow-[0_10px_30px_rgba(43,36,31,0.08)] outline-none"
         >
           {chapters.map((chapter, index) => (
             <option key={chapter.id} value={index}>
@@ -4371,11 +4371,11 @@ export default function ChapterUIPrototype() {
         </select>
       </div>
       <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-4 md:gap-6 lg:grid-cols-[240px_minmax(640px,920px)_260px] lg:items-start xl:grid-cols-[260px_minmax(720px,1020px)_280px]">
-        <Card className="hidden rounded-[28px] border-0 bg-[#fbfaf5]/82 shadow-sm ring-1 ring-[#dbe5dc] lg:block">
+        <Card className="hidden rounded-[28px] border-0 bg-[#fffaf3]/82 shadow-sm ring-1 ring-[#eadfce] lg:block">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <Badge className="rounded-full bg-[#1f2723] text-white">Yun Mandarin Lab</Badge>
-              <Badge variant="outline" className="rounded-full border-[#c8d5cc] bg-[#fbfaf5] text-[#52615a]">Practice studio</Badge>
+              <Badge className="rounded-full bg-[#2b241f] text-white">Yun Mandarin Lab</Badge>
+              <Badge variant="outline" className="rounded-full border-[#d8cbb8] bg-[#fffaf3] text-[#6f6257]">Practice studio</Badge>
             </div>
             <CardTitle className="pt-2 text-2xl">Yun Mandarin Lab</CardTitle>
             <p className="text-sm leading-6 text-neutral-600">Guided Mandarin practice for everyday scenes, natural replies, and phrases worth keeping.</p>
@@ -4399,13 +4399,13 @@ export default function ChapterUIPrototype() {
                     onClick={() => switchChapter(index)}
                     className={`w-full rounded-2xl border p-4 text-left transition ${
                       active
-                        ? 'border-[#1f2723] bg-[#1f2723] text-white shadow-sm'
-                        : 'border-transparent bg-transparent hover:bg-[#e8f0ea]'
+                        ? 'border-[#2b241f] bg-[#2b241f] text-white shadow-sm'
+                        : 'border-transparent bg-transparent hover:bg-[#f3eadf]'
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className={`rounded-2xl p-2 ${active ? 'bg-white/15' : 'bg-[#e8f0ea]'}`}>
-                        <Icon className={`h-5 w-5 ${active ? 'text-white' : 'text-[#52615a]'}`} />
+                      <div className={`rounded-2xl p-2 ${active ? 'bg-white/15' : 'bg-[#f3eadf]'}`}>
+                        <Icon className={`h-5 w-5 ${active ? 'text-white' : 'text-[#6f6257]'}`} />
                       </div>
                       <div className="min-w-0">
                         <div className={`text-sm ${active ? 'text-white/75' : 'text-neutral-500'}`}>{chapter.label}</div>
@@ -4418,7 +4418,7 @@ export default function ChapterUIPrototype() {
               })}
             </div>
 
-            <div className="rounded-2xl bg-[#e8f0ea]/80 p-4">
+            <div className="rounded-2xl bg-[#f3eadf]/80 p-4">
               <div className="mb-2 flex items-center gap-2 text-sm font-medium">
                 <Heart className="h-4 w-4" /> Social comfort
               </div>
@@ -4426,7 +4426,7 @@ export default function ChapterUIPrototype() {
               <p className="mt-2 text-xs text-neutral-500">How polite, safe, and smooth your reply feels in the situation.</p>
             </div>
 
-            <div className="rounded-2xl bg-[#e8f0ea]/80 p-4">
+            <div className="rounded-2xl bg-[#f3eadf]/80 p-4">
               <div className="mb-2 flex items-center gap-2 text-sm font-medium">
                 <Sparkles className="h-4 w-4" /> Naturalness mastery
               </div>
@@ -4434,7 +4434,7 @@ export default function ChapterUIPrototype() {
               <p className="mt-2 text-xs text-neutral-500">How close your Chinese is to something a real person would naturally say.</p>
             </div>
 
-            <div className="rounded-2xl border border-dashed border-[#c8d5cc] bg-[#fbfaf5]/70 p-4">
+            <div className="rounded-2xl border border-dashed border-[#d8cbb8] bg-[#fffaf3]/70 p-4">
               <div className="mb-2 flex items-center gap-2 text-sm font-medium">
                 <BookOpen className="h-4 w-4" /> Language notes
               </div>
@@ -4443,13 +4443,13 @@ export default function ChapterUIPrototype() {
                   <p className="text-neutral-500">Save phrases you want to hear again.</p>
                 ) : (
                   collected.slice(-5).reverse().map((item) => (
-                    <div key={item.id} className="rounded-xl bg-[#e8f0ea]/80 p-2">{item.expression}</div>
+                    <div key={item.id} className="rounded-xl bg-[#f3eadf]/80 p-2">{item.expression}</div>
                   ))
                 )}
               </div>
             </div>
 
-            <div className="rounded-2xl bg-[#1f2723] p-4 text-sm text-white">
+            <div className="rounded-2xl bg-[#2b241f] p-4 text-sm text-white">
               <div className="font-semibold">Yun Mandarin Lab</div>
               <div className="mt-1 text-white/80">Mandarin practice for real conversations.</div>
               <div className="mt-2 text-white/70">Yun Mandarin Lab</div>
@@ -4467,7 +4467,7 @@ export default function ChapterUIPrototype() {
       </div>
 
       <div className="fixed inset-x-0 bottom-3 z-40 px-3 md:hidden">
-        <div className="mx-auto flex max-w-md gap-1 rounded-[30px] border border-[#dbe5dc] bg-[#fbfaf5]/95 p-2 shadow-[0_18px_45px_rgba(31,39,35,0.18)] backdrop-blur">
+        <div className="mx-auto flex max-w-md gap-1 rounded-[30px] border border-[#eadfce] bg-[#fffaf3]/95 p-2 shadow-[0_18px_45px_rgba(43,36,31,0.18)] backdrop-blur">
           <MobileTabButton active={currentView === 'home'} icon={House} label="Home" onClick={() => setCurrentView('home')} />
           <MobileTabButton active={currentView === 'story'} icon={Compass} label="Story" onClick={() => setCurrentView('story')} />
           <MobileTabButton active={currentView === 'favorites'} icon={Bookmark} label="Saved" onClick={() => setCurrentView('favorites')} />
@@ -4488,12 +4488,12 @@ export default function ChapterUIPrototype() {
               initial={{ y: 24, opacity: 0, scale: 0.98 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 12, opacity: 0, scale: 0.98 }}
-              className="max-h-[88vh] w-full overflow-y-auto rounded-t-[30px] bg-[#fbfaf5] p-4 shadow-[0_-18px_50px_rgba(31,39,35,0.24)] sm:p-5 md:max-w-2xl md:rounded-[30px] md:p-6 md:shadow-2xl"
+              className="max-h-[88vh] w-full overflow-y-auto rounded-t-[30px] bg-[#fffaf3] p-4 shadow-[0_-18px_50px_rgba(43,36,31,0.24)] sm:p-5 md:max-w-2xl md:rounded-[30px] md:p-6 md:shadow-2xl"
             >
               <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[#d8c9b8] md:hidden" />
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <div className="mb-2 text-sm font-medium text-[#3d6b59]">Teacher feedback</div>
+                  <div className="mb-2 text-sm font-medium text-[#8a6a28]">Teacher feedback</div>
                   <div className="mb-2 flex items-center gap-2">
                     {selectedOption.rating === 'Natural' ? (
                       <CheckCircle2 className="h-5 w-5 text-emerald-600" />
@@ -4503,8 +4503,8 @@ export default function ChapterUIPrototype() {
                     <RatingBadge rating={selectedOption.rating} />
                   </div>
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <h3 className={`${fontScale === 'sm' ? 'text-xl sm:text-2xl' : fontScale === 'lg' ? 'text-3xl sm:text-4xl' : 'text-2xl sm:text-3xl'} font-semibold leading-tight text-[#1f2723]`}>{selectedOption.zh}</h3>
-                    <div className="flex shrink-0 items-center gap-2 self-start rounded-full bg-[#e8f0ea] px-3 py-1.5 text-xs font-medium text-[#52615a]">
+                    <h3 className={`${fontScale === 'sm' ? 'text-xl sm:text-2xl' : fontScale === 'lg' ? 'text-3xl sm:text-4xl' : 'text-2xl sm:text-3xl'} font-semibold leading-tight text-[#2b241f]`}>{selectedOption.zh}</h3>
+                    <div className="flex shrink-0 items-center gap-2 self-start rounded-full bg-[#f3eadf] px-3 py-1.5 text-xs font-medium text-[#6f6257]">
                       <span className="hidden sm:inline">Hear it</span>
                       <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.option.${selectedOption.rating.toLowerCase()}`} text={selectedOption.zh} />
                     </div>
@@ -4515,11 +4515,11 @@ export default function ChapterUIPrototype() {
               </div>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <div className="border-l-2 border-[#4f7f69] bg-white/60 py-3 pl-4 pr-3">
+                <div className="border-l-2 border-[#d6a856] bg-white/60 py-3 pl-4 pr-3">
                   <div className="mb-2 text-sm font-medium">Teacher note</div>
                   <p className="text-sm leading-6 text-neutral-700">{selectedOption.explanation}</p>
                 </div>
-                <div className="border-l-2 border-[#4f7f69] bg-white/60 py-3 pl-4 pr-3">
+                <div className="border-l-2 border-[#d6a856] bg-white/60 py-3 pl-4 pr-3">
                   <div className="mb-2 text-sm font-medium">How it lands</div>
                   <p className="text-sm text-neutral-700">
                     Social comfort {selectedOption.relationship >= 0 ? '+' : ''}{selectedOption.relationship} - Naturalness +{selectedOption.score * 8}
@@ -4537,7 +4537,7 @@ export default function ChapterUIPrototype() {
               </div>
 
               {selectedOption.correction && (
-                <div className="mt-4 rounded-[24px] border border-dashed border-[#c8d5cc] bg-white/55 p-4">
+                <div className="mt-4 rounded-[24px] border border-dashed border-[#d8cbb8] bg-white/55 p-4">
                   <div className="mb-2 flex items-center justify-between gap-2 text-sm font-medium">
                   <span>Try this more natural version</span>
                   <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.correction.${selectedOption.rating.toLowerCase()}`} text={selectedOption.correction} small />
@@ -4578,7 +4578,7 @@ export default function ChapterUIPrototype() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 20, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="max-h-[88vh] w-full overflow-y-auto rounded-t-[30px] bg-[#fbfaf5] p-4 shadow-[0_-18px_50px_rgba(31,39,35,0.22)] sm:p-5 md:max-w-3xl md:rounded-[28px] md:bg-white md:p-6 md:shadow-2xl"
+              className="max-h-[88vh] w-full overflow-y-auto rounded-t-[30px] bg-[#fffaf3] p-4 shadow-[0_-18px_50px_rgba(43,36,31,0.22)] sm:p-5 md:max-w-3xl md:rounded-[28px] md:bg-white md:p-6 md:shadow-2xl"
             >
               <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[#d8c9b8] md:hidden" />
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -4613,7 +4613,7 @@ export default function ChapterUIPrototype() {
               
 
               {glossaryShowEnglish && (
-                <div className="mt-5 rounded-2xl bg-[#e8f0ea]/70 p-4 text-sm leading-6 text-neutral-700">
+                <div className="mt-5 rounded-2xl bg-[#f3eadf]/70 p-4 text-sm leading-6 text-neutral-700">
                   {selectedGlossary.explanation}
                 </div>
               )}
