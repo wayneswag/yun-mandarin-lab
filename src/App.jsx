@@ -101,6 +101,148 @@ const CHAPTER6_TIER_REWARDS = {
   },
 };
 
+const CHAPTER6_OPTION_META = {
+  Natural: { id: 'A', score: 3, relationship: 14 },
+  Stiff: { id: 'B', score: 2, relationship: 3 },
+  Awkward: { id: 'C', score: 1, relationship: -5 },
+  Incorrect: { id: 'D', score: 0, relationship: -10 },
+};
+
+function makeChapter6BranchOptions(entries) {
+  return ['Natural', 'Stiff', 'Awkward', 'Incorrect'].map((rating) => ({
+    ...CHAPTER6_OPTION_META[rating],
+    ...entries[rating],
+    rating,
+    glossary: entries[rating].glossary || [],
+  }));
+}
+
+const CHAPTER6_BRANCH_NODES = {
+  decision4: {
+    high: {
+      branchKey: 'understands',
+      npcLineZh: '我明白了。我现在帮你给咖啡馆打电话。',
+      npcLinePy: 'Wǒ míngbai le. Wǒ xiànzài bāng nǐ gěi kāfēiguǎn dǎ diànhuà.',
+      npcLineEn: 'I understand. I will call the café for you now.',
+      options: makeChapter6BranchOptions({
+        Natural: { zh: '太好了，麻烦你帮我打电话。我可以说明钱包的样子。', py: 'Tài hǎo le, máfan nǐ bāng wǒ dǎ diànhuà. Wǒ kěyǐ shuōmíng qiánbāo de yàngzi.', en: 'Great, please help me call. I can describe the wallet.', explanation: 'Natural and cooperative. It accepts the offer and prepares useful information.', correction: null, glossary: ['钱包'] },
+        Stiff: { zh: '好，请打电话。', py: 'Hǎo, qǐng dǎ diànhuà.', en: 'Okay, please call.', explanation: 'Correct but terse. It accepts the help without adding useful detail.', correction: '好，麻烦你帮我打电话。' },
+        Awkward: { zh: '好，你电话咖啡馆，问钱包。', py: 'Hǎo, nǐ diànhuà kāfēiguǎn, wèn qiánbāo.', en: 'Okay, you phone café, ask wallet.', explanation: 'The intended action is understandable, but the verb pattern is unnatural and sounds demanding.', correction: '好，麻烦你给咖啡馆打电话问一下钱包。', glossary: ['钱包'] },
+        Incorrect: { zh: '不用，我要给手机充电。', py: 'Bú yòng, wǒ yào gěi shǒujī chōngdiàn.', en: 'No need. I want to charge my phone.', explanation: 'This rejects the action that could recover the wallet and shifts away from the main problem.', correction: '麻烦你帮我给咖啡馆打电话。', glossary: ['手机', '充电'] },
+      }),
+    },
+    medium: {
+      branchKey: 'confirms',
+      npcLineZh: '你是说钱包可能落在咖啡馆了，对吗？',
+      npcLinePy: 'Nǐ shì shuō qiánbāo kěnéng là zài kāfēiguǎn le, duì ma?',
+      npcLineEn: 'You mean the wallet may have been left at the café, right?',
+    },
+    low: {
+      branchKey: 'misunderstands',
+      npcLineZh: '等一下，你丢的是手机还是钱包？',
+      npcLinePy: 'Děng yíxià, nǐ diū de shì shǒujī háishi qiánbāo?',
+      npcLineEn: 'Wait, did you lose your phone or your wallet?',
+      options: makeChapter6BranchOptions({
+        Natural: { zh: '丢的是钱包。手机还在，只是快没电了。', py: 'Diū de shì qiánbāo. Shǒujī hái zài, zhǐshì kuài méi diàn le.', en: 'It is the wallet that is missing. I still have my phone; it is just nearly out of battery.', explanation: 'Natural repair. It clearly separates the missing wallet from the low phone battery.', correction: null, glossary: ['钱包', '手机', '没电了'] },
+        Stiff: { zh: '钱包丢了，手机还在。', py: 'Qiánbāo diū le, shǒujī hái zài.', en: 'The wallet is lost; I still have the phone.', explanation: 'Correct and clear, though brief and less reassuring.', correction: '丢的是钱包，手机还在。', glossary: ['钱包', '手机'] },
+        Awkward: { zh: '不是手机丢，是钱包没有。', py: 'Bú shì shǒujī diū, shì qiánbāo méiyǒu.', en: 'Not phone lost, it is wallet not have.', explanation: 'The contrast is recoverable, but the structure is unnatural.', correction: '不是手机丢了，是钱包丢了。', glossary: ['钱包', '手机'] },
+        Incorrect: { zh: '对，我的手机丢了。', py: 'Duì, wǒ de shǒujī diū le.', en: 'Yes, I lost my phone.', explanation: 'This confirms the wrong item and sends the staff down the wrong path.', correction: '不是手机，是我的钱包丢了。', glossary: ['手机', '钱包'] },
+      }),
+    },
+  },
+  decision5: {
+    strong: {
+      branchKey: 'proactive-help',
+      npcLineZh: '咖啡馆找到你的钱包了。我已经请他们保管好，也可以帮你安排去取。',
+      npcLinePy: 'Kāfēiguǎn zhǎo dào nǐ de qiánbāo le. Wǒ yǐjīng qǐng tāmen bǎoguǎn hǎo, yě kěyǐ bāng nǐ ānpái qù qǔ.',
+      npcLineEn: 'The café found your wallet. I asked them to keep it safe, and I can help arrange collection.',
+      options: makeChapter6BranchOptions({
+        Natural: { zh: '太感谢了！麻烦你帮我安排一下，我的手机可能撑不了多久。', py: 'Tài gǎnxiè le! Máfan nǐ bāng wǒ ānpái yíxià, wǒ de shǒujī kěnéng chēng bù liǎo duōjiǔ.', en: 'Thank you so much! Please help me arrange it; my phone may not last much longer.', explanation: 'Natural and practical. It appreciates the extra help and explains the time pressure.', correction: null, glossary: ['手机'] },
+        Stiff: { zh: '好，帮我安排。', py: 'Hǎo, bāng wǒ ānpái.', en: 'Okay, arrange it for me.', explanation: 'The request is clear but sounds abrupt after proactive help.', correction: '好，谢谢。麻烦你帮我安排一下。' },
+        Awkward: { zh: '谢谢，你安排我去钱包。', py: 'Xièxie, nǐ ānpái wǒ qù qiánbāo.', en: 'Thanks, you arrange me go wallet.', explanation: 'The gratitude is present, but the action is expressed unnaturally.', correction: '谢谢，麻烦你帮我安排去取钱包。', glossary: ['钱包'] },
+        Incorrect: { zh: '不用找了，我要买新钱包。', py: 'Bú yòng zhǎo le, wǒ yào mǎi xīn qiánbāo.', en: 'Stop looking; I will buy a new wallet.', explanation: 'This abandons the confirmed recovery and rejects the offered help.', correction: '麻烦你帮我安排去取钱包。', glossary: ['钱包'] },
+      }),
+    },
+    mixed: {
+      branchKey: 'verification-needed',
+      npcLineZh: '咖啡馆找到一个黑色钱包，不过需要你确认里面的东西。',
+      npcLinePy: 'Kāfēiguǎn zhǎo dào yí ge hēisè qiánbāo, búguò xūyào nǐ quèrèn lǐmiàn de dōngxi.',
+      npcLineEn: 'The café found a black wallet, but they need you to confirm what is inside.',
+    },
+    weak: {
+      branchKey: 'procedural-help',
+      npcLineZh: '现在还不能确认丢了什么。请你先填写失物登记表。',
+      npcLinePy: 'Xiànzài hái bù néng quèrèn diū le shénme. Qǐng nǐ xiān tiánxiě shīwù dēngjìbiǎo.',
+      npcLineEn: 'We still cannot confirm what was lost. Please complete a lost-property form first.',
+      options: makeChapter6BranchOptions({
+        Natural: { zh: '好的，我来填写。请问需要写哪些信息？', py: 'Hǎo de, wǒ lái tiánxiě. Qǐngwèn xūyào xiě nǎxiē xìnxī?', en: 'Okay, I will fill it out. What information should I include?', explanation: 'Natural and cooperative. It accepts the procedure and asks for a clear next step.', correction: null },
+        Stiff: { zh: '好，给我表格。', py: 'Hǎo, gěi wǒ biǎogé.', en: 'Okay, give me the form.', explanation: 'Understandable but blunt in a formal service interaction.', correction: '好的，请给我一张表格。' },
+        Awkward: { zh: '我写丢东西的纸。', py: 'Wǒ xiě diū dōngxi de zhǐ.', en: 'I write lost thing paper.', explanation: 'The listener can infer the intent, but the form name and structure are unnatural.', correction: '我来填写失物登记表。' },
+        Incorrect: { zh: '咖啡馆已经把钱包给我了。', py: 'Kāfēiguǎn yǐjīng bǎ qiánbāo gěi wǒ le.', en: 'The café already gave me the wallet.', explanation: 'This claims a result that has not happened and prevents accurate assistance.', correction: '请给我失物登记表。', glossary: ['钱包'] },
+      }),
+    },
+  },
+  decision6: {
+    strong: {
+      branchKey: 'smooth-close',
+      npcLineZh: '钱包已经确认是你的。往前走就能取，我再带你去充电。',
+      npcLinePy: 'Qiánbāo yǐjīng quèrèn shì nǐ de. Wǎng qián zǒu jiù néng qǔ, wǒ zài dài nǐ qù chōngdiàn.',
+      npcLineEn: 'The wallet is confirmed as yours. You can collect it just ahead, and I will also show you where to charge.',
+      options: makeChapter6BranchOptions({
+        Natural: { zh: '太好了，真的谢谢你帮了我这么多！', py: 'Tài hǎo le, zhēn de xièxie nǐ bāng le wǒ zhème duō!', en: 'That is wonderful. Thank you so much for all your help!', explanation: 'Natural and warm. It recognizes the staff member’s extra effort and closes smoothly.', correction: null },
+        Stiff: { zh: '好，谢谢。', py: 'Hǎo, xièxie.', en: 'Okay, thanks.', explanation: 'Correct but brief after receiving substantial help.', correction: '太好了，真的谢谢你！' },
+        Awkward: { zh: '很好，你帮助我很多谢谢。', py: 'Hěn hǎo, nǐ bāngzhù wǒ hěn duō xièxie.', en: 'Very good, you help me much thanks.', explanation: 'The appreciation is clear, but the sentence is not natural Chinese.', correction: '真的谢谢你帮了我这么多。' },
+        Incorrect: { zh: '你的钱包找到了吗？', py: 'Nǐ de qiánbāo zhǎo dào le ma?', en: 'Was your wallet found?', explanation: 'This switches the missing wallet to the staff member and does not close your interaction.', correction: '太好了，真的谢谢你！', glossary: ['钱包'] },
+      }),
+    },
+    mixed: {
+      branchKey: 'clarified-close',
+      npcLineZh: '信息终于对上了。你可以去咖啡馆确认并领取钱包。',
+      npcLinePy: 'Xìnxī zhōngyú duì shàng le. Nǐ kěyǐ qù kāfēiguǎn quèrèn bìng lǐngqǔ qiánbāo.',
+      npcLineEn: 'The information finally matches. You can go to the café to verify and collect the wallet.',
+      options: makeChapter6BranchOptions({
+        Natural: { zh: '明白了，谢谢你耐心帮我确认。', py: 'Míngbai le, xièxie nǐ nàixīn bāng wǒ quèrèn.', en: 'I understand. Thank you for patiently helping me confirm it.', explanation: 'Natural and appropriate. It acknowledges the clarification effort.', correction: null },
+        Stiff: { zh: '知道了，谢谢。', py: 'Zhīdào le, xièxie.', en: 'Got it, thanks.', explanation: 'Correct but emotionally flat after a longer clarification.', correction: '明白了，谢谢你帮我确认。' },
+        Awkward: { zh: '现在知道，我去确认钱包。', py: 'Xiànzài zhīdào, wǒ qù quèrèn qiánbāo.', en: 'Now know, I go confirm wallet.', explanation: 'The next step is understandable, but the phrasing is incomplete.', correction: '现在明白了，我去确认钱包。', glossary: ['钱包'] },
+        Incorrect: { zh: '不用确认，那不是我的钱包。', py: 'Bú yòng quèrèn, nà bú shì wǒ de qiánbāo.', en: 'No need to verify; that is not my wallet.', explanation: 'This rejects the possible match before checking it.', correction: '好的，我去咖啡馆确认一下。', glossary: ['钱包'] },
+      }),
+    },
+    weak: {
+      branchKey: 'delayed-close',
+      npcLineZh: '请先把表格填好。我们确认以后再通知你。',
+      npcLinePy: 'Qǐng xiān bǎ biǎogé tián hǎo. Wǒmen quèrèn yǐhòu zài tōngzhī nǐ.',
+      npcLineEn: 'Please complete the form first. We will contact you after we confirm the details.',
+      options: makeChapter6BranchOptions({
+        Natural: { zh: '好的，我明白了。谢谢你，我会留下可以联系我的号码。', py: 'Hǎo de, wǒ míngbai le. Xièxie nǐ, wǒ huì liúxià kěyǐ liánxì wǒ de hàomǎ.', en: 'Okay, I understand. Thank you; I will leave a number where you can reach me.', explanation: 'Natural and practical. It accepts the delay and provides a useful next step.', correction: null },
+        Stiff: { zh: '好，我等通知。', py: 'Hǎo, wǒ děng tōngzhī.', en: 'Okay, I will wait for notification.', explanation: 'Correct but minimal and procedural.', correction: '好的，谢谢。我会等你们的通知。' },
+        Awkward: { zh: '好，我等你告诉以后。', py: 'Hǎo, wǒ děng nǐ gàosu yǐhòu.', en: 'Okay, I wait you tell later.', explanation: 'The intent is understandable, but the notification phrasing is unnatural.', correction: '好的，我等你们以后通知我。' },
+        Incorrect: { zh: '不用了，钱包已经找到了。', py: 'Bú yòng le, qiánbāo yǐjīng zhǎo dào le.', en: 'No need; the wallet has already been found.', explanation: 'This claims the unresolved problem is already solved.', correction: '好的，我先填写表格。', glossary: ['钱包'] },
+      }),
+    },
+  },
+};
+
+const CHAPTER6_ENDINGS = {
+  smooth: {
+    label: 'Smooth resolution',
+    zh: '工作人员很快明白了。钱包顺利找回，也带你去了充电的地方。',
+    py: 'Gōngzuò rényuán hěn kuài míngbai le. Qiánbāo shùnlì zhǎo huí, yě dài nǐ qù le chōngdiàn de dìfang.',
+    en: 'The staff understood quickly. Your wallet was recovered, and they also showed you where to charge your phone.',
+  },
+  clarified: {
+    label: 'Solved after clarification',
+    zh: '经过几次确认，钱包终于找到了，问题也解决了。',
+    py: 'Jīngguò jǐ cì quèrèn, qiánbāo zhōngyú zhǎo dào le, wèntí yě jiějué le.',
+    en: 'After several clarifications, the wallet was identified and the problem was solved.',
+  },
+  delayed: {
+    label: 'Help delayed',
+    zh: '工作人员还不能确认情况。你需要填写失物登记表并等待通知。',
+    py: 'Gōngzuò rényuán hái bù néng quèrèn qíngkuàng. Nǐ xūyào tiánxiě shīwù dēngjìbiǎo bìng děngdài tōngzhī.',
+    en: 'The staff still cannot confirm the situation. You need to complete a lost-property form and wait for an update.',
+  },
+};
+
 function clampChapter6Metric(value) {
   return Math.max(0, Math.min(100, value));
 }
@@ -2362,7 +2504,7 @@ const chapters = [
     nodes: [
       {
         id: 1,
-        mission: 'Explain that your phone is out of battery and ask where you can charge it.',
+        mission: 'Explain that your wallet is missing, your phone is nearly out of battery, and ask for help.',
         npc: 'Staff',
         npcLineZh: '你好，你看起来很着急。需要帮忙吗？',
         npcLinePy: 'Nǐ hǎo, nǐ kàn qǐlái hěn zháojí. Xūyào bāngmáng ma?',
@@ -2371,170 +2513,215 @@ const chapters = [
         options: [
           {
             id: 'A',
-            zh: '不好意思，我的手机没电了。这里可以充电吗？',
-            py: 'Bù hǎoyìsi, wǒ de shǒujī méi diàn le. Zhèlǐ kěyǐ chōngdiàn ma?',
-            en: 'Sorry, my phone is out of battery. Can I charge here?',
+            zh: '不好意思，我的钱包找不到了，手机也快没电了。可以帮我一下吗？',
+            py: 'Bù hǎoyìsi, wǒ de qiánbāo zhǎo bú dào le, shǒujī yě kuài méi diàn le. Kěyǐ bāng wǒ yíxià ma?',
+            en: 'Excuse me, I cannot find my wallet, and my phone is nearly out of battery. Could you help me?',
             rating: 'Natural',
             score: 3,
-            relationship: 12,
-            explanation: 'Natural and polite. It explains the problem clearly and asks for help in a practical way.',
+            relationship: 14,
+            explanation: 'Natural and considerate. It explains both problems clearly and gives the staff a polite next step.',
             correction: null,
-            glossary: ['手机', '没电了', '充电'],
+            glossary: ['钱包', '找不到', '手机', '没电了', '帮我一下'],
           },
           {
             id: 'B',
-            zh: '我的手机没电了。',
-            py: 'Wǒ de shǒujī méi diàn le.',
-            en: 'My phone is out of battery.',
+            zh: '我的钱包找不到了，手机快没电了。',
+            py: 'Wǒ de qiánbāo zhǎo bú dào le, shǒujī kuài méi diàn le.',
+            en: 'I cannot find my wallet, and my phone is nearly out of battery.',
             rating: 'Stiff',
             score: 2,
             relationship: 3,
-            explanation: 'Correct, but it only explains the problem. Asking whether you can charge it would move the conversation forward.',
-            correction: '我的手机没电了。这里可以充电吗？',
-            glossary: ['手机', '没电了'],
+            explanation: 'Correct and clear, but it leaves the staff to guess what help you want.',
+            correction: '我的钱包找不到了，手机也快没电了。可以帮我一下吗？',
+            glossary: ['钱包', '找不到', '手机', '没电了'],
           },
           {
             id: 'C',
-            zh: '我手机没有电，可以电这里吗？',
-            py: 'Wǒ shǒujī méiyǒu diàn, kěyǐ diàn zhèlǐ ma?',
-            en: 'My phone has no electricity, can electricity here?',
+            zh: '我的钱包没有找到，手机也没有电快了。',
+            py: 'Wǒ de qiánbāo méiyǒu zhǎodào, shǒujī yě méiyǒu diàn kuài le.',
+            en: 'My wallet has not found, and my phone also no battery soon.',
             rating: 'Awkward',
             score: 1,
             relationship: -5,
-            explanation: 'The meaning is guessable, but 充电 is the correct verb for charging a phone.',
-            correction: '我的手机没电了。这里可以充电吗？',
-            glossary: ['手机', '充电'],
+            explanation: 'The two problems are guessable, but the word order and result phrasing are unnatural.',
+            correction: '我的钱包找不到了，手机也快没电了。可以帮我一下吗？',
+            glossary: ['钱包', '手机'],
           },
           {
             id: 'D',
-            zh: '你手机没电了吗？',
-            py: 'Nǐ shǒujī méi diàn le ma?',
-            en: 'Is your phone out of battery?',
+            zh: '你的钱包和手机在哪儿？',
+            py: 'Nǐ de qiánbāo hé shǒujī zài nǎr?',
+            en: 'Where are your wallet and phone?',
             rating: 'Incorrect',
             score: 0,
             relationship: -10,
-            explanation: 'This asks about the staff member’s phone. You need to explain your own problem.',
-            correction: '我的手机没电了。这里可以充电吗？',
-            glossary: ['手机', '没电了'],
+            explanation: 'This asks about the staff member’s belongings instead of explaining your own problem.',
+            correction: '我的钱包找不到了，手机也快没电了。可以帮我一下吗？',
+            glossary: ['钱包', '手机'],
           },
         ],
       },
       {
         id: 2,
-        mission: 'Say that you cannot find your wallet and ask for help.',
+        mission: 'Explain when and where you last used the wallet.',
         npc: 'Staff',
-        npcLineZh: '你在找什么？我可以帮你看看。',
-        npcLinePy: 'Nǐ zài zhǎo shénme? Wǒ kěyǐ bāng nǐ kànkan.',
-        npcLineEn: 'What are you looking for? I can help you take a look.',
+        npcLineZh: '你最后一次看到钱包是什么时候？在哪里？',
+        npcLinePy: 'Nǐ zuìhòu yí cì kàn dào qiánbāo shì shénme shíhou? Zài nǎli?',
+        npcLineEn: 'When and where did you last see your wallet?',
         npcGlossary: [],
         options: [
           {
             id: 'A',
-            zh: '我找不到钱包，可以帮我一下吗？',
-            py: 'Wǒ zhǎo bú dào qiánbāo, kěyǐ bāng wǒ yíxià ma?',
-            en: 'I cannot find my wallet. Could you help me for a moment?',
+            zh: '大概半小时前，我在那边的咖啡馆买过东西。',
+            py: 'Dàgài bàn ge xiǎoshí qián, wǒ zài nàbiān de kāfēiguǎn mǎi guo dōngxi.',
+            en: 'About half an hour ago, I bought something at the café over there.',
             rating: 'Natural',
             score: 3,
             relationship: 12,
-            explanation: 'Natural and clear. It explains what you cannot find and asks for help politely.',
+            explanation: 'Natural and specific. It gives both a useful time and location.',
             correction: null,
-            glossary: ['找不到', '钱包', '帮我一下'],
+            glossary: [],
           },
           {
             id: 'B',
-            zh: '我找不到钱包。',
-            py: 'Wǒ zhǎo bú dào qiánbāo.',
-            en: 'I cannot find my wallet.',
+            zh: '半小时前，在咖啡馆。',
+            py: 'Bàn ge xiǎoshí qián, zài kāfēiguǎn.',
+            en: 'Half an hour ago, at the café.',
             rating: 'Stiff',
             score: 2,
             relationship: 3,
-            explanation: 'Correct, but incomplete. It explains the problem but does not clearly ask for help.',
-            correction: '我找不到钱包，可以帮我一下吗？',
-            glossary: ['找不到', '钱包'],
+            explanation: 'Understandable and useful, but it is a clipped answer rather than a complete sentence.',
+            correction: '大概半小时前，我在那边的咖啡馆买过东西。',
+            glossary: [],
           },
           {
             id: 'C',
-            zh: '我的钱包没有找到，你帮我。',
-            py: 'Wǒ de qiánbāo méiyǒu zhǎodào, nǐ bāng wǒ.',
-            en: 'My wallet not found, you help me.',
+            zh: '我看钱包在咖啡馆半小时前。',
+            py: 'Wǒ kàn qiánbāo zài kāfēiguǎn bàn ge xiǎoshí qián.',
+            en: 'I see wallet at café half an hour ago.',
             rating: 'Awkward',
             score: 1,
             relationship: -5,
-            explanation: 'The meaning is understandable, but it sounds blunt and English-influenced.',
-            correction: '我找不到钱包，可以帮我一下吗？',
+            explanation: 'The listener can recover the meaning, but the time and location are arranged unnaturally.',
+            correction: '半小时前，我在咖啡馆看到过钱包。',
             glossary: ['钱包'],
           },
           {
             id: 'D',
-            zh: '你的钱包在哪儿？',
-            py: 'Nǐ de qiánbāo zài nǎr?',
-            en: 'Where is your wallet?',
+            zh: '我现在想喝咖啡。',
+            py: 'Wǒ xiànzài xiǎng hē kāfēi.',
+            en: 'I want to drink coffee now.',
             rating: 'Incorrect',
             score: 0,
             relationship: -10,
-            explanation: 'This asks about the other person’s wallet. You need to explain that you cannot find your wallet.',
-            correction: '我找不到钱包，可以帮我一下吗？',
-            glossary: ['钱包'],
+            explanation: 'This mentions coffee but does not answer when or where you last saw the wallet.',
+            correction: '半小时前，我在咖啡馆用过钱包。',
+            glossary: [],
           },
         ],
       },
       {
         id: 3,
-        mission: 'Thank the person warmly after they help you find your wallet.',
+        mission: 'Describe the wallet clearly enough for the staff to identify it.',
         npc: 'Staff',
-        npcLineZh: '找到了，在这里。是你的钱包吗？',
-        npcLinePy: 'Zhǎo dào le, zài zhèlǐ. Shì nǐ de qiánbāo ma?',
-        npcLineEn: 'Found it. It is here. Is this your wallet?',
+        npcLineZh: '钱包是什么样的？里面有什么？',
+        npcLinePy: 'Qiánbāo shì shénme yàng de? Lǐmiàn yǒu shénme?',
+        npcLineEn: 'What does the wallet look like? What is inside it?',
         npcGlossary: ['钱包'],
         options: [
           {
             id: 'A',
-            zh: '是我的！太谢谢你了，麻烦你了！',
-            py: 'Shì wǒ de! Tài xièxie nǐ le, máfan nǐ le!',
-            en: 'It is mine! Thank you so much. Sorry to trouble you!',
+            zh: '是一个小黑色钱包，里面有银行卡和身份证。',
+            py: 'Shì yí ge xiǎo hēisè qiánbāo, lǐmiàn yǒu yínhángkǎ hé shēnfènzhèng.',
+            en: 'It is a small black wallet with a bank card and ID inside.',
             rating: 'Natural',
             score: 3,
-            relationship: 13,
-            explanation: 'Natural and warm. You confirm it is yours and thank the person strongly after they helped you.',
+            relationship: 12,
+            explanation: 'Natural and precise. The color, size, and contents make the wallet easy to identify.',
             correction: null,
-            glossary: ['太谢谢了', '麻烦你了'],
+            glossary: ['钱包'],
           },
           {
             id: 'B',
-            zh: '是我的，谢谢。',
-            py: 'Shì wǒ de, xièxie.',
-            en: 'It is mine, thanks.',
+            zh: '黑色的，里面有银行卡。',
+            py: 'Hēisè de, lǐmiàn yǒu yínhángkǎ.',
+            en: 'Black, with a bank card inside.',
             rating: 'Stiff',
             score: 2,
             relationship: 3,
-            explanation: 'Correct, but a little short after someone helped you. A warmer thank-you sounds better.',
-            correction: '是我的！太谢谢你了，麻烦你了！',
+            explanation: 'Correct and useful, but brief and less complete than the staff requested.',
+            correction: '是一个小黑色钱包，里面有银行卡。',
             glossary: [],
           },
           {
             id: 'C',
-            zh: '是我钱包，你很好谢谢。',
-            py: 'Shì wǒ qiánbāo, nǐ hěn hǎo xièxie.',
-            en: 'Is my wallet, you are very good thanks.',
+            zh: '钱包黑色小，银行卡在里面有。',
+            py: 'Qiánbāo hēisè xiǎo, yínhángkǎ zài lǐmiàn yǒu.',
+            en: 'Wallet black small, bank card inside has.',
             rating: 'Awkward',
             score: 1,
             relationship: -5,
-            explanation: 'The listener can guess your feeling, but the sentence is not natural Chinese.',
-            correction: '是我的！太谢谢你了，麻烦你了！',
+            explanation: 'The details are present, but the word order makes identification harder.',
+            correction: '钱包是黑色的，里面有银行卡。',
             glossary: ['钱包'],
           },
           {
             id: 'D',
-            zh: '你找不到钱包吗？',
-            py: 'Nǐ zhǎo bú dào qiánbāo ma?',
-            en: 'Can’t you find your wallet?',
+            zh: '我的手机是白色的。',
+            py: 'Wǒ de shǒujī shì báisè de.',
+            en: 'My phone is white.',
             rating: 'Incorrect',
             score: 0,
             relationship: -10,
-            explanation: 'This asks the staff member a new question instead of confirming and thanking them.',
-            correction: '是我的！太谢谢你了，麻烦你了！',
-            glossary: ['找不到', '钱包'],
+            explanation: 'This describes the phone instead of the missing wallet.',
+            correction: '我的钱包是黑色的，里面有银行卡。',
+            glossary: ['手机', '钱包'],
           },
+        ],
+      },
+      {
+        id: 4,
+        mission: 'Confirm that the café is the likely location and ask the staff to contact it.',
+        npc: 'Staff',
+        npcLineZh: '你是说钱包可能落在咖啡馆了，对吗？',
+        npcLinePy: 'Nǐ shì shuō qiánbāo kěnéng là zài kāfēiguǎn le, duì ma?',
+        npcLineEn: 'You mean the wallet may have been left at the café, right?',
+        npcGlossary: ['钱包'],
+        options: [
+          { id: 'A', zh: '对，我可能把钱包落在那里了。可以帮我联系一下咖啡馆吗？', py: 'Duì, wǒ kěnéng bǎ qiánbāo là zài nàli le. Kěyǐ bāng wǒ liánxì yíxià kāfēiguǎn ma?', en: 'Yes, I may have left it there. Could you help me contact the café?', rating: 'Natural', score: 3, relationship: 14, explanation: 'Natural and cooperative. It confirms the likely location and asks for a practical next step.', correction: null, glossary: ['钱包'] },
+          { id: 'B', zh: '对，可能在咖啡馆。', py: 'Duì, kěnéng zài kāfēiguǎn.', en: 'Yes, it may be at the café.', rating: 'Stiff', score: 2, relationship: 3, explanation: 'Correct, but the staff still has to decide what action to take.', correction: '对，可能在咖啡馆。可以帮我联系一下吗？', glossary: [] },
+          { id: 'C', zh: '对，钱包可能忘记咖啡馆。', py: 'Duì, qiánbāo kěnéng wàngjì kāfēiguǎn.', en: 'Yes, wallet maybe forgot café.', rating: 'Awkward', score: 1, relationship: -5, explanation: 'The meaning is recoverable, but 落在 or 忘在 is needed for leaving an object somewhere.', correction: '对，我可能把钱包忘在咖啡馆了。', glossary: ['钱包'] },
+          { id: 'D', zh: '不是，我的手机在咖啡馆。', py: 'Bú shì, wǒ de shǒujī zài kāfēiguǎn.', en: 'No, my phone is at the café.', rating: 'Incorrect', score: 0, relationship: -10, explanation: 'This changes the missing item and sends the conversation in the wrong direction.', correction: '对，我的钱包可能在咖啡馆。', glossary: ['手机', '钱包'] },
+        ],
+      },
+      {
+        id: 5,
+        mission: 'Respond to the café search result and provide the next information needed.',
+        npc: 'Staff',
+        npcLineZh: '咖啡馆找到一个黑色钱包，不过需要你确认里面的东西。',
+        npcLinePy: 'Kāfēiguǎn zhǎo dào yí ge hēisè qiánbāo, búguò xūyào nǐ quèrèn lǐmiàn de dōngxi.',
+        npcLineEn: 'The café found a black wallet, but they need you to confirm what is inside.',
+        npcGlossary: ['钱包'],
+        options: [
+          { id: 'A', zh: '里面有一张银行卡和我的身份证，我可以再说明详细一点。', py: 'Lǐmiàn yǒu yì zhāng yínhángkǎ hé wǒ de shēnfènzhèng, wǒ kěyǐ zài shuōmíng xiángxì yìdiǎn.', en: 'There is a bank card and my ID inside. I can give more detail.', rating: 'Natural', score: 3, relationship: 12, explanation: 'Natural and helpful. It gives identifying details and offers to cooperate further.', correction: null, glossary: [] },
+          { id: 'B', zh: '有银行卡和身份证。', py: 'Yǒu yínhángkǎ hé shēnfènzhèng.', en: 'There is a bank card and ID.', rating: 'Stiff', score: 2, relationship: 3, explanation: 'Correct and useful, but short and procedural.', correction: '里面有银行卡和我的身份证。', glossary: [] },
+          { id: 'C', zh: '里面银行卡身份证都是有。', py: 'Lǐmiàn yínhángkǎ shēnfènzhèng dōu shì yǒu.', en: 'Inside bank card ID all are have.', rating: 'Awkward', score: 1, relationship: -5, explanation: 'The contents are understandable, but the structure is unnatural.', correction: '里面有银行卡和身份证。', glossary: [] },
+          { id: 'D', zh: '我不知道咖啡馆在哪里。', py: 'Wǒ bù zhīdào kāfēiguǎn zài nǎli.', en: 'I do not know where the café is.', rating: 'Incorrect', score: 0, relationship: -10, explanation: 'This does not provide the identifying information the café needs.', correction: '里面有银行卡和我的身份证。', glossary: [] },
+        ],
+      },
+      {
+        id: 6,
+        mission: 'Close the interaction naturally based on the result of the search.',
+        npc: 'Staff',
+        npcLineZh: '信息对上了。你可以去咖啡馆拿钱包，我也告诉你充电的地方。',
+        npcLinePy: 'Xìnxī duì shàng le. Nǐ kěyǐ qù kāfēiguǎn ná qiánbāo, wǒ yě gàosu nǐ chōngdiàn de dìfang.',
+        npcLineEn: 'The information matches. You can collect your wallet at the café, and I will show you where to charge your phone.',
+        npcGlossary: ['钱包', '充电'],
+        options: [
+          { id: 'A', zh: '太好了，真的谢谢你！麻烦你告诉我怎么走。', py: 'Tài hǎo le, zhēn de xièxie nǐ! Máfan nǐ gàosu wǒ zěnme zǒu.', en: 'That is great, thank you so much! Please tell me how to get there.', rating: 'Natural', score: 3, relationship: 14, explanation: 'Natural and warm. It thanks the staff and confirms the practical next step.', correction: null, glossary: ['麻烦你了'] },
+          { id: 'B', zh: '好，谢谢。', py: 'Hǎo, xièxie.', en: 'Okay, thanks.', rating: 'Stiff', score: 2, relationship: 3, explanation: 'Correct, but brief after receiving substantial help.', correction: '太好了，真的谢谢你！', glossary: [] },
+          { id: 'C', zh: '很好，你给我很多帮助谢谢。', py: 'Hěn hǎo, nǐ gěi wǒ hěn duō bāngzhù xièxie.', en: 'Very good, you give me much help thanks.', rating: 'Awkward', score: 1, relationship: -5, explanation: 'The gratitude is clear, but the sentence is not natural Chinese.', correction: '太好了，真的谢谢你帮了我这么多。', glossary: [] },
+          { id: 'D', zh: '你的钱包找到了吗？', py: 'Nǐ de qiánbāo zhǎo dào le ma?', en: 'Was your wallet found?', rating: 'Incorrect', score: 0, relationship: -10, explanation: 'This asks about the staff member’s wallet instead of closing your own interaction.', correction: '太好了，真的谢谢你！', glossary: ['钱包'] },
         ],
       },
     ],
@@ -2941,7 +3128,7 @@ export default function ChapterUIPrototype() {
   const safeCurrentChapterIndex = clampArrayIndex(currentChapterIndex, chapters.length);
   const currentChapter = chapters[safeCurrentChapterIndex] || chapters[0];
   const safeCurrentNodeIndex = clampArrayIndex(currentNodeIndex, currentChapter?.nodes?.length || 0);
-  const currentNode = currentChapter?.nodes?.[safeCurrentNodeIndex] || {
+  const baseCurrentNode = currentChapter?.nodes?.[safeCurrentNodeIndex] || {
     id: 0,
     mission: '',
     npc: '',
@@ -2952,6 +3139,41 @@ export default function ChapterUIPrototype() {
     options: [],
   };
   const isChapter6Prototype = currentChapter.id === 'chapter6';
+  const sceneMetricsBeforeCurrent = useMemo(() => {
+    if (!isChapter6Prototype) return { socialComfort: 50, naturalness: 50 };
+    const earlierChoices = Object.fromEntries(
+      Object.entries(sceneRun).filter(([key]) => Number(key) < safeCurrentNodeIndex)
+    );
+    return calculateSceneRunMetrics(earlierChoices);
+  }, [isChapter6Prototype, safeCurrentNodeIndex, sceneRun]);
+  const activeChapter6Branch = useMemo(() => {
+    if (!isChapter6Prototype) return null;
+    if (safeCurrentNodeIndex === 3) {
+      const tier = sceneMetricsBeforeCurrent.naturalness >= 65
+        ? 'high'
+        : sceneMetricsBeforeCurrent.naturalness >= 40
+        ? 'medium'
+        : 'low';
+      return CHAPTER6_BRANCH_NODES.decision4[tier];
+    }
+    if (safeCurrentNodeIndex === 4 || safeCurrentNodeIndex === 5) {
+      const tier = sceneMetricsBeforeCurrent.naturalness >= 65 && sceneMetricsBeforeCurrent.socialComfort >= 65
+        ? 'strong'
+        : sceneMetricsBeforeCurrent.naturalness >= 40 && sceneMetricsBeforeCurrent.socialComfort >= 40
+        ? 'mixed'
+        : 'weak';
+      return CHAPTER6_BRANCH_NODES[safeCurrentNodeIndex === 4 ? 'decision5' : 'decision6'][tier];
+    }
+    return null;
+  }, [isChapter6Prototype, safeCurrentNodeIndex, sceneMetricsBeforeCurrent]);
+  const currentNode = useMemo(() => {
+    if (!activeChapter6Branch) return baseCurrentNode;
+    return {
+      ...baseCurrentNode,
+      ...activeChapter6Branch,
+      options: activeChapter6Branch.options || baseCurrentNode.options,
+    };
+  }, [activeChapter6Branch, baseCurrentNode]);
   const currentDeviceLabel = useMemo(() => getCurrentDeviceLabel(), []);
   const displayOptions = useMemo(() => {
     const shuffled = shuffleArray(Array.isArray(currentNode.options) ? currentNode.options : []);
@@ -2965,6 +3187,7 @@ export default function ChapterUIPrototype() {
     () => (Array.isArray(currentNode.options) ? currentNode.options : []).find((o) => o.id === selectedOptionId) || null,
     [currentNode, selectedOptionId]
   );
+  const currentNodeAudioPrefix = `${currentChapter.id}.node${currentNode.id}${currentNode.branchKey ? `.${currentNode.branchKey}` : ''}`;
   const sceneMetrics = useMemo(() => calculateSceneRunMetrics(sceneRun), [sceneRun]);
   const chapter6LatestRating = useMemo(() => {
     const submittedIndexes = Object.keys(sceneRun).map(Number).sort((a, b) => b - a);
@@ -2983,9 +3206,29 @@ export default function ChapterUIPrototype() {
   const activeNote = currentChapter.grammarNotes.find((note) => note.id === activeNoteId) || currentChapter.grammarNotes[0];
   const selectedGlossary = selectedGlossaryKey ? glossary[selectedGlossaryKey] : null;
 
-  const chapterProgress = ((safeCurrentNodeIndex + 1) / currentChapter.nodes.length) * 100;
+  const chapter6Ending = useMemo(() => {
+    if (!isChapter6Prototype || safeCurrentNodeIndex !== 5 || !sceneRun[5]) return null;
+    const incorrectCount = Object.values(sceneRun).filter((choice) => choice.rating === 'Incorrect').length;
+    const ending = sceneMetrics.socialComfort >= 70 && sceneMetrics.naturalness >= 70 && incorrectCount < 2
+      ? CHAPTER6_ENDINGS.smooth
+      : sceneMetrics.socialComfort >= 40 && sceneMetrics.naturalness >= 40 && incorrectCount < 2
+      ? CHAPTER6_ENDINGS.clarified
+      : CHAPTER6_ENDINGS.delayed;
+    const weakDecisions = Object.entries(sceneRun)
+      .filter(([, choice]) => choice.rating !== 'Natural')
+      .map(([index, choice]) => `Decision ${Number(index) + 1}: ${choice.rating}`);
+    return {
+      ...ending,
+      explanation: weakDecisions.length > 0
+        ? `Your path included ${weakDecisions.join(', ')}. Those choices produced the final scene values used for this ending.`
+        : 'Six natural replies kept the request clear, cooperative, and easy to act on.',
+    };
+  }, [isChapter6Prototype, safeCurrentNodeIndex, sceneMetrics, sceneRun]);
+
+  const chapterDecisionTotal = currentChapter.nodes.length;
+  const chapterProgress = ((safeCurrentNodeIndex + 1) / chapterDecisionTotal) * 100;
   const overallProgress = ((safeCurrentChapterIndex + 1) / chapters.length) * 100;
-  const isLastNode = safeCurrentNodeIndex === currentChapter.nodes.length - 1;
+  const isLastNode = safeCurrentNodeIndex === chapterDecisionTotal - 1;
   const isLastChapter = safeCurrentChapterIndex === chapters.length - 1;
   const chapter6ResultTier = useMemo(() => {
     if (!isChapter6Prototype || !isLastNode || !sceneRun[safeCurrentNodeIndex]) return null;
@@ -3333,8 +3576,10 @@ export default function ChapterUIPrototype() {
         return {
           ...earlierChoices,
           [safeCurrentNodeIndex]: {
+            optionId: selectedOption.id,
             rating: selectedOption.rating,
             relationship: selectedOption.relationship,
+            branchKey: currentNode.branchKey || 'base',
             previousMetrics,
             newMetrics,
           },
@@ -3355,10 +3600,10 @@ export default function ChapterUIPrototype() {
       selected: selectedOption.zh,
       selectedPinyin: selectedOption.py,
       selectedEnglish: selectedOption.en,
-      selectedAudioId: `${currentChapter.id}.node${currentNode.id}.option.${selectedRole}`,
+      selectedAudioId: `${currentNodeAudioPrefix}.option.${selectedRole}`,
       rating: selectedOption.rating,
       correction: selectedOption.correction,
-      correctionAudioId: selectedOption.correction ? `${currentChapter.id}.node${currentNode.id}.correction.${selectedRole}` : '',
+      correctionAudioId: selectedOption.correction ? `${currentNodeAudioPrefix}.correction.${selectedRole}` : '',
       timestamp: Date.now(),
     };
     setPracticeLog((prev) => [...prev, logItem]);
@@ -3385,6 +3630,32 @@ export default function ChapterUIPrototype() {
     if (isLastNode) return;
     setShowFeedback(false);
     setCurrentNodeIndex(safeCurrentNodeIndex + 1);
+  };
+
+  const handleChapter6Rewind = (nodeIndex) => {
+    const safeNodeIndex = clampArrayIndex(nodeIndex, chapterDecisionTotal);
+    setSceneRun((prev) => Object.fromEntries(
+      Object.entries(prev).filter(([key]) => Number(key) < safeNodeIndex)
+    ));
+    setNodeSelections((prev) => Object.fromEntries(
+      Object.entries(prev).filter(([key]) => {
+        const [chapterIndex, decisionIndex] = key.split('-').map(Number);
+        return chapterIndex !== safeCurrentChapterIndex || decisionIndex < safeNodeIndex;
+      })
+    ));
+    setSelectedOptionId(null);
+    setShowFeedback(false);
+    setCurrentNodeIndex(safeNodeIndex);
+  };
+
+  const handleChapter6Replay = () => {
+    setSceneRun({});
+    setNodeSelections((prev) => Object.fromEntries(
+      Object.entries(prev).filter(([key]) => Number(key.split('-')[0]) !== safeCurrentChapterIndex)
+    ));
+    setSelectedOptionId(null);
+    setShowFeedback(false);
+    setCurrentNodeIndex(0);
   };
 
   const handleAuthSubmit = async (mode) => {
@@ -4158,7 +4429,7 @@ export default function ChapterUIPrototype() {
                   <div className="min-w-0 border-l-2 border-[#d6a856] bg-[#fffaf3]/65 py-3 pl-3 pr-2">
                     <div className="text-neutral-500">Current progress</div>
                     <div className="mt-1 break-words font-medium text-neutral-900">Chapter {currentChapterIndex + 1} &middot; {currentChapter.shortTitle}</div>
-                    <div className="mt-1 text-neutral-600">Question {currentNodeIndex + 1}</div>
+                    <div className="mt-1 text-neutral-600">Question {safeCurrentNodeIndex + 1}</div>
                   </div>
                   <div className="min-w-0 border-l-2 border-[#d6a856] bg-[#fffaf3]/65 py-3 pl-3 pr-2">
                     <div className="text-neutral-500">Last synced</div>
@@ -4262,7 +4533,7 @@ export default function ChapterUIPrototype() {
 
             <div className="mb-4 flex items-start justify-between gap-3 text-neutral-500">
               <span className="min-w-0 flex-1 text-xs leading-5 sm:text-sm">Tap highlighted words for meaning, examples, and teacher notes.</span>
-              <span className="shrink-0 text-sm font-medium">{currentNodeIndex + 1}/{currentChapter.nodes.length}</span>
+              <span className="shrink-0 text-sm font-medium">{safeCurrentNodeIndex + 1}/{chapterDecisionTotal}</span>
             </div>
             <Progress value={chapterProgress} className="h-2" />
 
@@ -4283,7 +4554,7 @@ export default function ChapterUIPrototype() {
                 </div>
                 <div className="flex items-center gap-2 rounded-full bg-[#fffaf3]/85 px-3 py-1.5 text-xs font-medium text-[#6f6257]">
                   <span>Play line</span>
-                  <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.npc`} text={currentNode.npcLineZh} />
+                  <AudioButton audioId={`${currentNodeAudioPrefix}.npc`} text={currentNode.npcLineZh} />
                 </div>
               </div>
               <div className="space-y-3">
@@ -4306,7 +4577,7 @@ export default function ChapterUIPrototype() {
                   expression: option.zh,
                   pinyin: option.py,
                   english: option.en,
-                  audioId: `${currentChapter.id}.node${currentNode.id}.option.${option.rating.toLowerCase()}`,
+                  audioId: `${currentNodeAudioPrefix}.option.${option.rating.toLowerCase()}`,
                   type: 'option',
                   source: `${currentChapter.shortTitle} · Option`,
                   chapter: currentChapter.shortTitle,
@@ -4330,7 +4601,7 @@ export default function ChapterUIPrototype() {
                           <span>{active ? 'Selected reply' : `Reply ${option.displayId}`}</span>
                           <div className="flex items-center gap-2">
                             <span className="hidden text-xs sm:inline">Listen</span>
-                            <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.option.${option.rating.toLowerCase()}`} text={option.zh} dark={active} small />
+                            <AudioButton audioId={`${currentNodeAudioPrefix}.option.${option.rating.toLowerCase()}`} text={option.zh} dark={active} small />
                             <SaveButton
                             saved={optionSaved}
                             dark={active}
@@ -4364,7 +4635,7 @@ export default function ChapterUIPrototype() {
                   variant="outline"
                   className="h-12 w-full rounded-2xl text-base font-semibold"
                   onClick={handlePreviousNode}
-                  disabled={currentNodeIndex === 0 || showFeedback}
+                  disabled={safeCurrentNodeIndex === 0 || showFeedback}
                 >
                   Previous
                 </Button>
@@ -4672,7 +4943,7 @@ export default function ChapterUIPrototype() {
             <div className="mt-5">
               <div className="mb-2 flex items-center justify-between text-xs text-white/55">
                 <span>Chapter progress</span>
-                <span>{currentNodeIndex + 1}/{currentChapter.nodes.length}</span>
+                <span>{safeCurrentNodeIndex + 1}/{chapterDecisionTotal}</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-white/15">
                 <div className="h-full rounded-full bg-[#d6a856]" style={{ width: `${chapterProgress}%` }} />
@@ -4843,7 +5114,7 @@ export default function ChapterUIPrototype() {
                     <h3 className={`${fontScale === 'sm' ? 'text-xl sm:text-2xl' : fontScale === 'lg' ? 'text-3xl sm:text-4xl' : 'text-2xl sm:text-3xl'} font-semibold leading-tight text-[#2b241f]`}>{selectedOption.zh}</h3>
                     <div className="flex shrink-0 items-center gap-2 self-start rounded-full bg-[#f3eadf] px-3 py-1.5 text-xs font-medium text-[#6f6257]">
                       <span className="hidden sm:inline">Hear it</span>
-                      <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.option.${selectedOption.rating.toLowerCase()}`} text={selectedOption.zh} />
+                      <AudioButton audioId={`${currentNodeAudioPrefix}.option.${selectedOption.rating.toLowerCase()}`} text={selectedOption.zh} />
                     </div>
                   </div>
                   {showPinyin && <p className="mt-2 text-sm leading-6 text-neutral-500">{selectedOption.py}</p>}
@@ -4906,7 +5177,7 @@ export default function ChapterUIPrototype() {
                           <div className="border-t border-[#e7dccd] px-4 pb-4 pt-3">
                             <div className="flex items-start justify-between gap-3">
                               <p className="text-xl font-semibold leading-snug text-[#2b241f]">{selectedOption.correction}</p>
-                              <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.correction.${selectedOption.rating.toLowerCase()}`} text={selectedOption.correction} small />
+                              <AudioButton audioId={`${currentNodeAudioPrefix}.correction.${selectedOption.rating.toLowerCase()}`} text={selectedOption.correction} small />
                             </div>
                             {showPinyin && correctionDetails?.py && <p className="mt-2 text-sm leading-6 text-neutral-500">{correctionDetails.py}</p>}
                             {showEnglish && correctionDetails?.en && <p className="mt-1 text-sm leading-6 text-neutral-700">{correctionDetails.en}</p>}
@@ -4919,12 +5190,52 @@ export default function ChapterUIPrototype() {
                   <div className="mt-4 rounded-[24px] border border-dashed border-[#d8cbb8] bg-white/55 p-4">
                     <div className="mb-2 flex items-center justify-between gap-2 text-sm font-medium">
                       <span>Try this more natural version</span>
-                      <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.correction.${selectedOption.rating.toLowerCase()}`} text={selectedOption.correction} small />
+                      <AudioButton audioId={`${currentNodeAudioPrefix}.correction.${selectedOption.rating.toLowerCase()}`} text={selectedOption.correction} small />
                     </div>
                     <p className="text-xl font-semibold leading-snug">{selectedOption.correction}</p>
                   </div>
                 )
               )}
+
+              <AnimatePresence mode="wait">
+                {chapter6Ending && (
+                  <motion.section
+                    key={chapter6Ending.label}
+                    initial={{ opacity: 0, y: 14, scale: 0.985 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.99 }}
+                    transition={{ duration: 0.32, ease: 'easeOut' }}
+                    className="mt-5 overflow-hidden rounded-[26px] border border-indigo-200 bg-[linear-gradient(135deg,_#f5f3fa_0%,_#fff9ed_100%)]"
+                  >
+                    <div className="border-b border-indigo-200/70 px-4 py-3 sm:px-5">
+                      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-indigo-700">Your conversation ending</div>
+                      <h4 className="mt-1 text-xl font-semibold text-[#25222f]">{chapter6Ending.label}</h4>
+                    </div>
+                    <div className="space-y-3 px-4 py-4 sm:px-5">
+                      <p className="text-xl font-semibold leading-snug text-[#211f2c]">{chapter6Ending.zh}</p>
+                      {showPinyin && <p className="text-sm leading-6 text-indigo-700/75">{chapter6Ending.py}</p>}
+                      {showEnglish && <p className="text-sm leading-6 text-neutral-700">{chapter6Ending.en}</p>}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="rounded-2xl bg-white/70 p-3 text-sm">
+                          <div className="text-neutral-500">Final Social comfort</div>
+                          <div className="mt-1 text-xl font-semibold text-[#25222f]">{sceneMetrics.socialComfort}</div>
+                        </div>
+                        <div className="rounded-2xl bg-white/70 p-3 text-sm">
+                          <div className="text-neutral-500">Final Naturalness</div>
+                          <div className="mt-1 text-xl font-semibold text-[#25222f]">{sceneMetrics.naturalness}</div>
+                        </div>
+                      </div>
+                      <p className="border-l-2 border-amber-500 pl-3 text-sm leading-6 text-neutral-600">{chapter6Ending.explanation}</p>
+                    </div>
+                    <div className="grid gap-2 border-t border-indigo-200/70 bg-white/45 p-3 sm:grid-cols-2">
+                      <Button variant="outline" className="min-h-11 rounded-2xl bg-white/75" onClick={() => handleChapter6Rewind(0)}>Rewind to decision 1</Button>
+                      <Button variant="outline" className="min-h-11 rounded-2xl bg-white/75" onClick={() => handleChapter6Rewind(2)}>Rewind to decision 3</Button>
+                      <Button variant="outline" className="min-h-11 rounded-2xl bg-white/75" onClick={() => handleChapter6Rewind(4)}>Rewind to decision 5</Button>
+                      <Button variant="outline" className="min-h-11 rounded-2xl border-indigo-300 bg-indigo-50 text-indigo-950 hover:bg-indigo-100" onClick={handleChapter6Replay}>Replay scene</Button>
+                    </div>
+                  </motion.section>
+                )}
+              </AnimatePresence>
 
               {chapter6ResultTier && (
                 <motion.section
@@ -4976,7 +5287,7 @@ export default function ChapterUIPrototype() {
 
               <div className="mt-6 flex flex-col-reverse gap-3 md:flex-row md:justify-between">
                 <div className="grid w-full grid-cols-2 gap-2 md:w-auto">
-                  <Button variant="outline" className="h-11 rounded-2xl md:h-auto" onClick={handlePreviousNode} disabled={currentNodeIndex === 0}>
+                  <Button variant="outline" className="h-11 rounded-2xl md:h-auto" onClick={handlePreviousNode} disabled={safeCurrentNodeIndex === 0}>
                     Previous
                   </Button>
                   <Button variant="outline" className="h-11 rounded-2xl md:h-auto" onClick={handleNextNode} disabled={isLastNode}>
