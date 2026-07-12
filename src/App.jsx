@@ -39,7 +39,7 @@ const supabase = SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY
   ? createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
   : null;
 
-const CHAPTER6_NATURALNESS_DELTA = {
+const SCENE_NATURALNESS_DELTA = {
   Natural: 12,
   Stiff: 4,
   Awkward: -6,
@@ -105,7 +105,7 @@ function clampChapter6Metric(value) {
   return Math.max(0, Math.min(100, value));
 }
 
-function calculateChapter6RunMetrics(run) {
+function calculateSceneRunMetrics(run) {
   return Object.keys(run)
     .map(Number)
     .sort((a, b) => a - b)
@@ -113,9 +113,16 @@ function calculateChapter6RunMetrics(run) {
       const choice = run[index];
       return {
         socialComfort: clampChapter6Metric(metrics.socialComfort + choice.relationship),
-        naturalness: clampChapter6Metric(metrics.naturalness + CHAPTER6_NATURALNESS_DELTA[choice.rating]),
+        naturalness: clampChapter6Metric(metrics.naturalness + SCENE_NATURALNESS_DELTA[choice.rating]),
       };
     }, { socialComfort: 50, naturalness: 50 });
+}
+
+function applySceneMetricChoice(metrics, choice) {
+  return {
+    socialComfort: clampChapter6Metric(metrics.socialComfort + choice.relationship),
+    naturalness: clampChapter6Metric(metrics.naturalness + SCENE_NATURALNESS_DELTA[choice.rating]),
+  };
 }
 
 function StaffAvatar({ rating, compact = false }) {
@@ -2679,13 +2686,94 @@ async function resolveAudioUrl(audioId, text) {
 }
 
 function RatingBadge({ rating }) {
-  const map = {
-    Natural: 'border-emerald-600 bg-emerald-50 text-emerald-950',
-    Stiff: 'border-amber-500 bg-amber-50 text-amber-950',
-    Awkward: 'border-orange-600 bg-orange-100 text-orange-950',
-    Incorrect: 'border-rose-500 bg-rose-50 text-rose-950',
+  const palette = {
+    Natural: { backgroundColor: '#ecfdf5', borderColor: '#059669', color: '#064e3b' },
+    Stiff: { backgroundColor: '#fffbeb', borderColor: '#d97706', color: '#78350f' },
+    Awkward: { backgroundColor: '#fff7ed', borderColor: '#ea580c', color: '#7c2d12' },
+    Incorrect: { backgroundColor: '#fff1f2', borderColor: '#e11d48', color: '#881337' },
   };
-  return <Badge className={`rounded-full border px-2.5 py-1 font-semibold shadow-sm ${map[rating]}`}>{rating}</Badge>;
+  return (
+    <span
+      className="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold shadow-sm"
+      style={palette[rating] || { backgroundColor: '#f5f5f5', borderColor: '#737373', color: '#262626' }}
+    >
+      {rating}
+    </span>
+  );
+}
+
+function SceneMetricBar({ icon: Icon, label, value, previousValue, tone }) {
+  const changed = Number.isFinite(previousValue);
+  const delta = changed ? value - previousValue : 0;
+  const colors = tone === 'amber'
+    ? {
+        icon: 'text-amber-700',
+        track: 'bg-amber-100',
+        fill: 'bg-amber-500',
+        delta: delta >= 0 ? 'text-amber-800' : 'text-rose-700',
+      }
+    : {
+        icon: 'text-indigo-700',
+        track: 'bg-indigo-100',
+        fill: 'bg-indigo-500',
+        delta: delta >= 0 ? 'text-indigo-800' : 'text-rose-700',
+      };
+
+  return (
+    <div className="rounded-2xl border border-white/80 bg-white/70 p-3 shadow-sm">
+      <div className="mb-2 flex items-center justify-between gap-3 text-sm">
+        <div className="flex min-w-0 items-center gap-2 font-semibold text-[#2b241f]">
+          <Icon className={`h-4 w-4 shrink-0 ${colors.icon}`} />
+          <span>{label}</span>
+        </div>
+        <div className="shrink-0 font-semibold tabular-nums text-[#2b241f]" aria-live="polite">
+          {changed ? (
+            <span className="flex items-center gap-1.5">
+              <span className="text-neutral-500">{previousValue}</span>
+              <span aria-hidden="true">→</span>
+              <span>{value}</span>
+              <span className={`rounded-full bg-white px-1.5 py-0.5 text-[11px] ${colors.delta}`}>
+                {delta >= 0 ? '+' : ''}{delta}
+              </span>
+            </span>
+          ) : value}
+        </div>
+      </div>
+      <div className={`h-2.5 overflow-hidden rounded-full ${colors.track}`}>
+        <motion.div
+          key={`${previousValue ?? value}-${value}`}
+          initial={{ width: `${changed ? previousValue : value}%` }}
+          animate={{ width: `${value}%` }}
+          transition={{ duration: 0.65, ease: 'easeOut' }}
+          className={`h-full rounded-full ${colors.fill}`}
+        />
+      </div>
+    </div>
+  );
+}
+
+function StorySceneMetrics({ metrics, transition = null, compact = false }) {
+  return (
+    <section
+      className={`grid gap-3 rounded-[22px] border border-[#e7dccd] bg-[#fffaf3]/75 ${compact ? 'p-3 sm:grid-cols-2' : 'p-4 md:grid-cols-2'}`}
+      aria-label="Current scene metrics"
+    >
+      <SceneMetricBar
+        icon={Heart}
+        label="Social comfort"
+        value={metrics.socialComfort}
+        previousValue={transition?.previousMetrics.socialComfort}
+        tone="amber"
+      />
+      <SceneMetricBar
+        icon={Sparkles}
+        label="Naturalness"
+        value={metrics.naturalness}
+        previousValue={transition?.previousMetrics.naturalness}
+        tone="indigo"
+      />
+    </section>
+  );
 }
 
 function shuffleArray(array) {
@@ -2799,7 +2887,7 @@ export default function ChapterUIPrototype() {
   const [selectedOptionId, setSelectedOptionId] = useState(null);
   const [nodeSelections, setNodeSelections] = useState(persisted?.nodeSelections || {});
   const [showFeedback, setShowFeedback] = useState(false);
-  const [chapter6Run, setChapter6Run] = useState({});
+  const [sceneRun, setSceneRun] = useState({});
   const [betterVersionOpen, setBetterVersionOpen] = useState(true);
   const [showPinyin, setShowPinyin] = useState(persisted?.showPinyin ?? true);
   const [showEnglish, setShowEnglish] = useState(persisted?.showEnglish ?? true);
@@ -2877,11 +2965,18 @@ export default function ChapterUIPrototype() {
     () => (Array.isArray(currentNode.options) ? currentNode.options : []).find((o) => o.id === selectedOptionId) || null,
     [currentNode, selectedOptionId]
   );
-  const chapter6Metrics = useMemo(() => calculateChapter6RunMetrics(chapter6Run), [chapter6Run]);
+  const sceneMetrics = useMemo(() => calculateSceneRunMetrics(sceneRun), [sceneRun]);
   const chapter6LatestRating = useMemo(() => {
-    const submittedIndexes = Object.keys(chapter6Run).map(Number).sort((a, b) => b - a);
-    return chapter6Run[safeCurrentNodeIndex]?.rating || chapter6Run[submittedIndexes[0]]?.rating || null;
-  }, [chapter6Run, safeCurrentNodeIndex]);
+    const submittedIndexes = Object.keys(sceneRun).map(Number).sort((a, b) => b - a);
+    return sceneRun[safeCurrentNodeIndex]?.rating || sceneRun[submittedIndexes[0]]?.rating || null;
+  }, [sceneRun, safeCurrentNodeIndex]);
+  const sceneMetricTransition = showFeedback ? sceneRun[safeCurrentNodeIndex] || null : null;
+  const submittedSceneDeltas = sceneMetricTransition
+    ? {
+        socialComfort: sceneMetricTransition.newMetrics.socialComfort - sceneMetricTransition.previousMetrics.socialComfort,
+        naturalness: sceneMetricTransition.newMetrics.naturalness - sceneMetricTransition.previousMetrics.naturalness,
+      }
+    : null;
   const correctionDetails = isChapter6Prototype && selectedOption?.correction
     ? CHAPTER6_CORRECTION_DETAILS[selectedOption.correction] || null
     : null;
@@ -2893,21 +2988,21 @@ export default function ChapterUIPrototype() {
   const isLastNode = safeCurrentNodeIndex === currentChapter.nodes.length - 1;
   const isLastChapter = safeCurrentChapterIndex === chapters.length - 1;
   const chapter6ResultTier = useMemo(() => {
-    if (!isChapter6Prototype || !isLastNode || !chapter6Run[safeCurrentNodeIndex]) return null;
-    const choices = Object.values(chapter6Run);
+    if (!isChapter6Prototype || !isLastNode || !sceneRun[safeCurrentNodeIndex]) return null;
+    const choices = Object.values(sceneRun);
     const incorrectCount = choices.filter((choice) => choice.rating === 'Incorrect').length;
     const naturalCount = choices.filter((choice) => choice.rating === 'Natural').length;
-    if (chapter6Metrics.socialComfort < 40 || chapter6Metrics.naturalness < 40 || incorrectCount >= 2) {
+    if (sceneMetrics.socialComfort < 40 || sceneMetrics.naturalness < 40 || incorrectCount >= 2) {
       return CHAPTER6_TIER_REWARDS.needsRepair;
     }
-    if (chapter6Metrics.socialComfort >= 80 && chapter6Metrics.naturalness >= 80 && incorrectCount === 0 && naturalCount >= 2) {
+    if (sceneMetrics.socialComfort >= 80 && sceneMetrics.naturalness >= 80 && incorrectCount === 0 && naturalCount >= 2) {
       return CHAPTER6_TIER_REWARDS.nativeRecovery;
     }
-    if (chapter6Metrics.socialComfort >= 65 && chapter6Metrics.naturalness >= 65 && incorrectCount < 2) {
+    if (sceneMetrics.socialComfort >= 65 && sceneMetrics.naturalness >= 65 && incorrectCount < 2) {
       return CHAPTER6_TIER_REWARDS.strongRecovery;
     }
     return CHAPTER6_TIER_REWARDS.usefulRecovery;
-  }, [chapter6Metrics, chapter6Run, safeCurrentNodeIndex, isChapter6Prototype, isLastNode]);
+  }, [sceneMetrics, sceneRun, safeCurrentNodeIndex, isChapter6Prototype, isLastNode]);
   const chapterOverview = useMemo(() => {
     const overview = chapters.map((chapter, index) => {
       const completed = chapter.nodes.filter((_, nodeIndex) => nodeSelections[makeNodeKey(index, nodeIndex)]).length;
@@ -2994,7 +3089,7 @@ export default function ChapterUIPrototype() {
     setSelectedOptionId(null);
     setShowFeedback(false);
     setSelectedGlossaryKey(null);
-    if (currentChapter.id === 'chapter6') setChapter6Run({});
+    setSceneRun({});
   }, [
     currentChapter.id,
     currentChapterIndex,
@@ -3208,8 +3303,8 @@ export default function ChapterUIPrototype() {
 
   useEffect(() => {
     setBetterVersionOpen(true);
-    if (isChapter6Prototype) setChapter6Run({});
-  }, [isChapter6Prototype]);
+    setSceneRun({});
+  }, [currentChapter.id]);
 
   const handleSelectOption = (optionId) => {
     const key = makeNodeKey(safeCurrentChapterIndex, safeCurrentNodeIndex);
@@ -3219,7 +3314,7 @@ export default function ChapterUIPrototype() {
 
   const switchChapter = (index) => {
     const nextChapterIndex = clampArrayIndex(index, chapters.length);
-    if (chapters[nextChapterIndex].id === 'chapter6') setChapter6Run({});
+    setSceneRun({});
     setCurrentChapterIndex(nextChapterIndex);
     setCurrentNodeIndex(0);
     setShowFeedback(false);
@@ -3230,14 +3325,23 @@ export default function ChapterUIPrototype() {
 
   const handleSubmit = () => {
     if (!selectedOption) return;
+    if (currentView === 'story') {
+      setSceneRun((prev) => {
+        const earlierChoices = Object.fromEntries(Object.entries(prev).filter(([key]) => Number(key) < safeCurrentNodeIndex));
+        const previousMetrics = calculateSceneRunMetrics(earlierChoices);
+        const newMetrics = applySceneMetricChoice(previousMetrics, selectedOption);
+        return {
+          ...earlierChoices,
+          [safeCurrentNodeIndex]: {
+            rating: selectedOption.rating,
+            relationship: selectedOption.relationship,
+            previousMetrics,
+            newMetrics,
+          },
+        };
+      });
+    }
     if (isChapter6Prototype) {
-      setChapter6Run((prev) => ({
-        ...Object.fromEntries(Object.entries(prev).filter(([key]) => Number(key) < safeCurrentNodeIndex)),
-        [safeCurrentNodeIndex]: {
-          rating: selectedOption.rating,
-          relationship: selectedOption.relationship,
-        },
-      }));
       setBetterVersionOpen(selectedOption.rating !== 'Natural');
     }
     setShowFeedback(true);
@@ -3552,7 +3656,7 @@ export default function ChapterUIPrototype() {
     setSelectedOptionId(null);
     setNodeSelections({});
     setShowFeedback(false);
-    setChapter6Run({});
+    setSceneRun({});
     setBetterVersionOpen(true);
     setShowPinyin(true);
     setShowEnglish(true);
@@ -4162,6 +4266,10 @@ export default function ChapterUIPrototype() {
             </div>
             <Progress value={chapterProgress} className="h-2" />
 
+            <div className="mt-4">
+              <StorySceneMetrics metrics={sceneMetrics} transition={sceneMetricTransition} />
+            </div>
+
             <motion.div layout className="mt-5 rounded-[24px] bg-[#f3eadf]/85 p-4 sm:p-5 md:mt-6 md:rounded-[28px] md:p-6">
               {isChapter6Prototype && (
                 <div className="mb-5 border-b border-[#d8cbb8] pb-4">
@@ -4642,21 +4750,25 @@ export default function ChapterUIPrototype() {
               })}
             </div>
 
-            <div className="rounded-2xl bg-[#f3eadf]/80 p-4">
-              <div className="mb-2 flex items-center gap-2 text-sm font-medium">
-                <Heart className="h-4 w-4" /> Social comfort
-              </div>
-              <Progress value={trust} className="h-2" />
-              <p className="mt-2 text-xs text-neutral-500">How polite, safe, and smooth your reply feels in the situation.</p>
-            </div>
+            {currentView !== 'story' && (
+              <>
+                <div className="rounded-2xl bg-[#f3eadf]/80 p-4">
+                  <div className="mb-2 flex items-center gap-2 text-sm font-medium">
+                    <Heart className="h-4 w-4" /> Social comfort
+                  </div>
+                  <Progress value={trust} className="h-2" />
+                  <p className="mt-2 text-xs text-neutral-500">How polite, safe, and smooth your reply feels in the situation.</p>
+                </div>
 
-            <div className="rounded-2xl bg-[#f3eadf]/80 p-4">
-              <div className="mb-2 flex items-center gap-2 text-sm font-medium">
-                <Sparkles className="h-4 w-4" /> Naturalness mastery
-              </div>
-              <Progress value={mastery} className="h-2" />
-              <p className="mt-2 text-xs text-neutral-500">How close your Chinese is to something a real person would naturally say.</p>
-            </div>
+                <div className="rounded-2xl bg-[#f3eadf]/80 p-4">
+                  <div className="mb-2 flex items-center gap-2 text-sm font-medium">
+                    <Sparkles className="h-4 w-4" /> Naturalness mastery
+                  </div>
+                  <Progress value={mastery} className="h-2" />
+                  <p className="mt-2 text-xs text-neutral-500">How close your Chinese is to something a real person would naturally say.</p>
+                </div>
+              </>
+            )}
 
             <div className="rounded-2xl border border-dashed border-[#d8cbb8] bg-[#fffaf3]/70 p-4">
               <div className="mb-2 flex items-center gap-2 text-sm font-medium">
@@ -4747,7 +4859,9 @@ export default function ChapterUIPrototype() {
                 <div className="border-l-2 border-[#d6a856] bg-white/60 py-3 pl-4 pr-3">
                   <div className="mb-2 text-sm font-medium">How it lands</div>
                   <p className="text-sm text-neutral-700">
-                    Social comfort {selectedOption.relationship >= 0 ? '+' : ''}{selectedOption.relationship} - Naturalness +{selectedOption.score * 8}
+                    Social comfort {(submittedSceneDeltas?.socialComfort ?? selectedOption.relationship) >= 0 ? '+' : ''}{submittedSceneDeltas?.socialComfort ?? selectedOption.relationship}
+                    {' · '}Naturalness {(submittedSceneDeltas?.naturalness ?? SCENE_NATURALNESS_DELTA[selectedOption.rating]) >= 0 ? '+' : ''}
+                    {submittedSceneDeltas?.naturalness ?? SCENE_NATURALNESS_DELTA[selectedOption.rating]}
                   </p>
                   <p className="mt-2 text-sm leading-6 text-neutral-600">
                     {selectedOption.rating === 'Natural'
@@ -4759,6 +4873,10 @@ export default function ChapterUIPrototype() {
                       : 'This creates confusion and weakens the interaction.'}
                   </p>
                 </div>
+              </div>
+
+              <div className="mt-4">
+                <StorySceneMetrics metrics={sceneMetrics} transition={sceneMetricTransition} compact />
               </div>
 
               {selectedOption.correction && (
@@ -4821,8 +4939,8 @@ export default function ChapterUIPrototype() {
                       <h4 className="mt-0.5 text-lg font-semibold text-[#25222f]">{chapter6ResultTier.label}</h4>
                     </div>
                     <div className="flex gap-2 text-xs font-semibold text-[#25222f]">
-                      <span className="rounded-full bg-white/80 px-2.5 py-1">Comfort {chapter6Metrics.socialComfort}</span>
-                      <span className="rounded-full bg-white/80 px-2.5 py-1">Naturalness {chapter6Metrics.naturalness}</span>
+                      <span className="rounded-full bg-white/80 px-2.5 py-1">Comfort {sceneMetrics.socialComfort}</span>
+                      <span className="rounded-full bg-white/80 px-2.5 py-1">Naturalness {sceneMetrics.naturalness}</span>
                     </div>
                   </div>
                   <div className="space-y-3 px-4 py-4">
