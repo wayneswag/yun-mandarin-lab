@@ -8,6 +8,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   CheckCircle2,
   XCircle,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  CircleEllipsis,
+  CircleHelp,
   MessageSquareQuote,
   BookOpen,
   Sparkles,
@@ -34,9 +39,153 @@ const supabase = SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY
   ? createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
   : null;
 
+const CHAPTER6_NATURALNESS_DELTA = {
+  Natural: 12,
+  Stiff: 4,
+  Awkward: -6,
+  Incorrect: -12,
+};
+
+const CHAPTER6_CORRECTION_DETAILS = {
+  '我的手机没电了。这里可以充电吗？': {
+    py: 'Wǒ de shǒujī méi diàn le. Zhèlǐ kěyǐ chōngdiàn ma?',
+    en: 'My phone is out of battery. Can I charge here?',
+  },
+  '我找不到钱包，可以帮我一下吗？': {
+    py: 'Wǒ zhǎo bú dào qiánbāo, kěyǐ bāng wǒ yíxià ma?',
+    en: 'I cannot find my wallet. Could you help me for a moment?',
+  },
+  '是我的！太谢谢你了，麻烦你了！': {
+    py: 'Shì wǒ de! Tài xièxie nǐ le, máfan nǐ le!',
+    en: 'It is mine! Thank you so much. Sorry to trouble you!',
+  },
+};
+
+const CHAPTER6_TIER_REWARDS = {
+  needsRepair: {
+    tier: 'Tier 1',
+    label: 'Needs repair',
+    intro: 'This run unlocked one reliable repair line for trying the scene again.',
+    title: 'Extra useful reply',
+    zh: '不好意思，可以再说一遍吗？',
+    py: 'Bù hǎoyìsi, kěyǐ zài shuō yí biàn ma?',
+    en: 'Sorry, could you say that again?',
+  },
+  usefulRecovery: {
+    tier: 'Tier 2',
+    label: 'Useful recovery',
+    intro: 'You kept the interaction workable and earned a softer request alternative.',
+    title: 'Extra natural alternative',
+    zh: '麻烦你帮我看一下，可以吗？',
+    py: 'Máfan nǐ bāng wǒ kàn yíxià, kěyǐ ma?',
+    en: 'Could I trouble you to help me take a look?',
+  },
+  strongRecovery: {
+    tier: 'Tier 3',
+    label: 'Strong recovery',
+    intro: 'Your replies stayed clear and cooperative, unlocking two bonus examples.',
+    title: 'Bonus quick examples',
+    examples: [
+      { zh: '我的手机快没电了。', py: 'Wǒ de shǒujī kuài méi diàn le.', en: 'My phone is nearly out of battery.' },
+      { zh: '找到了，太谢谢你了！', py: 'Zhǎo dào le, tài xièxie nǐ le!', en: 'I found it. Thank you so much!' },
+    ],
+  },
+  nativeRecovery: {
+    tier: 'Tier 4',
+    label: 'Native-level recovery',
+    intro: 'This run unlocked a preview of how the conversation could continue naturally.',
+    title: 'Hidden follow-up scene preview',
+    zh: '充电的地方就在前面，我带你过去吧。',
+    py: 'Chōngdiàn de dìfang jiù zài qiánmiàn, wǒ dài nǐ guòqu ba.',
+    en: 'The charging area is just ahead. I’ll show you the way.',
+  },
+};
+
+function clampChapter6Metric(value) {
+  return Math.max(0, Math.min(100, value));
+}
+
+function calculateChapter6RunMetrics(run) {
+  return Object.keys(run)
+    .map(Number)
+    .sort((a, b) => a - b)
+    .reduce((metrics, index) => {
+      const choice = run[index];
+      return {
+        socialComfort: clampChapter6Metric(metrics.socialComfort + choice.relationship),
+        naturalness: clampChapter6Metric(metrics.naturalness + CHAPTER6_NATURALNESS_DELTA[choice.rating]),
+      };
+    }, { socialComfort: 50, naturalness: 50 });
+}
+
+function StaffAvatar({ rating, compact = false }) {
+  const state = {
+    Natural: {
+      label: 'Friendly',
+      shell: 'border-emerald-300 bg-emerald-50 text-emerald-950 shadow-[0_10px_26px_rgba(5,150,105,0.14)]',
+      marker: 'bg-emerald-600 text-white',
+      Icon: CheckCircle2,
+      animate: { scale: [1, 1.05, 1], y: [0, -3, 0] },
+    },
+    Stiff: {
+      label: 'Reserved',
+      shell: 'border-neutral-300 bg-neutral-100 text-neutral-800',
+      marker: 'bg-neutral-700 text-white',
+      Icon: CircleEllipsis,
+      animate: { scale: [1, 0.98, 1], y: [0, 1, 0] },
+    },
+    Awkward: {
+      label: 'Unsure',
+      shell: 'border-orange-400 bg-orange-50 text-orange-950 shadow-[0_10px_24px_rgba(234,88,12,0.12)]',
+      marker: 'bg-orange-600 text-white',
+      Icon: CircleHelp,
+      animate: { rotate: [0, -5, 0] },
+    },
+    Incorrect: {
+      label: 'Misunderstood',
+      shell: 'border-rose-400 bg-rose-50 text-rose-950 shadow-[0_10px_24px_rgba(190,18,60,0.12)]',
+      marker: 'bg-rose-700 text-white',
+      Icon: AlertTriangle,
+      animate: { x: [0, -5, 4, -3, 0] },
+    },
+  }[rating] || {
+    label: 'Listening',
+    shell: 'border-indigo-200 bg-[#34304f] text-white shadow-[0_10px_26px_rgba(52,48,79,0.18)]',
+    marker: 'bg-white text-[#34304f]',
+    Icon: CircleEllipsis,
+    animate: { scale: 1 },
+  };
+  const MarkerIcon = state.Icon;
+
+  return (
+    <div className="flex shrink-0 items-center gap-3">
+      <motion.div
+        key={rating || 'listening'}
+        animate={state.animate}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        className={`relative flex shrink-0 items-center justify-center border font-bold tracking-[0.12em] ${state.shell} ${compact ? 'h-11 w-11 rounded-xl text-[10px]' : 'h-16 w-16 rounded-[20px] text-sm'}`}
+      >
+        ST
+        <span className={`absolute -bottom-1 -right-1 flex items-center justify-center rounded-full ring-2 ring-white ${state.marker} ${compact ? 'h-5 w-5' : 'h-6 w-6'}`}>
+          <MarkerIcon className={compact ? 'h-3 w-3' : 'h-3.5 w-3.5'} />
+        </span>
+      </motion.div>
+      <div className="min-w-0">
+        <div className="text-xs font-medium uppercase tracking-[0.14em] text-neutral-500">Staff</div>
+        <div className="whitespace-nowrap text-sm font-semibold text-[#2b241f]">{state.label}</div>
+      </div>
+    </div>
+  );
+}
+
 function isStrongPassword(password) {
   const normalized = password.trim().toLowerCase();
   return password.length >= 8 && normalized.length > 0 && !WEAK_PASSWORDS.has(normalized);
+}
+
+function clampArrayIndex(index, length) {
+  if (!Number.isInteger(index) || length <= 0) return 0;
+  return Math.max(0, Math.min(length - 1, index));
 }
 
 function PasswordInput({ value, onChange, placeholder, visible, onToggle }) {
@@ -2650,6 +2799,8 @@ export default function ChapterUIPrototype() {
   const [selectedOptionId, setSelectedOptionId] = useState(null);
   const [nodeSelections, setNodeSelections] = useState(persisted?.nodeSelections || {});
   const [showFeedback, setShowFeedback] = useState(false);
+  const [chapter6Run, setChapter6Run] = useState({});
+  const [betterVersionOpen, setBetterVersionOpen] = useState(true);
   const [showPinyin, setShowPinyin] = useState(persisted?.showPinyin ?? true);
   const [showEnglish, setShowEnglish] = useState(persisted?.showEnglish ?? true);
   const [reviewShowPinyin, setReviewShowPinyin] = useState(true);
@@ -2699,28 +2850,64 @@ export default function ChapterUIPrototype() {
   const chineseOptionClass = fontScale === 'sm' ? 'text-base' : fontScale === 'lg' ? 'text-xl' : 'text-lg';
   const glossaryTitleClass = fontScale === 'sm' ? 'text-xl' : fontScale === 'lg' ? 'text-3xl' : 'text-2xl';
 
-  const currentChapter = chapters[currentChapterIndex];
-  const currentNode = currentChapter.nodes[currentNodeIndex];
+  const safeCurrentChapterIndex = clampArrayIndex(currentChapterIndex, chapters.length);
+  const currentChapter = chapters[safeCurrentChapterIndex] || chapters[0];
+  const safeCurrentNodeIndex = clampArrayIndex(currentNodeIndex, currentChapter?.nodes?.length || 0);
+  const currentNode = currentChapter?.nodes?.[safeCurrentNodeIndex] || {
+    id: 0,
+    mission: '',
+    npc: '',
+    npcLineZh: '',
+    npcLinePy: '',
+    npcLineEn: '',
+    npcGlossary: [],
+    options: [],
+  };
+  const isChapter6Prototype = currentChapter.id === 'chapter6';
   const currentDeviceLabel = useMemo(() => getCurrentDeviceLabel(), []);
   const displayOptions = useMemo(() => {
-    const shuffled = shuffleArray(currentNode.options);
+    const shuffled = shuffleArray(Array.isArray(currentNode.options) ? currentNode.options : []);
     const labels = ['A', 'B', 'C', 'D'];
     return shuffled.map((option, index) => ({
       ...option,
       displayId: labels[index] || option.id,
     }));
-  }, [currentChapterIndex, currentNodeIndex]);
+  }, [currentNode, safeCurrentChapterIndex, safeCurrentNodeIndex]);
   const selectedOption = useMemo(
-    () => currentNode.options.find((o) => o.id === selectedOptionId) || null,
+    () => (Array.isArray(currentNode.options) ? currentNode.options : []).find((o) => o.id === selectedOptionId) || null,
     [currentNode, selectedOptionId]
   );
+  const chapter6Metrics = useMemo(() => calculateChapter6RunMetrics(chapter6Run), [chapter6Run]);
+  const chapter6LatestRating = useMemo(() => {
+    const submittedIndexes = Object.keys(chapter6Run).map(Number).sort((a, b) => b - a);
+    return chapter6Run[safeCurrentNodeIndex]?.rating || chapter6Run[submittedIndexes[0]]?.rating || null;
+  }, [chapter6Run, safeCurrentNodeIndex]);
+  const correctionDetails = isChapter6Prototype && selectedOption?.correction
+    ? CHAPTER6_CORRECTION_DETAILS[selectedOption.correction] || null
+    : null;
   const activeNote = currentChapter.grammarNotes.find((note) => note.id === activeNoteId) || currentChapter.grammarNotes[0];
   const selectedGlossary = selectedGlossaryKey ? glossary[selectedGlossaryKey] : null;
 
-  const chapterProgress = ((currentNodeIndex + 1) / currentChapter.nodes.length) * 100;
-  const overallProgress = ((currentChapterIndex + 1) / chapters.length) * 100;
-  const isLastNode = currentNodeIndex === currentChapter.nodes.length - 1;
-  const isLastChapter = currentChapterIndex === chapters.length - 1;
+  const chapterProgress = ((safeCurrentNodeIndex + 1) / currentChapter.nodes.length) * 100;
+  const overallProgress = ((safeCurrentChapterIndex + 1) / chapters.length) * 100;
+  const isLastNode = safeCurrentNodeIndex === currentChapter.nodes.length - 1;
+  const isLastChapter = safeCurrentChapterIndex === chapters.length - 1;
+  const chapter6ResultTier = useMemo(() => {
+    if (!isChapter6Prototype || !isLastNode || !chapter6Run[safeCurrentNodeIndex]) return null;
+    const choices = Object.values(chapter6Run);
+    const incorrectCount = choices.filter((choice) => choice.rating === 'Incorrect').length;
+    const naturalCount = choices.filter((choice) => choice.rating === 'Natural').length;
+    if (chapter6Metrics.socialComfort < 40 || chapter6Metrics.naturalness < 40 || incorrectCount >= 2) {
+      return CHAPTER6_TIER_REWARDS.needsRepair;
+    }
+    if (chapter6Metrics.socialComfort >= 80 && chapter6Metrics.naturalness >= 80 && incorrectCount === 0 && naturalCount >= 2) {
+      return CHAPTER6_TIER_REWARDS.nativeRecovery;
+    }
+    if (chapter6Metrics.socialComfort >= 65 && chapter6Metrics.naturalness >= 65 && incorrectCount < 2) {
+      return CHAPTER6_TIER_REWARDS.strongRecovery;
+    }
+    return CHAPTER6_TIER_REWARDS.usefulRecovery;
+  }, [chapter6Metrics, chapter6Run, safeCurrentNodeIndex, isChapter6Prototype, isLastNode]);
   const chapterOverview = useMemo(() => {
     const overview = chapters.map((chapter, index) => {
       const completed = chapter.nodes.filter((_, nodeIndex) => nodeSelections[makeNodeKey(index, nodeIndex)]).length;
@@ -2763,8 +2950,8 @@ export default function ChapterUIPrototype() {
 
   const appState = useMemo(() => ({
     currentView,
-    currentChapterIndex,
-    currentNodeIndex,
+    currentChapterIndex: safeCurrentChapterIndex,
+    currentNodeIndex: safeCurrentNodeIndex,
     showPinyin,
     showEnglish,
     trust,
@@ -2781,8 +2968,8 @@ export default function ChapterUIPrototype() {
     nodeSelections,
   }), [
     currentView,
-    currentChapterIndex,
-    currentNodeIndex,
+    safeCurrentChapterIndex,
+    safeCurrentNodeIndex,
     showPinyin,
     showEnglish,
     trust,
@@ -2799,6 +2986,23 @@ export default function ChapterUIPrototype() {
   ]);
   appStateRef.current = appState;
 
+  useEffect(() => {
+    if (currentChapterIndex === safeCurrentChapterIndex && currentNodeIndex === safeCurrentNodeIndex) return;
+
+    setCurrentChapterIndex(safeCurrentChapterIndex);
+    setCurrentNodeIndex(safeCurrentNodeIndex);
+    setSelectedOptionId(null);
+    setShowFeedback(false);
+    setSelectedGlossaryKey(null);
+    if (currentChapter.id === 'chapter6') setChapter6Run({});
+  }, [
+    currentChapter.id,
+    currentChapterIndex,
+    currentNodeIndex,
+    safeCurrentChapterIndex,
+    safeCurrentNodeIndex,
+  ]);
+
   const isCollected = (id) => collected.some((item) => item.id === id);
 
   const toggleCollected = (item) => {
@@ -2811,12 +3015,8 @@ export default function ChapterUIPrototype() {
   const applyAppState = (state) => {
     if (!state || typeof state !== 'object') return;
 
-    const nextChapterIndex = Number.isInteger(state.currentChapterIndex)
-      ? Math.max(0, Math.min(chapters.length - 1, state.currentChapterIndex))
-      : 0;
-    const nextNodeIndex = Number.isInteger(state.currentNodeIndex)
-      ? Math.max(0, Math.min(chapters[nextChapterIndex].nodes.length - 1, state.currentNodeIndex))
-      : 0;
+    const nextChapterIndex = clampArrayIndex(state.currentChapterIndex, chapters.length);
+    const nextNodeIndex = clampArrayIndex(state.currentNodeIndex, chapters[nextChapterIndex].nodes.length);
 
     setCurrentView(typeof state.currentView === 'string' ? state.currentView : 'home');
     setCurrentChapterIndex(nextChapterIndex);
@@ -3002,27 +3202,44 @@ export default function ChapterUIPrototype() {
   }, [appState, cloudSyncReady, session?.user?.id]);
 
   useEffect(() => {
-    const savedSelection = nodeSelections[makeNodeKey(currentChapterIndex, currentNodeIndex)] || null;
+    const savedSelection = nodeSelections[makeNodeKey(safeCurrentChapterIndex, safeCurrentNodeIndex)] || null;
     setSelectedOptionId(savedSelection);
-  }, [currentChapterIndex, currentNodeIndex, nodeSelections]);
+  }, [nodeSelections, safeCurrentChapterIndex, safeCurrentNodeIndex]);
+
+  useEffect(() => {
+    setBetterVersionOpen(true);
+    if (isChapter6Prototype) setChapter6Run({});
+  }, [isChapter6Prototype]);
 
   const handleSelectOption = (optionId) => {
-    const key = makeNodeKey(currentChapterIndex, currentNodeIndex);
+    const key = makeNodeKey(safeCurrentChapterIndex, safeCurrentNodeIndex);
     setSelectedOptionId(optionId);
     setNodeSelections((prev) => ({ ...prev, [key]: optionId }));
   };
 
   const switchChapter = (index) => {
-    setCurrentChapterIndex(index);
+    const nextChapterIndex = clampArrayIndex(index, chapters.length);
+    if (chapters[nextChapterIndex].id === 'chapter6') setChapter6Run({});
+    setCurrentChapterIndex(nextChapterIndex);
     setCurrentNodeIndex(0);
     setShowFeedback(false);
     setSelectedGlossaryKey(null);
-    setActiveNoteId(chapters[index].grammarNotes[0].id);
+    setActiveNoteId(chapters[nextChapterIndex].grammarNotes[0].id);
     setCurrentView('story');
   };
 
   const handleSubmit = () => {
     if (!selectedOption) return;
+    if (isChapter6Prototype) {
+      setChapter6Run((prev) => ({
+        ...Object.fromEntries(Object.entries(prev).filter(([key]) => Number(key) < safeCurrentNodeIndex)),
+        [safeCurrentNodeIndex]: {
+          rating: selectedOption.rating,
+          relationship: selectedOption.relationship,
+        },
+      }));
+      setBetterVersionOpen(selectedOption.rating !== 'Natural');
+    }
     setShowFeedback(true);
     setTrust((prev) => Math.max(0, Math.min(100, prev + selectedOption.relationship)));
     setMastery((prev) => Math.max(0, Math.min(100, prev + selectedOption.score * 8)));
@@ -3046,24 +3263,24 @@ export default function ChapterUIPrototype() {
   const handleContinue = () => {
     setShowFeedback(false);
     if (!isLastNode) {
-      setCurrentNodeIndex((prev) => prev + 1);
+      setCurrentNodeIndex(safeCurrentNodeIndex + 1);
       return;
     }
     if (!isLastChapter) {
-      switchChapter(currentChapterIndex + 1);
+      switchChapter(safeCurrentChapterIndex + 1);
     }
   };
 
   const handlePreviousNode = () => {
-    if (currentNodeIndex === 0) return;
+    if (safeCurrentNodeIndex === 0) return;
     setShowFeedback(false);
-    setCurrentNodeIndex((prev) => Math.max(0, prev - 1));
+    setCurrentNodeIndex(safeCurrentNodeIndex - 1);
   };
 
   const handleNextNode = () => {
     if (isLastNode) return;
     setShowFeedback(false);
-    setCurrentNodeIndex((prev) => Math.min(currentChapter.nodes.length - 1, prev + 1));
+    setCurrentNodeIndex(safeCurrentNodeIndex + 1);
   };
 
   const handleAuthSubmit = async (mode) => {
@@ -3335,6 +3552,8 @@ export default function ChapterUIPrototype() {
     setSelectedOptionId(null);
     setNodeSelections({});
     setShowFeedback(false);
+    setChapter6Run({});
+    setBetterVersionOpen(true);
     setShowPinyin(true);
     setShowEnglish(true);
     setTrust(30);
@@ -3944,6 +4163,11 @@ export default function ChapterUIPrototype() {
             <Progress value={chapterProgress} className="h-2" />
 
             <motion.div layout className="mt-5 rounded-[24px] bg-[#f3eadf]/85 p-4 sm:p-5 md:mt-6 md:rounded-[28px] md:p-6">
+              {isChapter6Prototype && (
+                <div className="mb-5 border-b border-[#d8cbb8] pb-4">
+                  <StaffAvatar rating={chapter6LatestRating} />
+                </div>
+              )}
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3 text-sm text-neutral-600">
                 <div className="flex items-center gap-2">
                   <MessageSquareQuote className="h-4 w-4 text-[#8a6a28]" />
@@ -4492,7 +4716,8 @@ export default function ChapterUIPrototype() {
             >
               <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[#d8c9b8] md:hidden" />
               <div className="flex items-start justify-between gap-4">
-                <div>
+                {isChapter6Prototype && <StaffAvatar rating={selectedOption.rating} compact />}
+                <div className="min-w-0 flex-1">
                   <div className="mb-2 text-sm font-medium text-[#8a6a28]">Teacher feedback</div>
                   <div className="mb-2 flex items-center gap-2">
                     {selectedOption.rating === 'Natural' ? (
@@ -4537,13 +4762,98 @@ export default function ChapterUIPrototype() {
               </div>
 
               {selectedOption.correction && (
-                <div className="mt-4 rounded-[24px] border border-dashed border-[#d8cbb8] bg-white/55 p-4">
-                  <div className="mb-2 flex items-center justify-between gap-2 text-sm font-medium">
-                  <span>Try this more natural version</span>
-                  <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.correction.${selectedOption.rating.toLowerCase()}`} text={selectedOption.correction} small />
-                </div>
-                <p className="text-xl font-semibold leading-snug">{selectedOption.correction}</p>
-                </div>
+                isChapter6Prototype ? (
+                  <div className="mt-4 overflow-hidden rounded-[24px] border border-[#d8cbb8] bg-white/60">
+                    <button
+                      type="button"
+                      onClick={() => setBetterVersionOpen((open) => !open)}
+                      className="flex min-h-12 w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm font-semibold text-[#2b241f] transition hover:bg-[#fff8ef]"
+                      aria-expanded={betterVersionOpen}
+                    >
+                      <span>Try this more natural version</span>
+                      <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-[#6f6257]">
+                        {betterVersionOpen ? 'Close' : 'Open'}
+                        {betterVersionOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      </span>
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {betterVersionOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.24, ease: 'easeOut' }}
+                          className="overflow-hidden"
+                        >
+                          <div className="border-t border-[#e7dccd] px-4 pb-4 pt-3">
+                            <div className="flex items-start justify-between gap-3">
+                              <p className="text-xl font-semibold leading-snug text-[#2b241f]">{selectedOption.correction}</p>
+                              <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.correction.${selectedOption.rating.toLowerCase()}`} text={selectedOption.correction} small />
+                            </div>
+                            {showPinyin && correctionDetails?.py && <p className="mt-2 text-sm leading-6 text-neutral-500">{correctionDetails.py}</p>}
+                            {showEnglish && correctionDetails?.en && <p className="mt-1 text-sm leading-6 text-neutral-700">{correctionDetails.en}</p>}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ) : (
+                  <div className="mt-4 rounded-[24px] border border-dashed border-[#d8cbb8] bg-white/55 p-4">
+                    <div className="mb-2 flex items-center justify-between gap-2 text-sm font-medium">
+                      <span>Try this more natural version</span>
+                      <AudioButton audioId={`${currentChapter.id}.node${currentNode.id}.correction.${selectedOption.rating.toLowerCase()}`} text={selectedOption.correction} small />
+                    </div>
+                    <p className="text-xl font-semibold leading-snug">{selectedOption.correction}</p>
+                  </div>
+                )
+              )}
+
+              {chapter6ResultTier && (
+                <motion.section
+                  initial={{ opacity: 0, y: 12, scale: 0.99 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  className="mt-5 overflow-hidden rounded-[24px] border border-indigo-200 bg-[linear-gradient(135deg,_#f5f3fa,_#fff8ea)]"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-indigo-200/70 px-4 py-3">
+                    <div>
+                      <div className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700">{chapter6ResultTier.tier}</div>
+                      <h4 className="mt-0.5 text-lg font-semibold text-[#25222f]">{chapter6ResultTier.label}</h4>
+                    </div>
+                    <div className="flex gap-2 text-xs font-semibold text-[#25222f]">
+                      <span className="rounded-full bg-white/80 px-2.5 py-1">Comfort {chapter6Metrics.socialComfort}</span>
+                      <span className="rounded-full bg-white/80 px-2.5 py-1">Naturalness {chapter6Metrics.naturalness}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-3 px-4 py-4">
+                    <p className="text-sm leading-6 text-neutral-700">{chapter6ResultTier.intro}</p>
+                    <div className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-800">What you earned in this run</div>
+                    <div className="text-sm font-semibold text-[#25222f]">{chapter6ResultTier.title}</div>
+                    {chapter6ResultTier.examples ? (
+                      <div className="space-y-3">
+                        {chapter6ResultTier.examples.map((example) => (
+                          <div key={example.zh} className="border-l-2 border-indigo-300 pl-3">
+                            <div className="flex items-start gap-2">
+                              <div className="min-w-0 flex-1 text-lg font-semibold leading-snug text-[#25222f]">{example.zh}</div>
+                              <div className="shrink-0"><AudioButton text={example.zh} /></div>
+                            </div>
+                            {showPinyin && <div className="mt-1 text-sm leading-5 text-indigo-700/75">{example.py}</div>}
+                            {showEnglish && <div className="mt-1 text-sm leading-5 text-neutral-600">{example.en}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="border-l-2 border-indigo-300 pl-3">
+                        <div className="flex items-start gap-2">
+                          <div className="min-w-0 flex-1 text-lg font-semibold leading-snug text-[#25222f]">{chapter6ResultTier.zh}</div>
+                          <div className="shrink-0"><AudioButton text={chapter6ResultTier.zh} /></div>
+                        </div>
+                        {showPinyin && <div className="mt-1 text-sm leading-5 text-indigo-700/75">{chapter6ResultTier.py}</div>}
+                        {showEnglish && <div className="mt-1 text-sm leading-5 text-neutral-600">{chapter6ResultTier.en}</div>}
+                      </div>
+                    )}
+                  </div>
+                </motion.section>
               )}
 
               <div className="mt-6 flex flex-col-reverse gap-3 md:flex-row md:justify-between">
