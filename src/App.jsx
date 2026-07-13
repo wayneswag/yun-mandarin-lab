@@ -564,7 +564,7 @@ const CHAPTER6_ENDINGS = {
   },
 };
 
-function clampChapter6Metric(value) {
+function clampSceneMetric(value) {
   return Math.max(0, Math.min(100, value));
 }
 
@@ -575,20 +575,48 @@ function calculateSceneRunMetrics(run) {
     .reduce((metrics, index) => {
       const choice = run[index];
       return {
-        socialComfort: clampChapter6Metric(metrics.socialComfort + choice.relationship),
-        naturalness: clampChapter6Metric(metrics.naturalness + SCENE_NATURALNESS_DELTA[choice.rating]),
+        socialComfort: clampSceneMetric(metrics.socialComfort + choice.relationship),
+        naturalness: clampSceneMetric(metrics.naturalness + SCENE_NATURALNESS_DELTA[choice.rating]),
       };
     }, { socialComfort: 50, naturalness: 50 });
 }
 
 function applySceneMetricChoice(metrics, choice) {
   return {
-    socialComfort: clampChapter6Metric(metrics.socialComfort + choice.relationship),
-    naturalness: clampChapter6Metric(metrics.naturalness + SCENE_NATURALNESS_DELTA[choice.rating]),
+    socialComfort: clampSceneMetric(metrics.socialComfort + choice.relationship),
+    naturalness: clampSceneMetric(metrics.naturalness + SCENE_NATURALNESS_DELTA[choice.rating]),
   };
 }
 
-function StaffAvatar({ rating, compact = false }) {
+function resolveSpeakerHeader(chapter, node) {
+  const role = firstAvailableText(
+    node?.speakerRole,
+    node?.npcRole,
+    node?.speaker,
+    node?.npc,
+    chapter?.speakerRole,
+    chapter?.npcRole,
+    chapter?.speaker
+  );
+  if (!role) return null;
+
+  const configuredLabel = firstAvailableText(node?.avatarLabel, node?.speakerAvatarLabel, chapter?.avatarLabel);
+  const neutralLabel = role
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
+  return {
+    role,
+    avatarLabel: configuredLabel || (neutralLabel.length > 1 ? neutralLabel : role.slice(0, 2).toUpperCase()),
+  };
+}
+
+function SpeakerHeader({ speaker, rating, compact = false }) {
+  if (!speaker?.role || !speaker?.avatarLabel) return null;
   const state = {
     Natural: {
       label: 'Friendly',
@@ -628,20 +656,25 @@ function StaffAvatar({ rating, compact = false }) {
   const MarkerIcon = state.Icon;
 
   return (
-    <div className="flex shrink-0 items-center gap-3">
+    <div
+      data-speaker-role={speaker.role}
+      data-speaker-status={state.label}
+      data-speaker-avatar={speaker.avatarLabel}
+      className="flex shrink-0 items-center gap-3"
+    >
       <motion.div
         key={rating || 'listening'}
         animate={state.animate}
         transition={{ duration: 0.4, ease: 'easeOut' }}
         className={`relative flex shrink-0 items-center justify-center border font-bold tracking-[0.12em] ${state.shell} ${compact ? 'h-11 w-11 rounded-xl text-[10px]' : 'h-16 w-16 rounded-[20px] text-sm'}`}
       >
-        ST
+        {speaker.avatarLabel}
         <span className={`absolute -bottom-1 -right-1 flex items-center justify-center rounded-full ring-2 ring-white ${state.marker} ${compact ? 'h-5 w-5' : 'h-6 w-6'}`}>
           <MarkerIcon className={compact ? 'h-3 w-3' : 'h-3.5 w-3.5'} />
         </span>
       </motion.div>
       <div className="min-w-0">
-        <div className="text-xs font-medium uppercase tracking-[0.14em] text-neutral-500">Staff</div>
+        <div className="text-xs font-medium uppercase tracking-[0.14em] text-neutral-500">{speaker.role}</div>
         <div className="whitespace-nowrap text-sm font-semibold text-[#2b241f]">{state.label}</div>
       </div>
     </div>
@@ -3222,6 +3255,332 @@ const chapters = [
   },
 ];
 
+// Explicit authored pronunciation and meaning support for the Chinese that each
+// Teacher note teaches or contrasts. Nothing here is generated from note prose.
+const TEACHER_NOTE_SUPPORT = Object.freeze({
+  'chapter1:newlai': {
+    terms: [{ zh: '新来的', py: 'xīn lái de', en: 'newly arrived; new here', audioText: '新来的' }],
+    pattern: { zh: '新 + 来 + 的', py: 'xīn + lái + de', en: 'new + come + attributive marker', audioText: '新，来，的' },
+    example: { zh: '新来的室友', py: 'xīn lái de shìyǒu', en: 'newly arrived roommate', audioText: '新来的室友' },
+  },
+  'chapter1:topic-comment': {
+    terms: [
+      { zh: '中文', py: 'Zhōngwén', en: 'Chinese language', audioText: '中文' },
+      { zh: '说得怎么样', py: 'shuō de zěnmeyàng', en: 'how well someone speaks', audioText: '说得怎么样' },
+    ],
+    pattern: { zh: '中文 + 说得怎么样？', py: 'Zhōngwén + shuō de zěnmeyàng?', en: 'topic + how well it is done', audioText: '中文说得怎么样？' },
+  },
+  'chapter1:shuode': {
+    terms: [
+      { zh: '得', py: 'de', en: 'complement marker for degree or result', audioText: '得' },
+      { zh: '说得怎么样', py: 'shuō de zěnmeyàng', en: 'how well someone speaks', audioText: '说得怎么样' },
+    ],
+    example: { zh: '写得很好 / 做得不错 / 跑得很快', py: 'xiě de hěn hǎo / zuò de búcuò / pǎo de hěn kuài', en: 'write well / do well / run fast', audioText: '写得很好，做得不错，跑得很快。' },
+  },
+  'chapter2:you-time': {
+    terms: [{ zh: '有时间', py: 'yǒu shíjiān', en: 'have time; be available', audioText: '有时间' }],
+    example: { zh: '你明天有时间吗？', py: 'Nǐ míngtiān yǒu shíjiān ma?', en: 'Are you free tomorrow?', audioText: '你明天有时间吗？' },
+  },
+  'chapter2:possible-future': {
+    terms: [
+      { zh: '可能', py: 'kěnéng', en: 'possibly; maybe', audioText: '可能' },
+      { zh: '会', py: 'huì', en: 'will or may; marks a predicted outcome here', audioText: '会' },
+    ],
+    example: { zh: '我明天可能会晚一点', py: 'Wǒ míngtiān kěnéng huì wǎn yìdiǎn', en: 'I may be a little late tomorrow', audioText: '我明天可能会晚一点。' },
+  },
+  'chapter2:yaoburan': {
+    terms: [{ zh: '要不然', py: 'yàoburán', en: 'otherwise; how about this instead', audioText: '要不然' }],
+    example: { zh: '要不然我们改时间吧？', py: 'Yàoburán wǒmen gǎi shíjiān ba?', en: 'Otherwise, shall we change the time?', audioText: '要不然我们改时间吧？' },
+  },
+  'chapter2:buhaoyisi': {
+    terms: [
+      { zh: '不好意思', py: 'bù hǎoyìsi', en: 'excuse me; sorry', audioText: '不好意思' },
+      { zh: '对不起', py: 'duìbuqǐ', en: 'sorry; a stronger or heavier apology', audioText: '对不起' },
+    ],
+  },
+  'chapter3:jiwei-weizi': {
+    terms: [
+      { zh: '几位', py: 'jǐ wèi', en: 'how many people; how many guests', audioText: '几位' },
+      { zh: '位子', py: 'wèizi', en: 'seat; seating', audioText: '位子' },
+    ],
+    example: { zh: '有没有位子', py: 'yǒu méiyǒu wèizi', en: 'are there any seats or tables available', audioText: '有没有位子' },
+  },
+  'chapter3:lai-order': {
+    terms: [{ zh: '来', py: 'lái', en: 'let me have; let us get', audioText: '来' }],
+    example: { zh: '来一份… / 再来两碗… / 先来一个…', py: 'lái yí fèn... / zài lái liǎng wǎn... / xiān lái yí ge...', en: 'one order of... / two more bowls of... / first, one...', audioText: '来一份，再来两碗，先来一个。' },
+  },
+  'chapter3:yigong-dabao': {
+    terms: [
+      { zh: '一共', py: 'yígòng', en: 'in total', audioText: '一共' },
+      { zh: '打包', py: 'dǎbāo', en: 'pack food to go', audioText: '打包' },
+      { zh: '刷卡', py: 'shuākǎ', en: 'pay by card', audioText: '刷卡' },
+    ],
+  },
+  'chapter4:kanqilai-state': {
+    terms: [{ zh: '看起来', py: 'kàn qǐlái', en: 'looks; seems', audioText: '看起来' }],
+    example: { zh: '你看起来迷路了', py: 'Nǐ kàn qǐlái mílù le', en: 'You look lost', audioText: '你看起来迷路了。' },
+  },
+  'chapter4:zenme-zou': {
+    terms: [{ zh: '怎么走', py: 'zěnme zǒu', en: 'how to get there; which way to go', audioText: '怎么走' }],
+    pattern: { zh: '去 + place + 怎么走？', py: 'qù + place + zěnme zǒu?', en: 'How do I get to [place]?', audioText: '去地铁站怎么走？' },
+  },
+  'chapter4:yihou-jiu-result': {
+    terms: [
+      { zh: '以后', py: 'yǐhòu', en: 'after; afterward', audioText: '以后' },
+      { zh: '就到了', py: 'jiù dào le', en: 'then you will be there', audioText: '就到了' },
+    ],
+    example: { zh: '左转以后就到了', py: 'Zuǒ zhuǎn yǐhòu jiù dào le', en: 'After you turn left, you will be there', audioText: '左转以后就到了。' },
+  },
+  'chapter4:confirm-directions': {
+    terms: [
+      { zh: '听不懂', py: 'tīng bù dǒng', en: 'cannot understand what one hears', audioText: '听不懂' },
+      { zh: '不好意思', py: 'bù hǎoyìsi', en: 'excuse me; sorry', audioText: '不好意思' },
+      { zh: '我没听清楚', py: 'Wǒ méi tīng qīngchu', en: 'I did not hear clearly', audioText: '我没听清楚。' },
+      { zh: '可以再说一遍吗？', py: 'Kěyǐ zài shuō yí biàn ma?', en: 'Could you say it again?', audioText: '可以再说一遍吗？' },
+    ],
+  },
+  'chapter5:duoshao-qian': {
+    terms: [
+      { zh: '多少钱', py: 'duōshao qián', en: 'how much money; what price', audioText: '多少钱' },
+      { zh: '请问', py: 'qǐngwèn', en: 'excuse me; may I ask', audioText: '请问' },
+    ],
+  },
+  'chapter5:yidianr-shopping': {
+    terms: [
+      { zh: '有点儿贵 / 太贵了', py: 'yǒudiǎnr guì / tài guì le', en: 'a little expensive / too expensive', audioText: '有点儿贵。太贵了。' },
+      { zh: '便宜一点', py: 'piányi yìdiǎn', en: 'a little cheaper', audioText: '便宜一点' },
+    ],
+    example: { zh: '有点儿太贵了', py: 'yǒudiǎnr tài guì le', en: 'a little too expensive; a casual combined form', audioText: '有点儿太贵了。' },
+  },
+  'chapter5:kankan-soft-action': {
+    terms: [
+      { zh: '看看', py: 'kànkan', en: 'take a look', audioText: '看看' },
+      { zh: '看', py: 'kàn', en: 'look; see', audioText: '看' },
+    ],
+    example: { zh: '我想看看别的', py: 'Wǒ xiǎng kànkan bié de', en: 'I want to look at something else', audioText: '我想看看别的。' },
+  },
+  'chapter5:payment-choice': {
+    terms: [{ zh: '刷卡还是现金？', py: 'Shuākǎ háishi xiànjīn?', en: 'Card or cash?', audioText: '刷卡还是现金？' }],
+    pattern: { zh: '可以 + verb + 吗', py: 'kěyǐ + verb + ma', en: 'Can or may [someone] do something?', audioText: '可以刷卡吗？' },
+    example: { zh: '可以刷卡吗？ / 可以付现金吗？', py: 'Kěyǐ shuākǎ ma? / Kěyǐ fù xiànjīn ma?', en: 'Can I pay by card? / Can I pay cash?', audioText: '可以刷卡吗？可以付现金吗？' },
+  },
+  'chapter6:soft-help-request': {
+    terms: [
+      { zh: '帮我一下', py: 'bāng wǒ yíxià', en: 'help me for a moment', audioText: '帮我一下' },
+      { zh: '一下', py: 'yíxià', en: 'a little; briefly; a request softener', audioText: '一下' },
+      { zh: '不好意思', py: 'bù hǎoyìsi', en: 'excuse me; sorry', audioText: '不好意思' },
+    ],
+    pattern: { zh: '可以 + verb + 吗', py: 'kěyǐ + verb + ma', en: 'Could or can [someone] do something?', audioText: '可以帮我一下吗？' },
+  },
+  'chapter6:mei-dian-le': {
+    terms: [
+      { zh: '没电 / 没电了', py: 'méi diàn / méi diàn le', en: 'no power / has run out of power', audioText: '没电。没电了。' },
+      { zh: '了', py: 'le', en: 'change-of-state particle here', audioText: '了' },
+    ],
+    example: { zh: '我的手机没电了', py: 'Wǒ de shǒujī méi diàn le', en: 'My phone is out of battery', audioText: '我的手机没电了。' },
+  },
+  'chapter6:zhao-bu-dao': {
+    terms: [
+      { zh: '找', py: 'zhǎo', en: 'look for', audioText: '找' },
+      { zh: '到', py: 'dào', en: 'reach; achieve a result', audioText: '到' },
+      { zh: '找不到', py: 'zhǎo bú dào', en: 'cannot find', audioText: '找不到' },
+      { zh: '没有', py: 'méiyǒu', en: 'not have; there is not', audioText: '没有' },
+    ],
+  },
+  'chapter6:time-place-guo': {
+    terms: [{ zh: '过', py: 'guo', en: 'past-experience marker', audioText: '过' }],
+    pattern: { zh: '半小时前 + 我在咖啡馆 + 买过东西', py: 'bàn ge xiǎoshí qián + wǒ zài kāfēiguǎn + mǎi guo dōngxi', en: 'time + place + past experience', audioText: '半小时前，我在咖啡馆买过东西。' },
+  },
+  'chapter6:describe-object': {
+    terms: [
+      { zh: '是一个……', py: 'shì yí ge...', en: 'it is a...', audioText: '是一个小黑色钱包。' },
+      { zh: '里面有', py: 'lǐmiàn yǒu', en: 'there is or are inside', audioText: '里面有' },
+    ],
+  },
+  'chapter6:clarify-not-a': {
+    terms: [
+      { zh: '不是 A', py: 'bú shì A', en: 'it is not A', audioText: '不是手机' },
+      { zh: '是 B', py: 'shì B', en: 'it is B', audioText: '是钱包' },
+    ],
+    pattern: { zh: '不是 A，是 B', py: 'bú shì A, shì B', en: 'it is not A; it is B', audioText: '不是手机，是钱包。' },
+  },
+  'chapter6:practical-next-step': {
+    terms: [
+      { zh: '确认', py: 'quèrèn', en: 'confirm; verify', audioText: '确认' },
+      { zh: '联系', py: 'liánxì', en: 'contact; get in touch with', audioText: '联系' },
+      { zh: '失物登记表', py: 'shīwù dēngjìbiǎo', en: 'lost-property registration form', audioText: '失物登记表' },
+    ],
+  },
+  'chapter6:thank-after-help': {
+    terms: [
+      { zh: '谢谢', py: 'xièxie', en: 'thank you', audioText: '谢谢' },
+      { zh: '太谢谢了', py: 'tài xièxie le', en: 'thank you so much', audioText: '太谢谢了' },
+      { zh: '麻烦你了', py: 'máfan nǐ le', en: 'sorry to trouble you; thank you for the effort', audioText: '麻烦你了' },
+    ],
+  },
+});
+
+function getTeacherNoteSupport(chapter, note) {
+  const support = TEACHER_NOTE_SUPPORT[`${chapter?.id}:${note?.id}`];
+  return {
+    terms: Array.isArray(support?.terms) ? support.terms : [],
+    pattern: support?.pattern || null,
+    example: support?.example || null,
+  };
+}
+
+const DEFAULT_CHAPTER_SUPPORT = Object.freeze({
+  glossaryExamplePolicy: Object.freeze({ requiredCount: 5, initiallyVisible: 2 }),
+  teacherNoteSupport: Object.freeze({ enabled: true }),
+  betterVersionSupport: true,
+  endingLanguageSupport: null,
+  progressiveOptionMeaning: false,
+  memoryMoments: null,
+  sayBeforeReveal: null,
+  memoryReplay: null,
+  stageSupport: null,
+  branchingSupport: null,
+  reactiveAvatar: true,
+  alignedLanguageClauses: false,
+  resultTierSupport: null,
+});
+
+// Lesson content stays in the chapter data above. This map only declares which
+// shared support systems have complete, authored data and may safely render.
+const CHAPTER_SUPPORT_CONFIG = Object.freeze({
+  chapter1: Object.freeze({}),
+  chapter2: Object.freeze({}),
+  chapter3: Object.freeze({}),
+  chapter4: Object.freeze({}),
+  chapter5: Object.freeze({}),
+  chapter6: Object.freeze({
+    teacherNoteSupport: Object.freeze({
+      enabled: true,
+      decisionSupport: CHAPTER6_SUPPORT_MAP,
+      progressiveExamples: true,
+    }),
+    betterVersionSupport: true,
+    endingLanguageSupport: Object.freeze({
+      finalDecision: 6,
+      endings: CHAPTER6_ENDINGS,
+    }),
+    progressiveOptionMeaning: true,
+    memoryMoments: Object.freeze({
+      targets: CHAPTER6_MEMORY_TARGETS,
+      byDecision: CHAPTER6_RETRIEVAL_BY_DECISION,
+    }),
+    sayBeforeReveal: Object.freeze({
+      decision: 6,
+      targetId: 'polite-close',
+      prompt: 'The wallet has been recovered and the staff has helped with the phone. Say a warm final response aloud.',
+    }),
+    memoryReplay: Object.freeze({
+      targets: CHAPTER6_MEMORY_TARGETS,
+      moments: CHAPTER6_MEMORY_MOMENTS,
+    }),
+    stageSupport: Object.freeze({
+      decisionSupport: CHAPTER6_SUPPORT_MAP,
+      transitions: CHAPTER6_STAGE_TRANSITIONS,
+    }),
+    branchingSupport: Object.freeze({ nodes: CHAPTER6_BRANCH_NODES }),
+    reactiveAvatar: true,
+    alignedLanguageClauses: true,
+    resultTierSupport: Object.freeze({ rewards: CHAPTER6_TIER_REWARDS }),
+  }),
+});
+
+function getChapterSupport(chapter) {
+  const configured = CHAPTER_SUPPORT_CONFIG[chapter?.id] || {};
+  return {
+    ...DEFAULT_CHAPTER_SUPPORT,
+    ...configured,
+    glossaryExamplePolicy: {
+      ...DEFAULT_CHAPTER_SUPPORT.glossaryExamplePolicy,
+      ...(configured.glossaryExamplePolicy || {}),
+    },
+    teacherNoteSupport: {
+      ...DEFAULT_CHAPTER_SUPPORT.teacherNoteSupport,
+      ...(configured.teacherNoteSupport || {}),
+    },
+  };
+}
+
+function hasCompleteLanguageLayers(value) {
+  return ['zh', 'py', 'en'].every((field) => typeof value?.[field] === 'string' && value[field].trim());
+}
+
+function getCompleteGlossaryExamples(entry) {
+  if (!Array.isArray(entry?.examples)) return [];
+  const glossaryId = normalizeAudioKey(entry.pinyin || entry.title);
+  return entry.examples.flatMap((example, sourceIndex) => hasCompleteLanguageLayers(example)
+    ? [{
+        ...example,
+        audioId: `glossary.${glossaryId}.ex${sourceIndex + 1}`,
+        saveEnabled: true,
+      }]
+    : []);
+}
+
+function findCompleteMemoryTarget(targets, targetId) {
+  const target = Array.isArray(targets) ? targets.find((item) => item?.id === targetId) : null;
+  return hasCompleteLanguageLayers(target) && typeof target.audioText === 'string' && target.audioText.trim()
+    ? target
+    : null;
+}
+
+function normalizeMemoryMoment(moment) {
+  if (!moment) return null;
+  return {
+    ...moment,
+    contextZh: moment.contextZh || moment.npcContext || '',
+    contextPy: moment.contextPy || moment.npcContextPy || '',
+    contextEn: moment.contextEn || moment.npcContextEn || '',
+    contextAudioText: moment.contextAudioText || moment.npcContext || '',
+    taskPrompt: moment.taskPrompt || moment.prompt || '',
+  };
+}
+
+function resolveMemoryMoment(memorySupport, decisionId) {
+  const moment = normalizeMemoryMoment(memorySupport?.byDecision?.[decisionId]);
+  const target = findCompleteMemoryTarget(memorySupport?.targets, moment?.targetId);
+  const hasCompleteMoment = moment && [
+    'contextZh',
+    'contextPy',
+    'contextEn',
+    'contextAudioText',
+    'taskPrompt',
+    'patternCueZh',
+    'patternCuePy',
+    'patternCueEn',
+    'firstClue',
+  ].every((field) => typeof moment[field] === 'string' && moment[field].trim());
+  return hasCompleteMoment && target ? { moment, target } : null;
+}
+
+function getCompleteMemoryReplay(memoryReplay) {
+  if (!Array.isArray(memoryReplay?.moments)) return [];
+  return memoryReplay.moments.flatMap((sourceMoment) => {
+    const moment = normalizeMemoryMoment(sourceMoment);
+    const target = findCompleteMemoryTarget(memoryReplay.targets, moment?.targetId);
+    const hasCompleteMoment = moment && [
+      'contextZh',
+      'contextPy',
+      'contextEn',
+      'contextAudioText',
+      'taskPrompt',
+      'patternCueZh',
+      'patternCuePy',
+      'patternCueEn',
+      'firstClue',
+    ].every((field) => typeof moment[field] === 'string' && moment[field].trim());
+    return hasCompleteMoment && target ? [{ moment, target }] : [];
+  });
+}
+
+function hasCompleteEnding(ending) {
+  return hasCompleteLanguageLayers(ending);
+}
+
 function applyBetterVersionTranslations(options) {
   if (!Array.isArray(options)) return;
 
@@ -3292,29 +3651,35 @@ function validateChapter6ContentSupport() {
   });
 }
 
-function validateChapter6MemoryTargets() {
+function validateChapterMemorySupport() {
   if (!import.meta.env.DEV) return;
 
-  CHAPTER6_MEMORY_TARGETS.forEach((target) => {
-    const missingField = ['zh', 'py', 'en', 'audioText', 'firstUseDecision', 'callbackDecision']
-      .find((field) => !target[field]);
-    if (missingField) {
-      console.warn(`[Chapter 6 memory] ${target.id || 'Unknown target'} is missing ${missingField}.`);
-    }
-    if (target.firstUseDecision < 1 || target.callbackDecision > 6 || target.callbackDecision < target.firstUseDecision) {
-      console.warn(`[Chapter 6 memory] ${target.id} has an invalid first-use or callback decision.`);
-    }
-  });
+  chapters.forEach((chapter) => {
+    const support = getChapterSupport(chapter);
+    const targets = support.memoryReplay?.targets || support.memoryMoments?.targets || [];
+    const moments = support.memoryReplay?.moments || Object.values(support.memoryMoments?.byDecision || {});
 
-  CHAPTER6_MEMORY_MOMENTS.forEach((moment) => {
-    if (!CHAPTER6_MEMORY_TARGETS.some((target) => target.id === moment.targetId)) {
-      console.warn(`[Chapter 6 memory] ${moment.id} references a missing target.`);
-    }
-    const missingSupportField = ['npcContext', 'npcContextPy', 'npcContextEn', 'patternCueZh', 'patternCuePy', 'patternCueEn']
-      .find((field) => !moment[field]);
-    if (missingSupportField) {
-      console.warn(`[Chapter 6 memory] ${moment.id} is missing ${missingSupportField}.`);
-    }
+    targets.forEach((target) => {
+      const missingField = ['zh', 'py', 'en', 'audioText', 'firstUseDecision', 'callbackDecision']
+        .find((field) => !target?.[field]);
+      if (missingField) {
+        console.warn(`[${chapter.label} memory] ${target?.id || 'Unknown target'} is missing ${missingField}.`);
+      }
+      if (target.firstUseDecision < 1 || target.callbackDecision > chapter.nodes.length || target.callbackDecision < target.firstUseDecision) {
+        console.warn(`[${chapter.label} memory] ${target.id} has an invalid first-use or callback decision.`);
+      }
+    });
+
+    moments.forEach((moment) => {
+      if (!targets.some((target) => target.id === moment?.targetId)) {
+        console.warn(`[${chapter.label} memory] ${moment?.id || 'Unknown moment'} references a missing target.`);
+      }
+      const missingSupportField = ['npcContext', 'npcContextPy', 'npcContextEn', 'patternCueZh', 'patternCuePy', 'patternCueEn']
+        .find((field) => !moment?.[field]);
+      if (missingSupportField) {
+        console.warn(`[${chapter.label} memory] ${moment?.id || 'Unknown moment'} is missing ${missingSupportField}.`);
+      }
+    });
   });
 }
 
@@ -3329,7 +3694,10 @@ function collectClickableGlossaryReferences() {
     });
   };
 
-  chapters.filter((chapter) => chapter.id !== 'chapter6').forEach((chapter) => {
+  chapters.forEach((chapter) => {
+    const support = getChapterSupport(chapter);
+    const decisionSupport = support.stageSupport?.decisionSupport;
+    if (decisionSupport) return;
     chapter.nodes.forEach((node) => {
       addMatches(chapter.label, node.npcLineZh, node.npcGlossary?.slice(0, 3), `decision ${node.id} NPC`);
       node.options?.forEach((option) => {
@@ -3338,39 +3706,43 @@ function collectClickableGlossaryReferences() {
     });
   });
 
-  const chapter6TextsByDecision = new Map();
-  const addChapter6Text = (decisionId, text, source) => {
+  chapters.forEach((chapter) => {
+    const support = getChapterSupport(chapter);
+    const decisionSupport = support.stageSupport?.decisionSupport;
+    if (!decisionSupport) return;
+    const textsByDecision = new Map();
+    const addText = (decisionId, text, source) => {
     if (!text) return;
-    const texts = chapter6TextsByDecision.get(decisionId) || [];
+    const texts = textsByDecision.get(decisionId) || [];
     texts.push({ text, source });
-    chapter6TextsByDecision.set(decisionId, texts);
+    textsByDecision.set(decisionId, texts);
   };
-  const inspectChapter6Branch = (value, decisionId, source = 'branch') => {
+    const inspectBranch = (value, decisionId, source = 'branch') => {
     if (Array.isArray(value)) {
-      value.forEach((item, index) => inspectChapter6Branch(item, decisionId, `${source} ${index + 1}`));
+      value.forEach((item, index) => inspectBranch(item, decisionId, `${source} ${index + 1}`));
       return;
     }
     if (!value || typeof value !== 'object') return;
-    if (typeof value.npcLineZh === 'string') addChapter6Text(decisionId, value.npcLineZh, `${source} NPC`);
-    if (typeof value.zh === 'string') addChapter6Text(decisionId, value.zh, `${source} option ${value.id || ''}`.trim());
+    if (typeof value.npcLineZh === 'string') addText(decisionId, value.npcLineZh, `${source} NPC`);
+    if (typeof value.zh === 'string') addText(decisionId, value.zh, `${source} option ${value.id || ''}`.trim());
     Object.values(value).forEach((child) => {
-      if (child && typeof child === 'object') inspectChapter6Branch(child, decisionId, source);
+      if (child && typeof child === 'object') inspectBranch(child, decisionId, source);
     });
   };
 
-  const chapter6 = chapters.find((chapter) => chapter.id === 'chapter6');
-  chapter6?.nodes.forEach((node) => {
-    addChapter6Text(node.id, node.npcLineZh, 'base NPC');
-    node.options?.forEach((option) => addChapter6Text(node.id, option.zh, `base option ${option.id}`));
-  });
-  Object.entries(CHAPTER6_BRANCH_NODES).forEach(([decisionKey, branches]) => {
-    inspectChapter6Branch(branches, Number(decisionKey.replace('decision', '')), decisionKey);
-  });
+    chapter.nodes.forEach((node) => {
+      addText(node.id, node.npcLineZh, 'base NPC');
+      node.options?.forEach((option) => addText(node.id, option.zh, `base option ${option.id}`));
+    });
+    Object.entries(support.branchingSupport?.nodes || {}).forEach(([decisionKey, branches]) => {
+      inspectBranch(branches, Number(decisionKey.replace('decision', '')), decisionKey);
+    });
 
-  Object.entries(CHAPTER6_SUPPORT_MAP).forEach(([decisionId, support]) => {
-    const keys = [...support.primaryGlossaryKeys.slice(0, 3), ...support.recycledGlossaryKeys];
-    (chapter6TextsByDecision.get(Number(decisionId)) || []).forEach(({ text, source }) => {
-      addMatches('Chapter 6', text, keys, `decision ${decisionId} ${source}`);
+    Object.entries(decisionSupport).forEach(([decisionId, decision]) => {
+      const keys = [...decision.primaryGlossaryKeys.slice(0, 3), ...decision.recycledGlossaryKeys];
+      (textsByDecision.get(Number(decisionId)) || []).forEach(({ text, source }) => {
+        addMatches(chapter.label, text, keys, `decision ${decisionId} ${source}`);
+      });
     });
   });
 
@@ -3409,14 +3781,62 @@ function validateClickableGlossaryExamples() {
   });
 }
 
+function validateTeacherNoteTermsAndSpeakers() {
+  if (!import.meta.env.DEV) return;
+  const containsChinese = (value) => typeof value === 'string' && /[\u3400-\u9fff]/.test(value);
+
+  chapters.forEach((chapter) => {
+    (chapter.grammarNotes || []).forEach((note) => {
+      const support = getTeacherNoteSupport(chapter, note);
+      const languageItems = [
+        ...support.terms.map((item, index) => ({ item, kind: `term${index + 1}` })),
+        ...(support.pattern ? [{ item: support.pattern, kind: 'pattern' }] : []),
+        ...(support.example ? [{ item: support.example, kind: 'example' }] : []),
+      ];
+      const noteDiscussesChinese = [note.title, note.short, ...(note.body || [])].some(containsChinese);
+      if (noteDiscussesChinese && languageItems.length === 0) {
+        console.warn(`[Teacher note validation] ${chapter.id}/${note.id} discusses Chinese but has no explicit language support.`);
+      }
+      languageItems.forEach(({ item, kind }) => {
+        const context = `${chapter.id}/${note.id}/${kind}`;
+        if (containsChinese(item?.zh) && !item?.py?.trim()) {
+          console.warn(`[Teacher note validation] ${context} has Chinese but no pinyin.`);
+        }
+        if (containsChinese(item?.zh) && !item?.en?.trim()) {
+          console.warn(`[Teacher note validation] ${context} has Chinese but no English meaning.`);
+        }
+        if (containsChinese(item?.zh) && !item?.audioText?.trim()) {
+          console.warn(`[Teacher note validation] ${context} has no audio target.`);
+        }
+      });
+    });
+
+    (chapter.nodes || []).forEach((node) => {
+      const role = firstAvailableText(
+        node?.speakerRole,
+        node?.npcRole,
+        node?.speaker,
+        node?.npc,
+        chapter?.speakerRole,
+        chapter?.npcRole,
+        chapter?.speaker,
+      );
+      if (role && !resolveSpeakerHeader(chapter, node)) {
+        console.warn(`[Speaker validation] ${chapter.id}/node${node.id} has role “${role}” but no speaker header.`);
+      }
+    });
+  });
+}
+
 chapters.forEach((chapter) => chapter.nodes.forEach((node) => applyBetterVersionTranslations(node.options)));
 Object.values(CHAPTER6_BRANCH_NODES).forEach((branches) => {
   Object.values(branches).forEach((branch) => applyBetterVersionTranslations(branch.options));
 });
 validateBetterVersionTranslations();
 validateChapter6ContentSupport();
-validateChapter6MemoryTargets();
+validateChapterMemorySupport();
 validateClickableGlossaryExamples();
+validateTeacherNoteTermsAndSpeakers();
 
 function normalizeAudioKey(text = '') {
   return text
@@ -3430,8 +3850,8 @@ function normalizeAudioKey(text = '') {
 function buildAudioManifest(chaptersData, glossaryData) {
   const manifest = [];
 
-  chaptersData.forEach((chapter) => {
-    chapter.nodes.forEach((node) => {
+  (Array.isArray(chaptersData) ? chaptersData : []).forEach((chapter) => {
+    (Array.isArray(chapter?.nodes) ? chapter.nodes : []).forEach((node) => {
       manifest.push({
         id: `${chapter.id}.node${node.id}.npc`,
         text: node.npcLineZh,
@@ -3441,7 +3861,7 @@ function buildAudioManifest(chaptersData, glossaryData) {
         version: 1,
       });
 
-      node.options.forEach((option) => {
+      (Array.isArray(node?.options) ? node.options : []).forEach((option) => {
         const role = option.rating.toLowerCase();
         manifest.push({
           id: `${chapter.id}.node${node.id}.option.${role}`,
@@ -3467,8 +3887,8 @@ function buildAudioManifest(chaptersData, glossaryData) {
       });
     });
 
-    chapter.grammarNotes.forEach((note) => {
-      note.examples.forEach((example, index) => {
+    (Array.isArray(chapter?.grammarNotes) ? chapter.grammarNotes : []).forEach((note) => {
+      (Array.isArray(note?.examples) ? note.examples : []).forEach((example, index) => {
         manifest.push({
           id: `${chapter.id}.grammar.${note.id}.ex${index + 1}`,
           text: example.zh,
@@ -3481,7 +3901,7 @@ function buildAudioManifest(chaptersData, glossaryData) {
     });
   });
 
-  Object.values(glossaryData).forEach((entry) => {
+  Object.values(glossaryData || {}).forEach((entry) => {
     const glossaryId = normalizeAudioKey(entry.pinyin || entry.title);
 
     manifest.push({
@@ -3492,7 +3912,7 @@ function buildAudioManifest(chaptersData, glossaryData) {
       version: 1,
     });
 
-    entry.examples.forEach((example, index) => {
+    (Array.isArray(entry?.examples) ? entry.examples : []).forEach((example, index) => {
       manifest.push({
         id: `glossary.${glossaryId}.ex${index + 1}`,
         text: example.zh,
@@ -3840,8 +4260,109 @@ function StoryLanguageStack({
   );
 }
 
+function hasCompleteTeacherNoteLanguage(item) {
+  return ['zh', 'py', 'en', 'audioText']
+    .every((field) => typeof item?.[field] === 'string' && item[field].trim());
+}
+
+function TeacherNoteLanguageRow({ item, kind = 'term' }) {
+  if (!hasCompleteTeacherNoteLanguage(item)) return null;
+  const dataProps = kind === 'pattern'
+    ? { 'data-note-pattern': item.zh }
+    : kind === 'example'
+    ? { 'data-note-example': item.zh }
+    : { 'data-note-term': item.zh };
+
+  return (
+    <div {...dataProps} className="min-w-0 border-t border-indigo-100/80 py-2.5 first:border-t-0">
+      {kind !== 'term' && (
+        <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-indigo-700/70">
+          {kind === 'pattern' ? 'Pattern' : 'Example'}
+        </div>
+      )}
+      <div className="flex min-w-0 items-start justify-between gap-2">
+        <div className="min-w-0 break-words text-[15px] font-semibold leading-snug text-[#2b241f]">{item.zh}</div>
+        <AudioButton text={item.audioText} small />
+      </div>
+      <div className="mt-1 min-w-0 break-words text-xs leading-5 text-neutral-600">
+        <span className="text-indigo-700/75">{item.py}</span>
+        <span aria-hidden="true"> · </span>
+        <span>{item.en}</span>
+      </div>
+    </div>
+  );
+}
+
+function TeacherNoteKeyLanguage({
+  support,
+  expanded = false,
+  onToggle,
+  disclosure = false,
+  showExample = true,
+}) {
+  const completeTerms = (support?.terms || []).filter(hasCompleteTeacherNoteLanguage);
+  const pattern = hasCompleteTeacherNoteLanguage(support?.pattern) ? support.pattern : null;
+  const example = showExample && hasCompleteTeacherNoteLanguage(support?.example) ? support.example : null;
+  const supportCount = completeTerms.length + Number(Boolean(pattern)) + Number(Boolean(example));
+  if (supportCount === 0) return null;
+
+  const reviewCount = completeTerms.length || supportCount;
+  if (disclosure && !expanded) {
+    return (
+      <button
+        type="button"
+        data-key-language-disclosure
+        onClick={onToggle}
+        className="flex min-h-10 w-full items-center justify-between gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/45 px-3 py-2 text-left text-sm font-semibold text-indigo-800"
+        aria-expanded="false"
+      >
+        <span>Review key language ({reviewCount})</span>
+        <ChevronDown className="h-4 w-4 shrink-0" />
+      </button>
+    );
+  }
+
+  const visibleTerms = disclosure || expanded ? completeTerms : completeTerms.slice(0, 2);
+  const hiddenTermCount = Math.max(0, completeTerms.length - visibleTerms.length);
+
+  return (
+    <section data-teacher-note-key-language className="min-w-0 rounded-2xl border border-indigo-100 bg-indigo-50/35 px-3 py-2">
+      <div className="flex min-h-8 items-center justify-between gap-3">
+        <div className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700">Key language</div>
+        {disclosure && (
+          <button type="button" onClick={onToggle} className="flex min-h-8 items-center gap-1 text-xs font-semibold text-indigo-700" aria-expanded="true">
+            Hide
+            <ChevronUp className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+      <div className="min-w-0">
+        {visibleTerms.map((term) => (
+          <TeacherNoteLanguageRow key={`${term.zh}-${term.py}`} item={term} />
+        ))}
+        {!disclosure && completeTerms.length > 2 && (
+          <button
+            type="button"
+            onClick={onToggle}
+            className="min-h-8 border-t border-indigo-100/80 py-1.5 text-xs font-semibold text-indigo-700"
+          >
+            {expanded ? 'Show fewer' : `Show ${hiddenTermCount} more`}
+          </button>
+        )}
+        {pattern && <TeacherNoteLanguageRow item={pattern} kind="pattern" />}
+        {example && <TeacherNoteLanguageRow item={example} kind="example" />}
+      </div>
+    </section>
+  );
+}
+
 function MemoryMomentCard({ moment, target, state = {}, onChange, onDismiss }) {
   if (!moment || !target) return null;
+  const contextZh = moment.contextZh || moment.npcContext;
+  const contextPy = moment.contextPy || moment.npcContextPy;
+  const contextEn = moment.contextEn || moment.npcContextEn;
+  const contextAudioText = moment.contextAudioText || contextZh;
+  const taskPrompt = moment.taskPrompt || moment.prompt;
 
   return (
     <section className="rounded-[22px] border border-indigo-100 bg-indigo-50/45 p-4 text-left shadow-sm">
@@ -3856,17 +4377,17 @@ function MemoryMomentCard({ moment, target, state = {}, onChange, onDismiss }) {
           </button>
         )}
       </div>
-      {moment.npcContext && (
+      {contextZh && (
         <div className="mt-3 rounded-2xl border border-indigo-100 bg-white/70 p-3">
           <div className="flex items-start justify-between gap-3">
-            <p className="text-lg font-semibold leading-snug text-[#2b241f]">{moment.npcContext}</p>
-            <AudioButton text={moment.npcContext} small />
+            <p className="text-lg font-semibold leading-snug text-[#2b241f]">{contextZh}</p>
+            <AudioButton text={contextAudioText} small />
           </div>
-          {state.showPinyin && moment.npcContextPy && <p className="mt-2 text-sm leading-6 text-neutral-500">{moment.npcContextPy}</p>}
-          {state.showEnglish && moment.npcContextEn && <p className="mt-1 text-sm leading-6 text-neutral-700">{moment.npcContextEn}</p>}
+          {state.showPinyin && contextPy && <p className="mt-2 text-sm leading-6 text-neutral-500">{contextPy}</p>}
+          {state.showEnglish && contextEn && <p className="mt-1 text-sm leading-6 text-neutral-700">{contextEn}</p>}
         </div>
       )}
-      <p className="mt-3 text-sm font-medium leading-6 text-neutral-700">{moment.prompt}</p>
+      <p className="mt-3 text-sm font-medium leading-6 text-neutral-700">{taskPrompt}</p>
       {moment.patternCueZh && (
         <div className="mt-2 rounded-xl bg-indigo-100/65 px-3 py-2">
           <p className="font-semibold text-indigo-950">{moment.patternCueZh}</p>
@@ -3911,14 +4432,14 @@ function MemoryMomentCard({ moment, target, state = {}, onChange, onDismiss }) {
   );
 }
 
-function SayBeforeRevealCard({ target, state = {}, onChange, onDismiss }) {
-  if (!target) return null;
+function SayBeforeRevealCard({ target, prompt, state = {}, onChange, onDismiss }) {
+  if (!target || !prompt) return null;
   return (
     <section className="rounded-[22px] border border-amber-200 bg-amber-50/55 p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <div className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-800">Say before reveal</div>
-          <p className="mt-1 text-sm leading-6 text-neutral-700">The wallet has been recovered and the staff has helped with the phone. Say a warm final response aloud.</p>
+          <p className="mt-1 text-sm leading-6 text-neutral-700">{prompt}</p>
         </div>
         <button type="button" onClick={onDismiss} className="min-h-9 rounded-full border border-amber-200 bg-white/70 px-3 py-1 text-xs font-semibold text-neutral-600">Not now</button>
       </div>
@@ -3941,6 +4462,138 @@ function SayBeforeRevealCard({ target, state = {}, onChange, onDismiss }) {
         </div>
       )}
     </section>
+  );
+}
+
+function FeedbackModal({ open, onClose, children }) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 p-0 md:items-center md:p-6"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) onClose();
+          }}
+        >
+          <motion.div
+            initial={{ y: 24, opacity: 0, scale: 0.98 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: 12, opacity: 0, scale: 0.98 }}
+            onClick={(event) => event.stopPropagation()}
+            className="relative max-h-[88vh] w-full overflow-y-auto rounded-t-[30px] bg-[#fffaf3] p-4 shadow-[0_-18px_50px_rgba(43,36,31,0.24)] sm:p-5 md:max-w-2xl md:rounded-[30px] md:p-6 md:shadow-2xl"
+          >
+            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[#d8c9b8] md:hidden" />
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute right-3 top-3 z-10 rounded-full border border-[#d8cbb8] bg-white/85 p-2 text-[#6f6257] transition hover:bg-[#fff8ef] hover:text-[#2b241f] sm:right-4 sm:top-4"
+              aria-label="Close feedback"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            {children}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function BetterVersionPanel({
+  betterVersion,
+  open,
+  showPinyin,
+  showEnglish,
+  onToggleOpen,
+  onTogglePinyin,
+  onToggleEnglish,
+}) {
+  if (!betterVersion) return null;
+  return (
+    <div className="mt-4 overflow-hidden rounded-[24px] border border-[#d8cbb8] bg-white/60">
+      <div className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <span className="text-sm font-semibold text-[#2b241f]">Try this more natural version</span>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <button type="button" onClick={onTogglePinyin} className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${showPinyin ? 'border-amber-300 bg-amber-50 text-amber-900' : 'border-[#d8cbb8] bg-white/70 text-[#6f6257]'}`} aria-pressed={showPinyin}>
+            Pinyin {showPinyin ? 'On' : 'Off'}
+          </button>
+          <button type="button" onClick={onToggleEnglish} className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${showEnglish ? 'border-indigo-300 bg-indigo-50 text-indigo-900' : 'border-[#d8cbb8] bg-white/70 text-[#6f6257]'}`} aria-pressed={showEnglish}>
+            English {showEnglish ? 'On' : 'Off'}
+          </button>
+          <button type="button" onClick={onToggleOpen} className="flex items-center gap-1 rounded-full border border-[#d8cbb8] bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[#6f6257] transition hover:bg-[#fff8ef]" aria-expanded={open}>
+            {open ? 'Close' : 'Open'}
+            {open ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+          </button>
+        </div>
+      </div>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.24, ease: 'easeOut' }} className="overflow-hidden">
+            <div className="border-t border-[#e7dccd] px-4 pb-4 pt-3">
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-xl font-semibold leading-snug text-[#2b241f]">{betterVersion.zh}</p>
+                <AudioButton audioId={betterVersion.audioId} text={betterVersion.audioText} small />
+              </div>
+              {showPinyin && betterVersion.py && <p className="mt-2 text-sm leading-6 text-neutral-500">{betterVersion.py}</p>}
+              {showEnglish && betterVersion.en && <p className="mt-1 text-sm leading-6 text-neutral-700">{betterVersion.en}</p>}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function EndingLanguageSection({ ending, showPinyin, showEnglish, onTogglePinyin, onToggleEnglish, children }) {
+  if (!hasCompleteEnding(ending)) return null;
+  return (
+    <>
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-indigo-200/70 px-4 py-3 sm:px-5">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-[0.16em] text-indigo-700">Your conversation ending</div>
+          <h4 className="mt-1 text-xl font-semibold text-[#25222f]">{ending.label}</h4>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          <button type="button" onClick={onTogglePinyin} className={`min-h-9 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${showPinyin ? 'border-indigo-300 bg-indigo-100 text-indigo-950' : 'border-[#d8cbb8] bg-white/75 text-neutral-600'}`} aria-pressed={showPinyin}>Ending Pinyin {showPinyin ? 'On' : 'Off'}</button>
+          <button type="button" onClick={onToggleEnglish} className={`min-h-9 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${showEnglish ? 'border-amber-300 bg-amber-100 text-amber-950' : 'border-[#d8cbb8] bg-white/75 text-neutral-600'}`} aria-pressed={showEnglish}>Ending English {showEnglish ? 'On' : 'Off'}</button>
+        </div>
+      </div>
+      <div className="space-y-3 px-4 py-4 sm:px-5">
+        <div className="flex items-start justify-between gap-3">
+          <p className="text-xl font-semibold leading-snug text-[#211f2c]">{ending.zh}</p>
+          <AudioButton text={ending.zh} small />
+        </div>
+        {showPinyin && <p className="text-sm leading-6 text-indigo-700/75">{ending.py}</p>}
+        {showEnglish && <p className="text-sm leading-6 text-neutral-700">{ending.en}</p>}
+        {children}
+      </div>
+    </>
+  );
+}
+
+function MemoryReplayPanel({ items, index, state, onStateChange, onIndexChange, onClose }) {
+  const current = items[index];
+  if (!current) return null;
+  return (
+    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden border-t border-indigo-200/70 bg-[#fffaf3]/80">
+      <div className="space-y-3 p-3 sm:p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700">Memory replay</div>
+            <div className="mt-0.5 text-sm text-neutral-600">Story moment {index + 1}/{items.length}</div>
+          </div>
+          <button type="button" onClick={onClose} className="min-h-9 rounded-full border border-[#d8cbb8] bg-white px-3 py-1 text-xs font-semibold text-neutral-600">Close replay</button>
+        </div>
+        <MemoryMomentCard moment={current.moment} target={current.target} state={state} onChange={onStateChange} />
+        <div className="grid grid-cols-2 gap-2">
+          <Button variant="outline" className="min-h-10 rounded-2xl" disabled={index === 0} onClick={() => onIndexChange(Math.max(0, index - 1))}>Previous moment</Button>
+          <Button variant="outline" className="min-h-10 rounded-2xl" disabled={index === items.length - 1} onClick={() => onIndexChange(Math.min(items.length - 1, index + 1))}>Next moment</Button>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -4019,8 +4672,10 @@ export default function ChapterUIPrototype() {
   const [glossaryShowEnglish, setGlossaryShowEnglish] = useState(true);
   const [quickExamplesShowPinyin, setQuickExamplesShowPinyin] = useState(persisted?.quickExamplesShowPinyin ?? true);
   const [quickExamplesShowEnglish, setQuickExamplesShowEnglish] = useState(persisted?.quickExamplesShowEnglish ?? true);
-  const [chapter6MoreNotesOpen, setChapter6MoreNotesOpen] = useState(false);
-  const [chapter6QuickExamplesExpanded, setChapter6QuickExamplesExpanded] = useState(false);
+  const [focusedTeacherNotesOpen, setFocusedTeacherNotesOpen] = useState(false);
+  const [teacherQuickExamplesExpanded, setTeacherQuickExamplesExpanded] = useState(false);
+  const [teacherKeyLanguageExpanded, setTeacherKeyLanguageExpanded] = useState(false);
+  const [feedbackKeyLanguageExpanded, setFeedbackKeyLanguageExpanded] = useState(false);
   const [audioRate, setAudioRate] = useState(persisted?.audioRate ?? 0.75);
   const [fontScale, setFontScale] = useState(persisted?.fontScale || 'md');
   const [session, setSession] = useState(null);
@@ -4069,35 +4724,40 @@ export default function ChapterUIPrototype() {
     npcGlossary: [],
     options: [],
   };
-  const isChapter6Prototype = currentChapter.id === 'chapter6';
-  const chapter6Support = isChapter6Prototype ? CHAPTER6_SUPPORT_MAP[baseCurrentNode.id] : null;
-  const currentMemoryMoment = isChapter6Prototype ? CHAPTER6_RETRIEVAL_BY_DECISION[baseCurrentNode.id] || null : null;
-  const currentMemoryTarget = currentMemoryMoment
-    ? CHAPTER6_MEMORY_TARGETS.find((target) => target.id === currentMemoryMoment.targetId) || null
+  const currentChapterSupport = useMemo(() => getChapterSupport(currentChapter), [currentChapter.id]);
+  const decisionSupport = currentChapterSupport.stageSupport?.decisionSupport?.[baseCurrentNode.id] || null;
+  const currentMemory = resolveMemoryMoment(currentChapterSupport.memoryMoments, baseCurrentNode.id);
+  const currentMemoryMoment = currentMemory?.moment || null;
+  const currentMemoryTarget = currentMemory?.target || null;
+  const sayBeforeRevealConfig = currentChapterSupport.sayBeforeReveal;
+  const sayBeforeRevealTarget = sayBeforeRevealConfig?.decision === baseCurrentNode.id
+    ? findCompleteMemoryTarget(
+        currentChapterSupport.memoryMoments?.targets || currentChapterSupport.memoryReplay?.targets,
+        sayBeforeRevealConfig.targetId
+      )
     : null;
-  const sayBeforeRevealTarget = isChapter6Prototype && baseCurrentNode.id === 6
-    ? CHAPTER6_MEMORY_TARGETS.find((target) => target.id === 'polite-close') || null
-    : null;
-  const replayMemoryMoment = memoryReplayOpen ? CHAPTER6_MEMORY_MOMENTS[memoryReplayIndex] || null : null;
-  const replayMemoryTarget = replayMemoryMoment
-    ? CHAPTER6_MEMORY_TARGETS.find((target) => target.id === replayMemoryMoment.targetId) || null
-    : null;
+  const replayMemoryItems = useMemo(
+    () => getCompleteMemoryReplay(currentChapterSupport.memoryReplay),
+    [currentChapterSupport.memoryReplay]
+  );
+  const supportsBranchingScene = Boolean(currentChapterSupport.branchingSupport);
   const sceneMetricsBeforeCurrent = useMemo(() => {
-    if (!isChapter6Prototype) return { socialComfort: 50, naturalness: 50 };
+    if (!supportsBranchingScene) return { socialComfort: 50, naturalness: 50 };
     const earlierChoices = Object.fromEntries(
       Object.entries(sceneRun).filter(([key]) => Number(key) < safeCurrentNodeIndex)
     );
     return calculateSceneRunMetrics(earlierChoices);
-  }, [isChapter6Prototype, safeCurrentNodeIndex, sceneRun]);
-  const activeChapter6Branch = useMemo(() => {
-    if (!isChapter6Prototype) return null;
+  }, [supportsBranchingScene, safeCurrentNodeIndex, sceneRun]);
+  const activeStoryBranch = useMemo(() => {
+    if (!supportsBranchingScene) return null;
+    const branchNodes = currentChapterSupport.branchingSupport.nodes;
     if (safeCurrentNodeIndex === 3) {
       const tier = sceneMetricsBeforeCurrent.naturalness >= 65
         ? 'high'
         : sceneMetricsBeforeCurrent.naturalness >= 40
         ? 'medium'
         : 'low';
-      return CHAPTER6_BRANCH_NODES.decision4[tier];
+      return branchNodes.decision4?.[tier] || null;
     }
     if (safeCurrentNodeIndex === 4 || safeCurrentNodeIndex === 5) {
       const tier = sceneMetricsBeforeCurrent.naturalness >= 65 && sceneMetricsBeforeCurrent.socialComfort >= 65
@@ -4105,18 +4765,22 @@ export default function ChapterUIPrototype() {
         : sceneMetricsBeforeCurrent.naturalness >= 40 && sceneMetricsBeforeCurrent.socialComfort >= 40
         ? 'mixed'
         : 'weak';
-      return CHAPTER6_BRANCH_NODES[safeCurrentNodeIndex === 4 ? 'decision5' : 'decision6'][tier];
+      return branchNodes[safeCurrentNodeIndex === 4 ? 'decision5' : 'decision6']?.[tier] || null;
     }
     return null;
-  }, [isChapter6Prototype, safeCurrentNodeIndex, sceneMetricsBeforeCurrent]);
+  }, [currentChapterSupport.branchingSupport, safeCurrentNodeIndex, sceneMetricsBeforeCurrent, supportsBranchingScene]);
   const currentNode = useMemo(() => {
-    if (!activeChapter6Branch) return baseCurrentNode;
+    if (!activeStoryBranch) return baseCurrentNode;
     return {
       ...baseCurrentNode,
-      ...activeChapter6Branch,
-      options: activeChapter6Branch.options || baseCurrentNode.options,
+      ...activeStoryBranch,
+      options: activeStoryBranch.options || baseCurrentNode.options,
     };
-  }, [activeChapter6Branch, baseCurrentNode]);
+  }, [activeStoryBranch, baseCurrentNode]);
+  const currentSpeaker = useMemo(
+    () => resolveSpeakerHeader(currentChapter, currentNode),
+    [currentChapter, currentNode]
+  );
   const currentDeviceLabel = useMemo(() => getCurrentDeviceLabel(), []);
   const displayOptions = useMemo(() => {
     const shuffled = shuffleArray(Array.isArray(currentNode.options) ? currentNode.options : []);
@@ -4141,10 +4805,7 @@ export default function ChapterUIPrototype() {
     ? 'Pinyin-supported'
     : 'Independent';
   const sceneMetrics = useMemo(() => calculateSceneRunMetrics(sceneRun), [sceneRun]);
-  const chapter6LatestRating = useMemo(() => {
-    const submittedIndexes = Object.keys(sceneRun).map(Number).sort((a, b) => b - a);
-    return sceneRun[safeCurrentNodeIndex]?.rating || sceneRun[submittedIndexes[0]]?.rating || null;
-  }, [sceneRun, safeCurrentNodeIndex]);
+  const latestSceneRating = sceneRun[safeCurrentNodeIndex]?.rating || null;
   const sceneMetricTransition = showFeedback ? sceneRun[safeCurrentNodeIndex] || null : null;
   const submittedSceneDeltas = sceneMetricTransition
     ? {
@@ -4153,39 +4814,53 @@ export default function ChapterUIPrototype() {
       }
     : null;
   const betterVersion = useMemo(
-    () => resolveBetterVersion({ selectedOption, currentNode, currentNodeAudioPrefix }),
-    [currentNode, currentNodeAudioPrefix, selectedOption]
+    () => currentChapterSupport.betterVersionSupport
+      ? resolveBetterVersion({ selectedOption, currentNode, currentNodeAudioPrefix })
+      : null,
+    [currentChapterSupport.betterVersionSupport, currentNode, currentNodeAudioPrefix, selectedOption]
   );
   const activeNote = currentChapter.grammarNotes.find((note) => note.id === activeNoteId) || currentChapter.grammarNotes[0];
-  const chapter6PrimaryNote = chapter6Support
-    ? currentChapter.grammarNotes.find((note) => chapter6Support.primaryNoteIds.includes(note.id)) || currentChapter.grammarNotes[0]
+  const primaryTeacherNote = decisionSupport
+    ? currentChapter.grammarNotes.find((note) => decisionSupport.primaryNoteIds.includes(note.id)) || currentChapter.grammarNotes[0]
     : null;
-  const visibleTeacherNote = chapter6PrimaryNote && (!chapter6MoreNotesOpen || activeNote.id === chapter6PrimaryNote.id)
-    ? chapter6PrimaryNote
+  const visibleTeacherNote = primaryTeacherNote && (!focusedTeacherNotesOpen || activeNote.id === primaryTeacherNote.id)
+    ? primaryTeacherNote
     : activeNote;
-  const chapter6MoreNotes = chapter6PrimaryNote
-    ? currentChapter.grammarNotes.filter((note) => note.id !== chapter6PrimaryNote.id)
+  const additionalTeacherNotes = primaryTeacherNote
+    ? currentChapter.grammarNotes.filter((note) => note.id !== primaryTeacherNote.id)
     : [];
   const visibleTeacherNoteExamples = Array.isArray(visibleTeacherNote.examples) ? visibleTeacherNote.examples : [];
-  const visibleQuickExamples = isChapter6Prototype && !chapter6QuickExamplesExpanded
+  const visibleTeacherNoteSupport = getTeacherNoteSupport(currentChapter, visibleTeacherNote);
+  const visibleQuickExamples = currentChapterSupport.teacherNoteSupport.progressiveExamples && !teacherQuickExamplesExpanded
     ? visibleTeacherNoteExamples.slice(0, 2)
     : visibleTeacherNoteExamples;
-  const chapter6StageTransition = isChapter6Prototype && sceneRun[safeCurrentNodeIndex]
-    ? CHAPTER6_STAGE_TRANSITIONS[baseCurrentNode.id] || null
+  const stageTransition = currentChapterSupport.stageSupport && sceneRun[safeCurrentNodeIndex]
+    ? currentChapterSupport.stageSupport.transitions?.[baseCurrentNode.id] || null
     : null;
   const selectedGlossary = selectedGlossaryKey ? glossary[selectedGlossaryKey] : null;
-  const selectedGlossaryExamples = Array.isArray(selectedGlossary?.examples) ? selectedGlossary.examples : [];
-  const glossaryExamplesForDisplay = selectedGlossaryExamples.slice(0, 5);
+  const selectedGlossaryExamples = getCompleteGlossaryExamples(selectedGlossary);
+  const glossaryExamplePolicy = currentChapterSupport.glossaryExamplePolicy;
+  const glossaryExamplesForDisplay = selectedGlossaryExamples.slice(0, glossaryExamplePolicy.requiredCount);
+  const canExpandGlossaryExamples = selectedGlossaryExamples.length === glossaryExamplePolicy.requiredCount
+    && selectedGlossary?.examples?.length === glossaryExamplePolicy.requiredCount;
   const visibleGlossaryExamples = glossaryExamplesExpanded
     ? glossaryExamplesForDisplay
-    : glossaryExamplesForDisplay.slice(0, 2);
+    : glossaryExamplesForDisplay.slice(0, glossaryExamplePolicy.initiallyVisible);
 
   useEffect(() => {
-    if (!chapter6PrimaryNote) return;
-    setActiveNoteId(chapter6PrimaryNote.id);
-    setChapter6MoreNotesOpen(false);
-    setChapter6QuickExamplesExpanded(false);
-  }, [chapter6PrimaryNote?.id]);
+    if (!primaryTeacherNote) return;
+    setActiveNoteId(primaryTeacherNote.id);
+    setFocusedTeacherNotesOpen(false);
+    setTeacherQuickExamplesExpanded(false);
+  }, [primaryTeacherNote?.id]);
+
+  useEffect(() => {
+    setTeacherKeyLanguageExpanded(false);
+  }, [currentChapter.id, visibleTeacherNote?.id]);
+
+  useEffect(() => {
+    setFeedbackKeyLanguageExpanded(false);
+  }, [showFeedback, selectedOption]);
 
   useEffect(() => {
     setRevealedOptionMeanings({});
@@ -4201,14 +4876,17 @@ export default function ChapterUIPrototype() {
     setGlossaryExamplesExpanded(false);
   }, [selectedGlossaryKey]);
 
-  const chapter6Ending = useMemo(() => {
-    if (!isChapter6Prototype || safeCurrentNodeIndex !== 5 || !sceneRun[5]) return null;
+  const conversationEnding = useMemo(() => {
+    const endingSupport = currentChapterSupport.endingLanguageSupport;
+    const finalNodeIndex = Number(endingSupport?.finalDecision) - 1;
+    if (!endingSupport || safeCurrentNodeIndex !== finalNodeIndex || !sceneRun[finalNodeIndex]) return null;
     const incorrectCount = Object.values(sceneRun).filter((choice) => choice.rating === 'Incorrect').length;
     const ending = sceneMetrics.socialComfort >= 70 && sceneMetrics.naturalness >= 70 && incorrectCount < 2
-      ? CHAPTER6_ENDINGS.smooth
+      ? endingSupport.endings?.smooth
       : sceneMetrics.socialComfort >= 40 && sceneMetrics.naturalness >= 40 && incorrectCount < 2
-      ? CHAPTER6_ENDINGS.clarified
-      : CHAPTER6_ENDINGS.delayed;
+      ? endingSupport.endings?.clarified
+      : endingSupport.endings?.delayed;
+    if (!hasCompleteEnding(ending)) return null;
     const weakDecisions = Object.entries(sceneRun)
       .filter(([, choice]) => choice.rating !== 'Natural')
       .map(([index, choice]) => `Decision ${Number(index) + 1}: ${choice.rating}`);
@@ -4218,40 +4896,43 @@ export default function ChapterUIPrototype() {
         ? `Your path included ${weakDecisions.join(', ')}. Those choices produced the final scene values used for this ending.`
         : 'Six natural replies kept the request clear, cooperative, and easy to act on.',
     };
-  }, [isChapter6Prototype, safeCurrentNodeIndex, sceneMetrics, sceneRun]);
+  }, [currentChapterSupport.endingLanguageSupport, safeCurrentNodeIndex, sceneMetrics, sceneRun]);
 
   useEffect(() => {
-    if (!chapter6Ending) return;
+    if (!conversationEnding) return;
     setEndingShowPinyin(true);
     setEndingShowEnglish(true);
-  }, [chapter6Ending?.label, sceneRun[5]?.optionId]);
+  }, [conversationEnding?.label]);
 
   const chapterDecisionTotal = currentChapter.nodes.length;
-  const chapterProgress = ((safeCurrentNodeIndex + 1) / chapterDecisionTotal) * 100;
+  const chapterProgress = chapterDecisionTotal > 0
+    ? ((safeCurrentNodeIndex + 1) / chapterDecisionTotal) * 100
+    : 0;
   const overallProgress = ((safeCurrentChapterIndex + 1) / chapters.length) * 100;
-  const isLastNode = safeCurrentNodeIndex === chapterDecisionTotal - 1;
+  const isLastNode = chapterDecisionTotal > 0 && safeCurrentNodeIndex === chapterDecisionTotal - 1;
   const isLastChapter = safeCurrentChapterIndex === chapters.length - 1;
-  const chapter6ResultTier = useMemo(() => {
-    if (!isChapter6Prototype || !isLastNode || !sceneRun[safeCurrentNodeIndex]) return null;
+  const sceneResultTier = useMemo(() => {
+    if (!currentChapterSupport.resultTierSupport || !isLastNode || !sceneRun[safeCurrentNodeIndex]) return null;
+    const rewards = currentChapterSupport.resultTierSupport.rewards;
     const choices = Object.values(sceneRun);
     const incorrectCount = choices.filter((choice) => choice.rating === 'Incorrect').length;
     const naturalCount = choices.filter((choice) => choice.rating === 'Natural').length;
     const supportSummary = `${optionEnglishRevealCount} option meaning${optionEnglishRevealCount === 1 ? '' : 's'} across ${optionEnglishDecisionCount} decision${optionEnglishDecisionCount === 1 ? '' : 's'}`;
     if (sceneMetrics.socialComfort < 40 || sceneMetrics.naturalness < 40 || incorrectCount >= 2) {
-      return { ...CHAPTER6_TIER_REWARDS.needsRepair, supportSummary, supportRule: 'Scene repair comes first; English help did not lower either scene metric.' };
+      return { ...rewards.needsRepair, supportSummary, supportRule: 'Scene repair comes first; English help did not lower either scene metric.' };
     }
     if (sceneMetrics.socialComfort >= 80 && sceneMetrics.naturalness >= 80 && incorrectCount === 0 && naturalCount >= 2) {
       return optionEnglishRevealCount <= 1
-        ? { ...CHAPTER6_TIER_REWARDS.nativeRecovery, supportSummary, supportRule: 'Tier 4 combines excellent scene results with no more than one English-option reveal.' }
-        : { ...CHAPTER6_TIER_REWARDS.strongRecovery, supportSummary, supportRule: 'Excellent scene results earned Tier 3; replay with one or fewer English-option reveals to reach the language-reward Tier 4.' };
+        ? { ...rewards.nativeRecovery, supportSummary, supportRule: 'Tier 4 combines excellent scene results with no more than one English-option reveal.' }
+        : { ...rewards.strongRecovery, supportSummary, supportRule: 'Excellent scene results earned Tier 3; replay with one or fewer English-option reveals to reach the language-reward Tier 4.' };
     }
     if (sceneMetrics.socialComfort >= 65 && sceneMetrics.naturalness >= 65 && incorrectCount < 2) {
       return optionEnglishRevealCount <= 2
-        ? { ...CHAPTER6_TIER_REWARDS.strongRecovery, supportSummary, supportRule: 'Tier 3 combines strong scene results with no more than two English-option reveals.' }
-        : { ...CHAPTER6_TIER_REWARDS.usefulRecovery, supportSummary, supportRule: 'The result stayed workable with support; replay with two or fewer English-option reveals for Tier 3.' };
+        ? { ...rewards.strongRecovery, supportSummary, supportRule: 'Tier 3 combines strong scene results with no more than two English-option reveals.' }
+        : { ...rewards.usefulRecovery, supportSummary, supportRule: 'The result stayed workable with support; replay with two or fewer English-option reveals for Tier 3.' };
     }
-    return { ...CHAPTER6_TIER_REWARDS.usefulRecovery, supportSummary, supportRule: 'English help is allowed and never changes the scene result; stronger metrics or less support can raise the language-reward tier.' };
-  }, [sceneMetrics, sceneRun, safeCurrentNodeIndex, isChapter6Prototype, isLastNode, optionEnglishDecisionCount, optionEnglishRevealCount]);
+    return { ...rewards.usefulRecovery, supportSummary, supportRule: 'English help is allowed and never changes the scene result; stronger metrics or less support can raise the language-reward tier.' };
+  }, [currentChapterSupport.resultTierSupport, sceneMetrics, sceneRun, safeCurrentNodeIndex, isLastNode, optionEnglishDecisionCount, optionEnglishRevealCount]);
   const chapterOverview = useMemo(() => {
     const overview = chapters.map((chapter, index) => {
       const completed = chapter.nodes.filter((_, nodeIndex) => nodeSelections[makeNodeKey(index, nodeIndex)]).length;
@@ -4678,7 +5359,7 @@ export default function ChapterUIPrototype() {
     setCurrentNodeIndex(safeCurrentNodeIndex + 1);
   };
 
-  const handleChapter6Rewind = (nodeIndex) => {
+  const handleStoryRewind = (nodeIndex) => {
     const safeNodeIndex = clampArrayIndex(nodeIndex, chapterDecisionTotal);
     setSceneRun((prev) => Object.fromEntries(
       Object.entries(prev).filter(([key]) => Number(key) < safeNodeIndex)
@@ -4705,7 +5386,7 @@ export default function ChapterUIPrototype() {
     setCurrentNodeIndex(safeNodeIndex);
   };
 
-  const handleChapter6Replay = () => {
+  const handleStoryReplay = () => {
     setSceneRun({});
     setRevealedOptionMeanings({});
     setOptionAssistanceByDecision({});
@@ -5608,16 +6289,8 @@ export default function ChapterUIPrototype() {
             </div>
 
             <motion.div layout className="mt-5 rounded-[24px] bg-[#f3eadf]/85 p-4 sm:p-5 md:mt-6 md:rounded-[28px] md:p-6">
-              {isChapter6Prototype && (
-                <div className="mb-5 border-b border-[#d8cbb8] pb-4">
-                  <StaffAvatar rating={chapter6LatestRating} />
-                </div>
-              )}
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 text-sm text-neutral-600">
-                <div className="flex items-center gap-2">
-                  <MessageSquareQuote className="h-4 w-4 text-[#8a6a28]" />
-                  <span>Listen to {currentNode.npc}</span>
-                </div>
+              <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-[#d8cbb8] pb-4 text-sm text-neutral-600">
+                <SpeakerHeader speaker={currentSpeaker} rating={latestSceneRating} />
                 <div className="flex items-center gap-2 rounded-full bg-[#fffaf3]/85 px-3 py-1.5 text-xs font-medium text-[#6f6257]">
                   <span>Play line</span>
                   <AudioButton audioId={`${currentNodeAudioPrefix}.npc`} text={currentNode.npcLineZh} />
@@ -5630,13 +6303,13 @@ export default function ChapterUIPrototype() {
                 showPinyin={showPinyin}
                 showEnglish={showEnglish}
                 glossaryKeys={currentNode.npcGlossary}
-                primaryKeys={chapter6Support?.primaryGlossaryKeys}
-                recycledKeys={chapter6Support?.recycledGlossaryKeys}
+                primaryKeys={decisionSupport?.primaryGlossaryKeys}
+                recycledKeys={decisionSupport?.recycledGlossaryKeys}
                 onOpen={setSelectedGlossaryKey}
                 chineseClassName={`${fontScale === 'sm' ? 'text-2xl sm:text-3xl' : fontScale === 'lg' ? 'text-4xl sm:text-5xl' : 'text-3xl sm:text-4xl'} font-semibold leading-tight tracking-tight text-[#2b241f]`}
                 pinyinClassName="text-sm leading-6 text-neutral-500 md:text-base"
                 englishClassName="mt-2 text-sm leading-5 text-neutral-600"
-                alignClauses={isChapter6Prototype}
+                alignClauses={currentChapterSupport.alignedLanguageClauses}
               />
             </motion.div>
 
@@ -5656,6 +6329,7 @@ export default function ChapterUIPrototype() {
               <div className="mt-5">
                 <SayBeforeRevealCard
                   target={sayBeforeRevealTarget}
+                  prompt={sayBeforeRevealConfig.prompt}
                   state={sayBeforeRevealState}
                   onChange={setSayBeforeRevealState}
                   onDismiss={() => setSayBeforeRevealState((prev) => ({ ...prev, dismissed: true }))}
@@ -5706,14 +6380,16 @@ export default function ChapterUIPrototype() {
                         <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-sm font-medium opacity-90">
                           <span>{active ? 'Selected reply' : `Reply ${option.displayId}`}</span>
                           <div className="flex flex-wrap items-center justify-end gap-1.5">
-                            <button
-                              type="button"
-                              onClick={(event) => handleOptionMeaningToggle(option.id, event)}
-                              className={`min-h-9 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${active ? 'border-white/30 bg-white/10 text-white hover:bg-white/20' : 'border-[#d8cbb8] bg-[#fffaf3] text-[#6f6257] hover:bg-[#f3eadf]'}`}
-                              aria-expanded={meaningRevealed}
-                            >
-                              {meaningRevealed ? 'Hide meaning' : 'Show meaning'}
-                            </button>
+                            {currentChapterSupport.progressiveOptionMeaning && (
+                              <button
+                                type="button"
+                                onClick={(event) => handleOptionMeaningToggle(option.id, event)}
+                                className={`min-h-9 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${active ? 'border-white/30 bg-white/10 text-white hover:bg-white/20' : 'border-[#d8cbb8] bg-[#fffaf3] text-[#6f6257] hover:bg-[#f3eadf]'}`}
+                                aria-expanded={meaningRevealed}
+                              >
+                                {meaningRevealed ? 'Hide meaning' : 'Show meaning'}
+                              </button>
+                            )}
                             <span className="hidden text-xs sm:inline">Listen</span>
                             <AudioButton audioId={`${currentNodeAudioPrefix}.option.${option.rating.toLowerCase()}`} text={option.zh} dark={active} small />
                             <SaveButton
@@ -5731,15 +6407,15 @@ export default function ChapterUIPrototype() {
                           py={option.py}
                           en={option.en}
                           showPinyin={showPinyin}
-                          showEnglish={meaningRevealed}
+                          showEnglish={currentChapterSupport.progressiveOptionMeaning ? meaningRevealed : showEnglish}
                           glossaryKeys={option.glossary}
-                          primaryKeys={chapter6Support?.primaryGlossaryKeys}
-                          recycledKeys={chapter6Support?.recycledGlossaryKeys}
+                          primaryKeys={decisionSupport?.primaryGlossaryKeys}
+                          recycledKeys={decisionSupport?.recycledGlossaryKeys}
                           onOpen={setSelectedGlossaryKey}
                           chineseClassName={`${fontScale === 'sm' ? 'text-lg sm:text-xl' : fontScale === 'lg' ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl'} font-semibold leading-snug`}
                           pinyinClassName={`mt-1 text-sm leading-5 ${active ? 'text-white/75' : 'text-neutral-500'}`}
                           englishClassName={`mt-2 rounded-xl px-3 py-2 text-sm leading-5 ${active ? 'bg-white/10 text-white/90' : 'bg-[#f5efe7] text-neutral-700'}`}
-                          alignClauses={isChapter6Prototype}
+                          alignClauses={currentChapterSupport.alignedLanguageClauses}
                           dark={active}
                         />
                       </div>
@@ -5756,7 +6432,7 @@ export default function ChapterUIPrototype() {
               </div>
 
               <AnimatePresence>
-                {chapter6StageTransition && (
+                {stageTransition && (
                   <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -5764,8 +6440,8 @@ export default function ChapterUIPrototype() {
                     transition={{ duration: 0.28, ease: 'easeOut' }}
                     className="border-l-2 border-indigo-300 px-3 py-1 text-sm text-neutral-600"
                   >
-                    <span className="font-semibold text-indigo-800">{chapter6StageTransition.title}</span>
-                    <span className="ml-2">{chapter6StageTransition.message}</span>
+                    <span className="font-semibold text-indigo-800">{stageTransition.title}</span>
+                    <span className="ml-2">{stageTransition.message}</span>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -5806,27 +6482,27 @@ export default function ChapterUIPrototype() {
             <p className="mt-1 text-sm leading-6 text-neutral-600">Use these notes after the main practice when you want a little more support.</p>
           </div>
 
-          {isChapter6Prototype ? (
+          {primaryTeacherNote ? (
             <div className="space-y-2">
               <button
                 type="button"
-                onClick={() => setActiveNoteId(chapter6PrimaryNote.id)}
+                onClick={() => setActiveNoteId(primaryTeacherNote.id)}
                 className="w-full rounded-2xl border border-[#d6a856] bg-[#f3eadf] px-3 py-2 text-left text-sm font-semibold text-[#2b241f]"
               >
-                Current focus · {chapter6PrimaryNote.title}
+                Current focus · {primaryTeacherNote.title}
               </button>
               <button
                 type="button"
-                onClick={() => setChapter6MoreNotesOpen((open) => !open)}
+                onClick={() => setFocusedTeacherNotesOpen((open) => !open)}
                 className="flex min-h-10 w-full items-center justify-between rounded-2xl border border-[#eadfce] bg-white/65 px-3 py-2 text-left text-sm text-neutral-600"
-                aria-expanded={chapter6MoreNotesOpen}
+                aria-expanded={focusedTeacherNotesOpen}
               >
                 More notes
-                {chapter6MoreNotesOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                {focusedTeacherNotesOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </button>
-              {chapter6MoreNotesOpen && (
+              {focusedTeacherNotesOpen && (
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  {chapter6MoreNotes.map((note) => (
+                  {additionalTeacherNotes.map((note) => (
                     <button key={note.id} type="button" onClick={() => setActiveNoteId(note.id)} className={`rounded-2xl border px-3 py-2 text-left text-sm transition ${activeNote.id === note.id ? 'border-[#d6a856] bg-[#f3eadf]' : 'border-[#eadfce] bg-white/65 text-neutral-600'}`}>
                       {note.title}
                     </button>
@@ -5848,6 +6524,12 @@ export default function ChapterUIPrototype() {
             <h4 className="font-semibold">{visibleTeacherNote.title}</h4>
             <p className="mt-1 text-sm leading-6 text-neutral-600">{visibleTeacherNote.short}</p>
           </div>
+
+          <TeacherNoteKeyLanguage
+            support={visibleTeacherNoteSupport}
+            expanded={teacherKeyLanguageExpanded}
+            onToggle={() => setTeacherKeyLanguageExpanded((expanded) => !expanded)}
+          />
 
           <div className="space-y-3 text-sm leading-6 text-neutral-700">
             {visibleTeacherNote.body.map((paragraph) => (
@@ -5891,9 +6573,9 @@ export default function ChapterUIPrototype() {
                 );
               })}
             </div>
-            {isChapter6Prototype && visibleTeacherNoteExamples.length > 2 && (
-              <button type="button" onClick={() => setChapter6QuickExamplesExpanded((expanded) => !expanded)} className="min-h-10 rounded-full border border-[#d8cbb8] bg-white/70 px-3 py-2 text-sm font-semibold text-[#6f6257]">
-                {chapter6QuickExamplesExpanded ? 'Show fewer' : `Show ${visibleTeacherNoteExamples.length - 2} more`}
+            {currentChapterSupport.teacherNoteSupport.progressiveExamples && visibleTeacherNoteExamples.length > 2 && (
+              <button type="button" onClick={() => setTeacherQuickExamplesExpanded((expanded) => !expanded)} className="min-h-10 rounded-full border border-[#d8cbb8] bg-white/70 px-3 py-2 text-sm font-semibold text-[#6f6257]">
+                {teacherQuickExamplesExpanded ? 'Show fewer' : `Show ${visibleTeacherNoteExamples.length - 2} more`}
               </button>
             )}
           </div>
@@ -5976,18 +6658,18 @@ export default function ChapterUIPrototype() {
             <p className="text-sm text-neutral-500">Grammar is explained where the learner is most likely to get stuck.</p>
           </CardHeader>
           <CardContent>
-            {isChapter6Prototype ? (
+            {primaryTeacherNote ? (
               <div className="mb-4 space-y-2">
-                <button type="button" onClick={() => setActiveNoteId(chapter6PrimaryNote.id)} className="w-full rounded-2xl border border-[#d6a856] bg-[#f3eadf] px-3 py-2 text-left text-sm font-semibold text-[#2b241f]">
-                  Current focus · {chapter6PrimaryNote.title}
+                <button type="button" onClick={() => setActiveNoteId(primaryTeacherNote.id)} className="w-full rounded-2xl border border-[#d6a856] bg-[#f3eadf] px-3 py-2 text-left text-sm font-semibold text-[#2b241f]">
+                  Current focus · {primaryTeacherNote.title}
                 </button>
-                <button type="button" onClick={() => setChapter6MoreNotesOpen((open) => !open)} className="flex min-h-10 w-full items-center justify-between rounded-2xl border border-[#eadfce] bg-white/65 px-3 py-2 text-left text-sm text-neutral-600" aria-expanded={chapter6MoreNotesOpen}>
+                <button type="button" onClick={() => setFocusedTeacherNotesOpen((open) => !open)} className="flex min-h-10 w-full items-center justify-between rounded-2xl border border-[#eadfce] bg-white/65 px-3 py-2 text-left text-sm text-neutral-600" aria-expanded={focusedTeacherNotesOpen}>
                   More notes
-                  {chapter6MoreNotesOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  {focusedTeacherNotesOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 </button>
-                {chapter6MoreNotesOpen && (
+                {focusedTeacherNotesOpen && (
                   <div className="space-y-2">
-                    {chapter6MoreNotes.map((note) => (
+                    {additionalTeacherNotes.map((note) => (
                       <button key={note.id} type="button" onClick={() => setActiveNoteId(note.id)} className={`w-full rounded-2xl border px-3 py-2 text-left text-sm ${activeNote.id === note.id ? 'border-[#d6a856] bg-[#f3eadf]' : 'border-[#eadfce] bg-white/65 text-neutral-600'}`}>
                         {note.title}
                       </button>
@@ -6009,6 +6691,12 @@ export default function ChapterUIPrototype() {
               <h4 className="font-semibold">{visibleTeacherNote.title}</h4>
               <p className="mt-1 text-sm text-neutral-600">{visibleTeacherNote.short}</p>
             </div>
+
+            <TeacherNoteKeyLanguage
+              support={visibleTeacherNoteSupport}
+              expanded={teacherKeyLanguageExpanded}
+              onToggle={() => setTeacherKeyLanguageExpanded((expanded) => !expanded)}
+            />
 
             <div className="mt-4 space-y-3 text-sm leading-6 text-neutral-700">
               {visibleTeacherNote.body.map((paragraph) => (
@@ -6051,9 +6739,9 @@ export default function ChapterUIPrototype() {
                   );
                 })}
               </div>
-              {isChapter6Prototype && visibleTeacherNoteExamples.length > 2 && (
-                <button type="button" onClick={() => setChapter6QuickExamplesExpanded((expanded) => !expanded)} className="mt-2 min-h-10 rounded-full border border-[#d8cbb8] bg-white/70 px-3 py-2 text-sm font-semibold text-[#6f6257]">
-                  {chapter6QuickExamplesExpanded ? 'Show fewer' : `Show ${visibleTeacherNoteExamples.length - 2} more`}
+              {currentChapterSupport.teacherNoteSupport.progressiveExamples && visibleTeacherNoteExamples.length > 2 && (
+                <button type="button" onClick={() => setTeacherQuickExamplesExpanded((expanded) => !expanded)} className="mt-2 min-h-10 rounded-full border border-[#d8cbb8] bg-white/70 px-3 py-2 text-sm font-semibold text-[#6f6257]">
+                  {teacherQuickExamplesExpanded ? 'Show fewer' : `Show ${visibleTeacherNoteExamples.length - 2} more`}
                 </button>
               )}
             </div>
@@ -6268,35 +6956,14 @@ export default function ChapterUIPrototype() {
         </div>
       </div>
 
-      <AnimatePresence>
-        {showFeedback && selectedOption && currentView === 'story' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 p-0 md:items-center md:p-6"
-            onClick={(event) => {
-              if (event.target === event.currentTarget) setShowFeedback(false);
-            }}
-          >
-            <motion.div
-              initial={{ y: 24, opacity: 0, scale: 0.98 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: 12, opacity: 0, scale: 0.98 }}
-              onClick={(event) => event.stopPropagation()}
-              className="relative max-h-[88vh] w-full overflow-y-auto rounded-t-[30px] bg-[#fffaf3] p-4 shadow-[0_-18px_50px_rgba(43,36,31,0.24)] sm:p-5 md:max-w-2xl md:rounded-[30px] md:p-6 md:shadow-2xl"
-            >
-              <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[#d8c9b8] md:hidden" />
-              <button
-                type="button"
-                onClick={() => setShowFeedback(false)}
-                className="absolute right-3 top-3 z-10 rounded-full border border-[#d8cbb8] bg-white/85 p-2 text-[#6f6257] transition hover:bg-[#fff8ef] hover:text-[#2b241f] sm:right-4 sm:top-4"
-                aria-label="Close feedback"
-              >
-                <X className="h-4 w-4" />
-              </button>
+      <FeedbackModal
+        open={Boolean(showFeedback && selectedOption && currentView === 'story')}
+        onClose={() => setShowFeedback(false)}
+      >
+        {selectedOption && (
+          <>
               <div className="flex items-start justify-between gap-4 pr-10">
-                {isChapter6Prototype && <StaffAvatar rating={selectedOption.rating} compact />}
+                <SpeakerHeader speaker={currentSpeaker} rating={selectedOption.rating} compact />
                 <div className="min-w-0 flex-1">
                   <div className="mb-2 text-sm font-medium text-[#8a6a28]">Teacher feedback</div>
                   <div className="mb-2 flex items-center gap-2">
@@ -6319,8 +6986,8 @@ export default function ChapterUIPrototype() {
                 </div>
               </div>
 
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <div className="border-l-2 border-[#d6a856] bg-white/60 py-3 pl-4 pr-3">
+              <div className="mt-6 grid items-start gap-4 md:grid-cols-2">
+                <div data-feedback-teacher-note className="border-l-2 border-[#d6a856] bg-white/60 py-3 pl-4 pr-3">
                   <div className="mb-2 text-sm font-medium">Teacher note</div>
                   {selectedOption.rating === 'Natural' ? (
                     <p className="text-sm leading-6 text-neutral-700">{selectedOption.explanation}</p>
@@ -6331,7 +6998,7 @@ export default function ChapterUIPrototype() {
                     </div>
                   )}
                 </div>
-                <div className="border-l-2 border-[#d6a856] bg-white/60 py-3 pl-4 pr-3">
+                <div data-feedback-how-it-lands className="border-l-2 border-[#d6a856] bg-white/60 py-3 pl-4 pr-3">
                   <div className="mb-2 text-sm font-medium">How it lands</div>
                   <p className="text-sm text-neutral-700">
                     Social comfort {(submittedSceneDeltas?.socialComfort ?? selectedOption.relationship) >= 0 ? '+' : ''}{submittedSceneDeltas?.socialComfort ?? selectedOption.relationship}
@@ -6350,6 +7017,16 @@ export default function ChapterUIPrototype() {
                 </div>
               </div>
 
+              <div className="mt-3">
+                <TeacherNoteKeyLanguage
+                  support={visibleTeacherNoteSupport}
+                  expanded={feedbackKeyLanguageExpanded}
+                  onToggle={() => setFeedbackKeyLanguageExpanded((expanded) => !expanded)}
+                  disclosure
+                  showExample={false}
+                />
+              </div>
+
               <div className="mt-4">
                 <StorySceneMetrics metrics={sceneMetrics} transition={sceneMetricTransition} compact />
               </div>
@@ -6361,92 +7038,34 @@ export default function ChapterUIPrototype() {
                 </div>
               )}
 
-              {betterVersion && (
-                <div className="mt-4 overflow-hidden rounded-[24px] border border-[#d8cbb8] bg-white/60">
-                  <div className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                    <span className="text-sm font-semibold text-[#2b241f]">Try this more natural version</span>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => setBetterVersionShowPinyin((visible) => !visible)}
-                        className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${betterVersionShowPinyin ? 'border-amber-300 bg-amber-50 text-amber-900' : 'border-[#d8cbb8] bg-white/70 text-[#6f6257]'}`}
-                        aria-pressed={betterVersionShowPinyin}
-                      >
-                        Pinyin {betterVersionShowPinyin ? 'On' : 'Off'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setBetterVersionShowEnglish((visible) => !visible)}
-                        className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${betterVersionShowEnglish ? 'border-indigo-300 bg-indigo-50 text-indigo-900' : 'border-[#d8cbb8] bg-white/70 text-[#6f6257]'}`}
-                        aria-pressed={betterVersionShowEnglish}
-                      >
-                        English {betterVersionShowEnglish ? 'On' : 'Off'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setBetterVersionOpen((open) => !open)}
-                        className="flex items-center gap-1 rounded-full border border-[#d8cbb8] bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[#6f6257] transition hover:bg-[#fff8ef]"
-                        aria-expanded={betterVersionOpen}
-                      >
-                        {betterVersionOpen ? 'Close' : 'Open'}
-                        {betterVersionOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                      </button>
-                    </div>
-                  </div>
-                  <AnimatePresence initial={false}>
-                    {betterVersionOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.24, ease: 'easeOut' }}
-                        className="overflow-hidden"
-                      >
-                        <div className="border-t border-[#e7dccd] px-4 pb-4 pt-3">
-                          <div className="flex items-start justify-between gap-3">
-                            <p className="text-xl font-semibold leading-snug text-[#2b241f]">{betterVersion.zh}</p>
-                            <AudioButton audioId={betterVersion.audioId} text={betterVersion.audioText} small />
-                          </div>
-                          {betterVersionShowPinyin && betterVersion.py && <p className="mt-2 text-sm leading-6 text-neutral-500">{betterVersion.py}</p>}
-                          {betterVersionShowEnglish && betterVersion.en && <p className="mt-1 text-sm leading-6 text-neutral-700">{betterVersion.en}</p>}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )}
+              <BetterVersionPanel
+                betterVersion={betterVersion}
+                open={betterVersionOpen}
+                showPinyin={betterVersionShowPinyin}
+                showEnglish={betterVersionShowEnglish}
+                onToggleOpen={() => setBetterVersionOpen((open) => !open)}
+                onTogglePinyin={() => setBetterVersionShowPinyin((visible) => !visible)}
+                onToggleEnglish={() => setBetterVersionShowEnglish((visible) => !visible)}
+              />
 
               <AnimatePresence mode="wait">
-                {chapter6Ending && (
+                {conversationEnding && (
                   <motion.section
-                    key={chapter6Ending.label}
+                    key={conversationEnding.label}
                     initial={{ opacity: 0, y: 14, scale: 0.985 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -8, scale: 0.99 }}
                     transition={{ duration: 0.32, ease: 'easeOut' }}
                     className="mt-5 overflow-hidden rounded-[26px] border border-indigo-200 bg-[linear-gradient(135deg,_#f5f3fa_0%,_#fff9ed_100%)]"
                   >
-                    <div className="flex flex-wrap items-start justify-between gap-3 border-b border-indigo-200/70 px-4 py-3 sm:px-5">
-                      <div>
-                        <div className="text-xs font-semibold uppercase tracking-[0.16em] text-indigo-700">Your conversation ending</div>
-                        <h4 className="mt-1 text-xl font-semibold text-[#25222f]">{chapter6Ending.label}</h4>
-                      </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        <button type="button" onClick={() => setEndingShowPinyin((visible) => !visible)} className={`min-h-9 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${endingShowPinyin ? 'border-indigo-300 bg-indigo-100 text-indigo-950' : 'border-[#d8cbb8] bg-white/75 text-neutral-600'}`} aria-pressed={endingShowPinyin}>
-                          Ending Pinyin {endingShowPinyin ? 'On' : 'Off'}
-                        </button>
-                        <button type="button" onClick={() => setEndingShowEnglish((visible) => !visible)} className={`min-h-9 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${endingShowEnglish ? 'border-amber-300 bg-amber-100 text-amber-950' : 'border-[#d8cbb8] bg-white/75 text-neutral-600'}`} aria-pressed={endingShowEnglish}>
-                          Ending English {endingShowEnglish ? 'On' : 'Off'}
-                        </button>
-                      </div>
-                    </div>
+                    <EndingLanguageSection
+                      ending={conversationEnding}
+                      showPinyin={endingShowPinyin}
+                      showEnglish={endingShowEnglish}
+                      onTogglePinyin={() => setEndingShowPinyin((visible) => !visible)}
+                      onToggleEnglish={() => setEndingShowEnglish((visible) => !visible)}
+                    />
                     <div className="space-y-3 px-4 py-4 sm:px-5">
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="text-xl font-semibold leading-snug text-[#211f2c]">{chapter6Ending.zh}</p>
-                        <AudioButton text={chapter6Ending.zh} small />
-                      </div>
-                      {endingShowPinyin && <p className="text-sm leading-6 text-indigo-700/75">{chapter6Ending.py}</p>}
-                      {endingShowEnglish && <p className="text-sm leading-6 text-neutral-700">{chapter6Ending.en}</p>}
                       <div className="grid grid-cols-2 gap-3">
                         <div className="rounded-2xl bg-white/70 p-3 text-sm">
                           <div className="text-neutral-500">Final Social comfort</div>
@@ -6457,89 +7076,50 @@ export default function ChapterUIPrototype() {
                           <div className="mt-1 text-xl font-semibold text-[#25222f]">{sceneMetrics.naturalness}</div>
                         </div>
                       </div>
-                      <p className="border-l-2 border-amber-500 pl-3 text-sm leading-6 text-neutral-600">{chapter6Ending.explanation}</p>
+                      <p className="border-l-2 border-amber-500 pl-3 text-sm leading-6 text-neutral-600">{conversationEnding.explanation}</p>
                     </div>
                     <div className="grid gap-2 border-t border-indigo-200/70 bg-white/45 p-3 sm:grid-cols-2">
-                      <Button variant="outline" className="min-h-11 rounded-2xl bg-white/75" onClick={() => handleChapter6Rewind(0)}>Rewind to decision 1</Button>
-                      <Button variant="outline" className="min-h-11 rounded-2xl bg-white/75" onClick={() => handleChapter6Rewind(2)}>Rewind to decision 3</Button>
-                      <Button variant="outline" className="min-h-11 rounded-2xl bg-white/75" onClick={() => handleChapter6Rewind(4)}>Rewind to decision 5</Button>
-                      <Button variant="outline" className="min-h-11 rounded-2xl border-indigo-300 bg-indigo-50 text-indigo-950 hover:bg-indigo-100" onClick={handleChapter6Replay}>Replay with less English support</Button>
-                      <Button
-                        variant="outline"
-                        className="min-h-11 rounded-2xl border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100 sm:col-span-2"
-                        onClick={() => {
-                          setMemoryReplayOpen(true);
-                          setMemoryReplayIndex(0);
-                          setMemoryReplayHintState({});
-                        }}
-                      >
-                        Replay the language moments
-                      </Button>
+                      <Button variant="outline" className="min-h-11 rounded-2xl bg-white/75" onClick={() => handleStoryRewind(0)}>Rewind to decision 1</Button>
+                      <Button variant="outline" className="min-h-11 rounded-2xl bg-white/75" onClick={() => handleStoryRewind(2)}>Rewind to decision 3</Button>
+                      <Button variant="outline" className="min-h-11 rounded-2xl bg-white/75" onClick={() => handleStoryRewind(4)}>Rewind to decision 5</Button>
+                      <Button variant="outline" className="min-h-11 rounded-2xl border-indigo-300 bg-indigo-50 text-indigo-950 hover:bg-indigo-100" onClick={handleStoryReplay}>Replay with less English support</Button>
+                      {replayMemoryItems.length > 0 && (
+                        <Button
+                          variant="outline"
+                          className="min-h-11 rounded-2xl border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100 sm:col-span-2"
+                          onClick={() => {
+                            setMemoryReplayOpen(true);
+                            setMemoryReplayIndex(0);
+                            setMemoryReplayHintState({});
+                          }}
+                        >
+                          Replay the language moments
+                        </Button>
+                      )}
                     </div>
                     <AnimatePresence initial={false}>
-                      {memoryReplayOpen && replayMemoryMoment && replayMemoryTarget && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="overflow-hidden border-t border-indigo-200/70 bg-[#fffaf3]/80"
-                        >
-                          <div className="space-y-3 p-3 sm:p-4">
-                            <div className="flex flex-wrap items-center justify-between gap-2">
-                              <div>
-                                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700">Memory replay</div>
-                                <div className="mt-0.5 text-sm text-neutral-600">Story moment {memoryReplayIndex + 1}/{CHAPTER6_MEMORY_MOMENTS.length}</div>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setMemoryReplayOpen(false);
-                                  setMemoryReplayHintState({});
-                                }}
-                                className="min-h-9 rounded-full border border-[#d8cbb8] bg-white px-3 py-1 text-xs font-semibold text-neutral-600"
-                              >
-                                Close replay
-                              </button>
-                            </div>
-                            <MemoryMomentCard
-                              moment={replayMemoryMoment}
-                              target={replayMemoryTarget}
-                              state={memoryReplayHintState}
-                              onChange={setMemoryReplayHintState}
-                            />
-                            <div className="grid grid-cols-2 gap-2">
-                              <Button
-                                variant="outline"
-                                className="min-h-10 rounded-2xl"
-                                disabled={memoryReplayIndex === 0}
-                                onClick={() => {
-                                  setMemoryReplayHintState({});
-                                  setMemoryReplayIndex((index) => Math.max(0, index - 1));
-                                }}
-                              >
-                                Previous moment
-                              </Button>
-                              <Button
-                                variant="outline"
-                                className="min-h-10 rounded-2xl"
-                                disabled={memoryReplayIndex === CHAPTER6_MEMORY_MOMENTS.length - 1}
-                                onClick={() => {
-                                  setMemoryReplayHintState({});
-                                  setMemoryReplayIndex((index) => Math.min(CHAPTER6_MEMORY_MOMENTS.length - 1, index + 1));
-                                }}
-                              >
-                                Next moment
-                              </Button>
-                            </div>
-                          </div>
-                        </motion.div>
+                      {memoryReplayOpen && replayMemoryItems.length > 0 && (
+                        <MemoryReplayPanel
+                          items={replayMemoryItems}
+                          index={memoryReplayIndex}
+                          state={memoryReplayHintState}
+                          onStateChange={setMemoryReplayHintState}
+                          onIndexChange={(index) => {
+                            setMemoryReplayHintState({});
+                            setMemoryReplayIndex(index);
+                          }}
+                          onClose={() => {
+                            setMemoryReplayOpen(false);
+                            setMemoryReplayHintState({});
+                          }}
+                        />
                       )}
                     </AnimatePresence>
                   </motion.section>
                 )}
               </AnimatePresence>
 
-              {chapter6ResultTier && (
+              {sceneResultTier && (
                 <motion.section
                   initial={{ opacity: 0, y: 12, scale: 0.99 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -6548,8 +7128,8 @@ export default function ChapterUIPrototype() {
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-indigo-200/70 px-4 py-3">
                     <div>
-                      <div className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700">{chapter6ResultTier.tier}</div>
-                      <h4 className="mt-0.5 text-lg font-semibold text-[#25222f]">{chapter6ResultTier.label}</h4>
+                      <div className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700">{sceneResultTier.tier}</div>
+                      <h4 className="mt-0.5 text-lg font-semibold text-[#25222f]">{sceneResultTier.label}</h4>
                     </div>
                     <div className="flex gap-2 text-xs font-semibold text-[#25222f]">
                       <span className="rounded-full bg-white/80 px-2.5 py-1">Comfort {sceneMetrics.socialComfort}</span>
@@ -6557,16 +7137,16 @@ export default function ChapterUIPrototype() {
                     </div>
                   </div>
                   <div className="space-y-3 px-4 py-4">
-                    <p className="text-sm leading-6 text-neutral-700">{chapter6ResultTier.intro}</p>
+                    <p className="text-sm leading-6 text-neutral-700">{sceneResultTier.intro}</p>
                     <div className="rounded-2xl border border-indigo-100 bg-white/65 px-3 py-2 text-sm leading-5 text-neutral-600">
-                      <div className="font-semibold text-[#25222f]">{completionSupportLabel} · {chapter6ResultTier.supportSummary}</div>
-                      <div className="mt-1">{chapter6ResultTier.supportRule}</div>
+                      <div className="font-semibold text-[#25222f]">{completionSupportLabel} · {sceneResultTier.supportSummary}</div>
+                      <div className="mt-1">{sceneResultTier.supportRule}</div>
                     </div>
                     <div className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-800">What you earned in this run</div>
-                    <div className="text-sm font-semibold text-[#25222f]">{chapter6ResultTier.title}</div>
-                    {chapter6ResultTier.examples ? (
+                    <div className="text-sm font-semibold text-[#25222f]">{sceneResultTier.title}</div>
+                    {sceneResultTier.examples ? (
                       <div className="space-y-3">
-                        {chapter6ResultTier.examples.map((example) => (
+                        {sceneResultTier.examples.map((example) => (
                           <div key={example.zh} className="border-l-2 border-indigo-300 pl-3">
                             <div className="flex items-start gap-2">
                               <div className="min-w-0 flex-1 text-lg font-semibold leading-snug text-[#25222f]">{example.zh}</div>
@@ -6580,11 +7160,11 @@ export default function ChapterUIPrototype() {
                     ) : (
                       <div className="border-l-2 border-indigo-300 pl-3">
                         <div className="flex items-start gap-2">
-                          <div className="min-w-0 flex-1 text-lg font-semibold leading-snug text-[#25222f]">{chapter6ResultTier.zh}</div>
-                          <div className="shrink-0"><AudioButton text={chapter6ResultTier.zh} /></div>
+                          <div className="min-w-0 flex-1 text-lg font-semibold leading-snug text-[#25222f]">{sceneResultTier.zh}</div>
+                          <div className="shrink-0"><AudioButton text={sceneResultTier.zh} /></div>
                         </div>
-                        {showPinyin && <div className="mt-1 text-sm leading-5 text-indigo-700/75">{chapter6ResultTier.py}</div>}
-                        {showEnglish && <div className="mt-1 text-sm leading-5 text-neutral-600">{chapter6ResultTier.en}</div>}
+                        {showPinyin && <div className="mt-1 text-sm leading-5 text-indigo-700/75">{sceneResultTier.py}</div>}
+                        {showEnglish && <div className="mt-1 text-sm leading-5 text-neutral-600">{sceneResultTier.en}</div>}
                       </div>
                     )}
                   </div>
@@ -6604,10 +7184,9 @@ export default function ChapterUIPrototype() {
                   {isLastNode ? (isLastChapter ? 'Finish practice' : 'Next chapter') : 'Back to lesson'}
                 </Button>
               </div>
-            </motion.div>
-          </motion.div>
+          </>
         )}
-      </AnimatePresence>
+      </FeedbackModal>
 
       <AnimatePresence>
         {selectedGlossary && (
@@ -6671,7 +7250,7 @@ export default function ChapterUIPrototype() {
                       expression: example.zh,
                       pinyin: example.py,
                       english: example.en,
-                      audioId: `glossary.${normalizeAudioKey(selectedGlossary.pinyin || selectedGlossary.title)}.ex${index + 1}`,
+                      audioId: example.audioId,
                       type: 'glossary-example',
                       source: `${selectedGlossary.title} · Glossary example`,
                       chapter: currentChapter.shortTitle,
@@ -6682,7 +7261,7 @@ export default function ChapterUIPrototype() {
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex min-w-0 items-start gap-1">
                           <div className={`${fontScale === 'sm' ? 'text-sm' : fontScale === 'lg' ? 'text-lg' : 'text-base'} min-w-0 font-semibold leading-snug`}>{example.zh}</div>
-                          <AudioButton audioId={`glossary.${normalizeAudioKey(selectedGlossary.pinyin || selectedGlossary.title)}.ex${index + 1}`} text={example.zh} small />
+                          <AudioButton audioId={example.audioId} text={example.zh} small />
                         </div>
                         <SaveButton saved={glossaryExampleSaved} onClick={() => toggleCollected(glossaryExampleItem)} />
                         </div>
@@ -6692,13 +7271,13 @@ export default function ChapterUIPrototype() {
                     );
                   })}
                 </div>
-                {glossaryExamplesForDisplay.length > 2 && (
+                {canExpandGlossaryExamples && (
                   <button
                     type="button"
                     onClick={() => setGlossaryExamplesExpanded((expanded) => !expanded)}
                     className="mt-3 min-h-10 rounded-full border border-[#d8cbb8] bg-white px-4 py-2 text-sm font-semibold text-[#6f6257]"
                   >
-                    {glossaryExamplesExpanded ? 'Show fewer' : `Show ${glossaryExamplesForDisplay.length - 2} more`}
+                    {glossaryExamplesExpanded ? 'Show fewer' : `Show ${glossaryExamplePolicy.requiredCount - glossaryExamplePolicy.initiallyVisible} more`}
                   </button>
                 )}
               </div>
