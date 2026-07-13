@@ -237,6 +237,22 @@ const CHAPTER6_SUPPORT_MAP = {
   },
 };
 
+const CHAPTER6_CORE_GLOSSARY_KEYS = [
+  '没电了',
+  '半小时前',
+  '咖啡馆',
+  '过',
+  '什么样',
+  '里面有',
+  '不是',
+  '联系',
+  '确认',
+  '失物登记表',
+];
+
+const CHAPTER6_GRAMMAR_GLOSSARY_KEYS = ['过', '里面有', '不是'];
+const CHAPTER6_RECYCLED_GLOSSARY_KEYS = ['钱包', '手机', '找不到', '帮我一下', '麻烦你了'];
+
 const CHAPTER6_STAGE_TRANSITIONS = {
   2: { title: 'Stage 1 complete', message: 'The staff now understands what is missing and where to look.' },
   4: { title: 'Stage 2 complete', message: 'The key details are clear, so the staff can act on the problem.' },
@@ -353,6 +369,11 @@ const CHAPTER6_MEMORY_MOMENTS = [
     label: 'Quick memory moment',
     context: 'The staff is about to ask what the wallet looks like. First, recall when and where you last used it.',
     npcContext: '你最后一次看到钱包是什么时候？在哪里？',
+    npcContextPy: 'Nǐ zuìhòu yí cì kàn dào qiánbāo shì shénme shíhou? Zài nǎli?',
+    npcContextEn: 'When and where did you last see your wallet?',
+    patternCueZh: '时间 + 地点 + V过',
+    patternCuePy: 'shíjiān + dìdiǎn + V guo',
+    patternCueEn: 'time + place + past experience with 过',
     prompt: 'Say the time, place, and past action before you reveal the model.',
     firstClue: 'Begin with 半小时前, then name the café.',
   },
@@ -363,6 +384,11 @@ const CHAPTER6_MEMORY_MOMENTS = [
     label: 'Quick memory moment',
     context: 'Before confirming the café’s result, make sure the staff knows which item is missing.',
     npcContext: '你丢的是手机，钱包还在，对吗？',
+    npcContextPy: 'Nǐ diū de shì shǒujī, qiánbāo hái zài, duì ma?',
+    npcContextEn: 'You lost the phone and still have the wallet, right?',
+    patternCueZh: '不是 A，是 B',
+    patternCuePy: 'Bú shì A, shì B',
+    patternCueEn: 'It is not A; it is B.',
     prompt: 'Use 不是A，是B to repair the misunderstanding.',
     firstClue: 'Reject 手机 first, then supply 钱包.',
   },
@@ -373,6 +399,11 @@ const CHAPTER6_MEMORY_MOMENTS = [
     label: 'Story callback',
     context: 'The café may have the wallet, but the staff still needs a practical next step.',
     npcContext: '你是说钱包可能落在咖啡馆了，对吗？',
+    npcContextPy: 'Nǐ shì shuō qiánbāo kěnéng là zài kāfēiguǎn le, duì ma?',
+    npcContextEn: 'You mean the wallet may have been left at the café, right?',
+    patternCueZh: '可以帮我……吗？',
+    patternCuePy: 'Kěyǐ bāng wǒ... ma?',
+    patternCueEn: 'Could you help me...?',
     prompt: 'Recall the polite request that asks the staff to contact the café.',
     firstClue: 'Start with 可以帮我…',
   },
@@ -383,6 +414,11 @@ const CHAPTER6_MEMORY_MOMENTS = [
     label: 'Story callback',
     context: 'The staff has helped recover the wallet and handled the phone problem.',
     npcContext: '信息对上了。你可以去拿钱包了。',
+    npcContextPy: 'Xìnxī duì shàng le. Nǐ kěyǐ qù ná qiánbāo le.',
+    npcContextEn: 'The information matches. You can go collect the wallet.',
+    patternCueZh: '太……了，麻烦你了',
+    patternCuePy: 'Tài... le, máfan nǐ le',
+    patternCueEn: 'Thank you so much; sorry to trouble you.',
     prompt: 'Say a warm closing that recognizes the staff member’s effort.',
     firstClue: 'Use stronger thanks, then acknowledge the trouble.',
   },
@@ -1207,6 +1243,9 @@ const glossary = {
     examples: [
       { zh: '半小时前，我还在咖啡馆。', py: 'Bàn ge xiǎoshí qián, wǒ hái zài kāfēiguǎn.', en: 'Half an hour ago, I was still at the café.' },
       { zh: '我半小时前看到过钱包。', py: 'Wǒ bàn ge xiǎoshí qián kàn dào guo qiánbāo.', en: 'I saw the wallet half an hour ago.' },
+      { zh: '她半小时前给我打过电话。', py: 'Tā bàn ge xiǎoshí qián gěi wǒ dǎ guo diànhuà.', en: 'She called me half an hour ago.' },
+      { zh: '半小时前，咖啡馆还开着。', py: 'Bàn ge xiǎoshí qián, kāfēiguǎn hái kāi zhe.', en: 'The café was still open half an hour ago.' },
+      { zh: '我们半小时前到的。', py: 'Wǒmen bàn ge xiǎoshí qián dào de.', en: 'We arrived half an hour ago.' },
     ],
   },
   '咖啡馆': {
@@ -1217,6 +1256,9 @@ const glossary = {
     examples: [
       { zh: '我在咖啡馆买过东西。', py: 'Wǒ zài kāfēiguǎn mǎi guo dōngxi.', en: 'I bought something at the café.' },
       { zh: '钱包可能在咖啡馆。', py: 'Qiánbāo kěnéng zài kāfēiguǎn.', en: 'The wallet may be at the café.' },
+      { zh: '咖啡馆在地铁站旁边。', py: 'Kāfēiguǎn zài dìtiězhàn pángbiān.', en: 'The café is next to the subway station.' },
+      { zh: '我给咖啡馆打电话。', py: 'Wǒ gěi kāfēiguǎn dǎ diànhuà.', en: 'I am calling the café.' },
+      { zh: '这家咖啡馆几点关门？', py: 'Zhè jiā kāfēiguǎn jǐ diǎn guānmén?', en: 'What time does this café close?' },
     ],
   },
   '过': {
@@ -1227,6 +1269,9 @@ const glossary = {
     examples: [
       { zh: '我在这里买过东西。', py: 'Wǒ zài zhèlǐ mǎi guo dōngxi.', en: 'I have bought something here.' },
       { zh: '我用过这个钱包。', py: 'Wǒ yòng guo zhège qiánbāo.', en: 'I have used this wallet.' },
+      { zh: '我去过北京。', py: 'Wǒ qù guo Běijīng.', en: 'I have been to Beijing.' },
+      { zh: '你看过这个电影吗？', py: 'Nǐ kàn guo zhège diànyǐng ma?', en: 'Have you seen this movie?' },
+      { zh: '她没用过这个软件。', py: 'Tā méi yòng guo zhège ruǎnjiàn.', en: 'She has not used this software.' },
     ],
   },
   '什么样': {
@@ -1237,6 +1282,9 @@ const glossary = {
     examples: [
       { zh: '钱包是什么样的？', py: 'Qiánbāo shì shénme yàng de?', en: 'What does the wallet look like?' },
       { zh: '你喜欢什么样的包？', py: 'Nǐ xǐhuan shénme yàng de bāo?', en: 'What kind of bag do you like?' },
+      { zh: '你在找什么样的钱包？', py: 'Nǐ zài zhǎo shénme yàng de qiánbāo?', en: 'What kind of wallet are you looking for?' },
+      { zh: '那个房间是什么样的？', py: 'Nàge fángjiān shì shénme yàng de?', en: 'What is that room like?' },
+      { zh: '他想买什么样的手机？', py: 'Tā xiǎng mǎi shénme yàng de shǒujī?', en: 'What kind of phone does he want to buy?' },
     ],
   },
   '里面有': {
@@ -1247,6 +1295,9 @@ const glossary = {
     examples: [
       { zh: '里面有银行卡。', py: 'Lǐmiàn yǒu yínhángkǎ.', en: 'There is a bank card inside.' },
       { zh: '钱包里面有身份证。', py: 'Qiánbāo lǐmiàn yǒu shēnfènzhèng.', en: 'There is an ID inside the wallet.' },
+      { zh: '箱子里面有几本书。', py: 'Xiāngzi lǐmiàn yǒu jǐ běn shū.', en: 'There are several books inside the box.' },
+      { zh: '房间里面有一张桌子。', py: 'Fángjiān lǐmiàn yǒu yì zhāng zhuōzi.', en: 'There is a table inside the room.' },
+      { zh: '里面有我的名字和电话。', py: 'Lǐmiàn yǒu wǒ de míngzi hé diànhuà.', en: 'My name and phone number are inside.' },
     ],
   },
   '不是': {
@@ -1257,6 +1308,9 @@ const glossary = {
     examples: [
       { zh: '不是手机，是钱包。', py: 'Bú shì shǒujī, shì qiánbāo.', en: 'It is not the phone; it is the wallet.' },
       { zh: '不是今天，是明天。', py: 'Bú shì jīntiān, shì míngtiān.', en: 'It is not today; it is tomorrow.' },
+      { zh: '不是黑色，是蓝色。', py: 'Bú shì hēisè, shì lánsè.', en: 'It is not black; it is blue.' },
+      { zh: '不是在这里，是在那里。', py: 'Bú shì zài zhèlǐ, shì zài nàli.', en: 'It is not here; it is over there.' },
+      { zh: '不是我打的电话，是他打的。', py: 'Bú shì wǒ dǎ de diànhuà, shì tā dǎ de.', en: 'It was not me who called; it was him.' },
     ],
   },
   '联系': {
@@ -1267,6 +1321,9 @@ const glossary = {
     examples: [
       { zh: '可以帮我联系咖啡馆吗？', py: 'Kěyǐ bāng wǒ liánxì kāfēiguǎn ma?', en: 'Could you help me contact the café?' },
       { zh: '我会联系他们。', py: 'Wǒ huì liánxì tāmen.', en: 'I will contact them.' },
+      { zh: '请先联系工作人员。', py: 'Qǐng xiān liánxì gōngzuò rényuán.', en: 'Please contact the staff first.' },
+      { zh: '我联系不上咖啡馆。', py: 'Wǒ liánxì bú shàng kāfēiguǎn.', en: 'I cannot reach the café.' },
+      { zh: '有消息请联系我。', py: 'Yǒu xiāoxi qǐng liánxì wǒ.', en: 'Please contact me if there is any news.' },
     ],
   },
   '确认': {
@@ -1277,6 +1334,9 @@ const glossary = {
     examples: [
       { zh: '请确认里面的东西。', py: 'Qǐng quèrèn lǐmiàn de dōngxi.', en: 'Please confirm what is inside.' },
       { zh: '我去咖啡馆确认一下。', py: 'Wǒ qù kāfēiguǎn quèrèn yíxià.', en: 'I will go to the café to confirm it.' },
+      { zh: '请确认你的名字。', py: 'Qǐng quèrèn nǐ de míngzi.', en: 'Please confirm your name.' },
+      { zh: '我想确认一下时间。', py: 'Wǒ xiǎng quèrèn yíxià shíjiān.', en: 'I would like to confirm the time.' },
+      { zh: '信息已经确认了。', py: 'Xìnxī yǐjīng quèrèn le.', en: 'The information has been confirmed.' },
     ],
   },
   '失物登记表': {
@@ -1287,6 +1347,9 @@ const glossary = {
     examples: [
       { zh: '请给我失物登记表。', py: 'Qǐng gěi wǒ shīwù dēngjìbiǎo.', en: 'Please give me a lost-property form.' },
       { zh: '我先填写失物登记表。', py: 'Wǒ xiān tiánxiě shīwù dēngjìbiǎo.', en: 'I will fill out the lost-property form first.' },
+      { zh: '失物登记表在哪里？', py: 'Shīwù dēngjìbiǎo zài nǎli?', en: 'Where is the lost-property form?' },
+      { zh: '请把信息写在失物登记表上。', py: 'Qǐng bǎ xìnxī xiě zài shīwù dēngjìbiǎo shàng.', en: 'Please write the information on the lost-property form.' },
+      { zh: '工作人员正在看失物登记表。', py: 'Gōngzuò rényuán zhèngzài kàn shīwù dēngjìbiǎo.', en: 'The staff member is reviewing the lost-property form.' },
     ],
   },
   '充电': {
@@ -3247,7 +3310,33 @@ function validateChapter6MemoryTargets() {
     if (!CHAPTER6_MEMORY_TARGETS.some((target) => target.id === moment.targetId)) {
       console.warn(`[Chapter 6 memory] ${moment.id} references a missing target.`);
     }
+    const missingSupportField = ['npcContext', 'npcContextPy', 'npcContextEn', 'patternCueZh', 'patternCuePy', 'patternCueEn']
+      .find((field) => !moment[field]);
+    if (missingSupportField) {
+      console.warn(`[Chapter 6 memory] ${moment.id} is missing ${missingSupportField}.`);
+    }
   });
+}
+
+function validateChapter6GlossaryExamples() {
+  if (!import.meta.env.DEV) return;
+
+  const validateExamples = (key, expectedCount, minimumOnly = false) => {
+    const examples = Array.isArray(glossary[key]?.examples) ? glossary[key].examples : [];
+    const countIsInvalid = minimumOnly ? examples.length < expectedCount : examples.length !== expectedCount;
+    if (countIsInvalid) {
+      console.warn(`[Chapter 6 glossary] ${key} has ${examples.length} examples; expected ${minimumOnly ? 'at least ' : ''}${expectedCount}.`);
+    }
+    examples.forEach((example, index) => {
+      if (!example?.zh || !example?.py || !example?.en) {
+        console.warn(`[Chapter 6 glossary] ${key} example ${index + 1} is missing Chinese, pinyin, or English.`);
+      }
+    });
+  };
+
+  CHAPTER6_CORE_GLOSSARY_KEYS.forEach((key) => validateExamples(key, 5));
+  CHAPTER6_GRAMMAR_GLOSSARY_KEYS.forEach((key) => validateExamples(key, 5));
+  CHAPTER6_RECYCLED_GLOSSARY_KEYS.forEach((key) => validateExamples(key, 2, true));
 }
 
 chapters.forEach((chapter) => chapter.nodes.forEach((node) => applyBetterVersionTranslations(node.options)));
@@ -3257,6 +3346,7 @@ Object.values(CHAPTER6_BRANCH_NODES).forEach((branches) => {
 validateBetterVersionTranslations();
 validateChapter6ContentSupport();
 validateChapter6MemoryTargets();
+validateChapter6GlossaryExamples();
 
 function normalizeAudioKey(text = '') {
   return text
@@ -3682,15 +3772,13 @@ function StoryLanguageStack({
 
 function MemoryMomentCard({ moment, target, state = {}, onChange, onDismiss }) {
   if (!moment || !target) return null;
-  const level = Number.isFinite(state.level) ? state.level : 0;
-  const nextLabels = ['Show first clue', 'Show pinyin', 'Show English', 'Reveal model answer'];
 
   return (
     <section className="rounded-[22px] border border-indigo-100 bg-indigo-50/45 p-4 text-left shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <div className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700">{moment.label}</div>
-          <p className="mt-1 text-sm leading-6 text-neutral-700">{moment.context}</p>
+          <p className="mt-1 text-sm leading-6 text-neutral-600">Recall the language before asking for support.</p>
         </div>
         {onDismiss && (
           <button type="button" onClick={onDismiss} className="min-h-9 rounded-full border border-indigo-100 bg-white/70 px-3 py-1 text-xs font-semibold text-neutral-600">
@@ -3698,12 +3786,48 @@ function MemoryMomentCard({ moment, target, state = {}, onChange, onDismiss }) {
           </button>
         )}
       </div>
-      {moment.npcContext && <p className="mt-3 border-l-2 border-indigo-200 pl-3 text-sm font-medium leading-6 text-[#2b241f]">{moment.npcContext}</p>}
-      <p className="mt-3 text-sm leading-6 text-neutral-600">{moment.prompt}</p>
-      {level >= 1 && <p className="mt-2 rounded-xl bg-white/70 px-3 py-2 text-sm text-indigo-900"><span className="font-semibold">First clue:</span> {moment.firstClue}</p>}
-      {level >= 2 && <p className="mt-2 text-sm leading-6 text-neutral-500">{target.py}</p>}
-      {level >= 3 && <p className="mt-1 text-sm leading-6 text-neutral-700">{target.en}</p>}
-      {level >= 4 && (
+      {moment.npcContext && (
+        <div className="mt-3 rounded-2xl border border-indigo-100 bg-white/70 p-3">
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-lg font-semibold leading-snug text-[#2b241f]">{moment.npcContext}</p>
+            <AudioButton text={moment.npcContext} small />
+          </div>
+          {state.showPinyin && moment.npcContextPy && <p className="mt-2 text-sm leading-6 text-neutral-500">{moment.npcContextPy}</p>}
+          {state.showEnglish && moment.npcContextEn && <p className="mt-1 text-sm leading-6 text-neutral-700">{moment.npcContextEn}</p>}
+        </div>
+      )}
+      <p className="mt-3 text-sm font-medium leading-6 text-neutral-700">{moment.prompt}</p>
+      {moment.patternCueZh && (
+        <div className="mt-2 rounded-xl bg-indigo-100/65 px-3 py-2">
+          <p className="font-semibold text-indigo-950">{moment.patternCueZh}</p>
+          {state.showPinyin && moment.patternCuePy && <p className="mt-1 text-sm text-indigo-700/75">{moment.patternCuePy}</p>}
+          {state.showEnglish && moment.patternCueEn && <p className="mt-1 text-sm text-neutral-700">{moment.patternCueEn}</p>}
+        </div>
+      )}
+      {!state.firstClue && (
+        <button type="button" onClick={() => onChange({ ...state, firstClue: true })} className="mt-3 min-h-10 rounded-full border border-indigo-200 bg-white px-4 py-2 text-sm font-semibold text-indigo-900 hover:bg-indigo-50">
+          Show first clue
+        </button>
+      )}
+      {state.firstClue && (
+        <>
+          <p className="mt-3 rounded-xl bg-white/70 px-3 py-2 text-sm text-indigo-900"><span className="font-semibold">First clue:</span> {moment.firstClue}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button type="button" onClick={() => onChange({ ...state, showPinyin: !state.showPinyin })} className={`min-h-10 rounded-full border px-3 py-2 text-xs font-semibold ${state.showPinyin ? 'border-indigo-300 bg-indigo-100 text-indigo-950' : 'border-[#d8cbb8] bg-white text-neutral-600'}`} aria-pressed={Boolean(state.showPinyin)}>
+              Memory Pinyin {state.showPinyin ? 'On' : 'Off'}
+            </button>
+            <button type="button" onClick={() => onChange({ ...state, showEnglish: !state.showEnglish })} className={`min-h-10 rounded-full border px-3 py-2 text-xs font-semibold ${state.showEnglish ? 'border-amber-300 bg-amber-100 text-amber-950' : 'border-[#d8cbb8] bg-white text-neutral-600'}`} aria-pressed={Boolean(state.showEnglish)}>
+              Memory English {state.showEnglish ? 'On' : 'Off'}
+            </button>
+            {!state.revealed && (
+              <button type="button" onClick={() => onChange({ ...state, revealed: true })} className="min-h-10 rounded-full border border-indigo-300 bg-white px-4 py-2 text-sm font-semibold text-indigo-950">
+                Reveal answer
+              </button>
+            )}
+          </div>
+        </>
+      )}
+      {state.revealed && (
         <div className="mt-3 rounded-2xl border border-indigo-100 bg-white/80 p-3">
           <div className="flex items-start justify-between gap-3">
             <p className="text-xl font-semibold leading-snug text-[#2b241f]">{target.zh}</p>
@@ -3712,11 +3836,6 @@ function MemoryMomentCard({ moment, target, state = {}, onChange, onDismiss }) {
           <p className="mt-2 text-sm leading-6 text-neutral-500">{target.py}</p>
           <p className="mt-1 text-sm leading-6 text-neutral-700">{target.en}</p>
         </div>
-      )}
-      {level < 4 && (
-        <button type="button" onClick={() => onChange({ ...state, level: level + 1 })} className="mt-3 min-h-10 rounded-full border border-indigo-200 bg-white px-4 py-2 text-sm font-semibold text-indigo-900 hover:bg-indigo-50">
-          {nextLabels[level]}
-        </button>
       )}
     </section>
   );
@@ -3813,6 +3932,9 @@ export default function ChapterUIPrototype() {
   const [memoryReplayOpen, setMemoryReplayOpen] = useState(false);
   const [memoryReplayIndex, setMemoryReplayIndex] = useState(0);
   const [memoryReplayHintState, setMemoryReplayHintState] = useState({});
+  const [endingShowPinyin, setEndingShowPinyin] = useState(true);
+  const [endingShowEnglish, setEndingShowEnglish] = useState(true);
+  const [glossaryExamplesExpanded, setGlossaryExamplesExpanded] = useState(false);
   const [showPinyin, setShowPinyin] = useState(persisted?.showPinyin ?? true);
   const [showEnglish, setShowEnglish] = useState(persisted?.showEnglish ?? true);
   const [reviewShowPinyin, setReviewShowPinyin] = useState(true);
@@ -3982,6 +4104,14 @@ export default function ChapterUIPrototype() {
     ? CHAPTER6_STAGE_TRANSITIONS[baseCurrentNode.id] || null
     : null;
   const selectedGlossary = selectedGlossaryKey ? glossary[selectedGlossaryKey] : null;
+  const selectedGlossaryExamples = Array.isArray(selectedGlossary?.examples) ? selectedGlossary.examples : [];
+  const selectedGlossaryIsChapter6Core = isChapter6Prototype && CHAPTER6_CORE_GLOSSARY_KEYS.includes(selectedGlossaryKey);
+  const selectedGlossaryIsChapter6Recycled = isChapter6Prototype && CHAPTER6_RECYCLED_GLOSSARY_KEYS.includes(selectedGlossaryKey);
+  const visibleGlossaryExamples = selectedGlossaryIsChapter6Core
+    ? (glossaryExamplesExpanded ? selectedGlossaryExamples : selectedGlossaryExamples.slice(0, 2))
+    : selectedGlossaryIsChapter6Recycled
+    ? selectedGlossaryExamples.slice(0, 2)
+    : selectedGlossaryExamples;
 
   useEffect(() => {
     if (!chapter6PrimaryNote) return;
@@ -3999,6 +4129,10 @@ export default function ChapterUIPrototype() {
   useEffect(() => {
     setMemoryReplayHintState({});
   }, [memoryReplayIndex]);
+
+  useEffect(() => {
+    setGlossaryExamplesExpanded(false);
+  }, [selectedGlossaryKey]);
 
   const chapter6Ending = useMemo(() => {
     if (!isChapter6Prototype || safeCurrentNodeIndex !== 5 || !sceneRun[5]) return null;
@@ -4018,6 +4152,12 @@ export default function ChapterUIPrototype() {
         : 'Six natural replies kept the request clear, cooperative, and easy to act on.',
     };
   }, [isChapter6Prototype, safeCurrentNodeIndex, sceneMetrics, sceneRun]);
+
+  useEffect(() => {
+    if (!chapter6Ending) return;
+    setEndingShowPinyin(true);
+    setEndingShowEnglish(true);
+  }, [chapter6Ending?.label, sceneRun[5]?.optionId]);
 
   const chapterDecisionTotal = currentChapter.nodes.length;
   const chapterProgress = ((safeCurrentNodeIndex + 1) / chapterDecisionTotal) * 100;
@@ -5440,7 +5580,7 @@ export default function ChapterUIPrototype() {
                   target={currentMemoryTarget}
                   state={memoryMomentState}
                   onChange={setMemoryMomentState}
-                  onDismiss={() => setMemoryMomentState((prev) => ({ ...prev, dismissed: true }))}
+                  onDismiss={() => setMemoryMomentState({ dismissed: true })}
                 />
               </div>
             )}
@@ -6219,14 +6359,27 @@ export default function ChapterUIPrototype() {
                     transition={{ duration: 0.32, ease: 'easeOut' }}
                     className="mt-5 overflow-hidden rounded-[26px] border border-indigo-200 bg-[linear-gradient(135deg,_#f5f3fa_0%,_#fff9ed_100%)]"
                   >
-                    <div className="border-b border-indigo-200/70 px-4 py-3 sm:px-5">
-                      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-indigo-700">Your conversation ending</div>
-                      <h4 className="mt-1 text-xl font-semibold text-[#25222f]">{chapter6Ending.label}</h4>
+                    <div className="flex flex-wrap items-start justify-between gap-3 border-b border-indigo-200/70 px-4 py-3 sm:px-5">
+                      <div>
+                        <div className="text-xs font-semibold uppercase tracking-[0.16em] text-indigo-700">Your conversation ending</div>
+                        <h4 className="mt-1 text-xl font-semibold text-[#25222f]">{chapter6Ending.label}</h4>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        <button type="button" onClick={() => setEndingShowPinyin((visible) => !visible)} className={`min-h-9 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${endingShowPinyin ? 'border-indigo-300 bg-indigo-100 text-indigo-950' : 'border-[#d8cbb8] bg-white/75 text-neutral-600'}`} aria-pressed={endingShowPinyin}>
+                          Ending Pinyin {endingShowPinyin ? 'On' : 'Off'}
+                        </button>
+                        <button type="button" onClick={() => setEndingShowEnglish((visible) => !visible)} className={`min-h-9 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${endingShowEnglish ? 'border-amber-300 bg-amber-100 text-amber-950' : 'border-[#d8cbb8] bg-white/75 text-neutral-600'}`} aria-pressed={endingShowEnglish}>
+                          Ending English {endingShowEnglish ? 'On' : 'Off'}
+                        </button>
+                      </div>
                     </div>
                     <div className="space-y-3 px-4 py-4 sm:px-5">
-                      <p className="text-xl font-semibold leading-snug text-[#211f2c]">{chapter6Ending.zh}</p>
-                      {showPinyin && <p className="text-sm leading-6 text-indigo-700/75">{chapter6Ending.py}</p>}
-                      {showEnglish && <p className="text-sm leading-6 text-neutral-700">{chapter6Ending.en}</p>}
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="text-xl font-semibold leading-snug text-[#211f2c]">{chapter6Ending.zh}</p>
+                        <AudioButton text={chapter6Ending.zh} small />
+                      </div>
+                      {endingShowPinyin && <p className="text-sm leading-6 text-indigo-700/75">{chapter6Ending.py}</p>}
+                      {endingShowEnglish && <p className="text-sm leading-6 text-neutral-700">{chapter6Ending.en}</p>}
                       <div className="grid grid-cols-2 gap-3">
                         <div className="rounded-2xl bg-white/70 p-3 text-sm">
                           <div className="text-neutral-500">Final Social comfort</div>
@@ -6446,7 +6599,7 @@ export default function ChapterUIPrototype() {
               <div className="mt-5">
                 <div className="mb-2 text-sm font-medium">Practical examples</div>
                 <div className="grid gap-3 md:grid-cols-2">
-                  {selectedGlossary.examples.map((example, index) => {
+                  {visibleGlossaryExamples.map((example, index) => {
                     const glossaryExampleItem = createCollectionItem({
                       expression: example.zh,
                       pinyin: example.py,
@@ -6472,6 +6625,15 @@ export default function ChapterUIPrototype() {
                     );
                   })}
                 </div>
+                {selectedGlossaryIsChapter6Core && selectedGlossaryExamples.length > 2 && (
+                  <button
+                    type="button"
+                    onClick={() => setGlossaryExamplesExpanded((expanded) => !expanded)}
+                    className="mt-3 min-h-10 rounded-full border border-[#d8cbb8] bg-white px-4 py-2 text-sm font-semibold text-[#6f6257]"
+                  >
+                    {glossaryExamplesExpanded ? 'Show fewer' : `Show ${selectedGlossaryExamples.length - 2} more`}
+                  </button>
+                )}
               </div>
             </motion.div>
           </motion.div>
