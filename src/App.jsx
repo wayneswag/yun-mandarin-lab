@@ -3255,6 +3255,183 @@ const chapters = [
   },
 ];
 
+const highlightTiers = (primaryGlossaryKeys = [], recycledGlossaryKeys = []) => ({
+  primaryGlossaryKeys,
+  recycledGlossaryKeys,
+});
+
+// Chapters 1–5 keep their existing three-decision stories, but every rendered
+// NPC line and option now has an explicit curriculum-authored highlight map.
+// An empty map is intentional: legacy glossary metadata must not create a
+// highlight unless the language is a teaching or review target in that line.
+const STORY_HIGHLIGHT_MAP = Object.freeze({
+  chapter1: {
+    1: {
+      npc: highlightTiers(['新来的']),
+      options: {
+        A: highlightTiers(['新来的']),
+        B: highlightTiers(),
+        C: highlightTiers(),
+        D: highlightTiers(['新来的']),
+      },
+    },
+    2: {
+      npc: highlightTiers(),
+      options: {
+        A: highlightTiers(),
+        B: highlightTiers(),
+        C: highlightTiers(),
+        D: highlightTiers(),
+      },
+    },
+    3: {
+      npc: highlightTiers(['中文', '说得怎么样']),
+      options: {
+        A: highlightTiers(['会', '中文']),
+        B: highlightTiers(['会', '中文']),
+        C: highlightTiers(['会', '中文']),
+        D: highlightTiers(['中文']),
+      },
+    },
+  },
+  chapter2: {
+    1: {
+      npc: highlightTiers(),
+      options: {
+        A: highlightTiers(['有时间']),
+        B: highlightTiers(['有时间']),
+        C: highlightTiers(),
+        D: highlightTiers(),
+      },
+    },
+    2: {
+      npc: highlightTiers([], ['有时间']),
+      options: {
+        A: highlightTiers(),
+        B: highlightTiers(),
+        C: highlightTiers(),
+        D: highlightTiers([], ['有时间']),
+      },
+    },
+    3: {
+      npc: highlightTiers(),
+      options: {
+        A: highlightTiers(['可能', '会', '要不然']),
+        B: highlightTiers(['晚一点']),
+        C: highlightTiers(['可能', '会', '晚一点']),
+        D: highlightTiers(),
+      },
+    },
+  },
+  chapter3: {
+    1: {
+      npc: highlightTiers(['几位']),
+      options: {
+        A: highlightTiers(['靠窗', '位子']),
+        B: highlightTiers(['位子']),
+        C: highlightTiers(),
+        D: highlightTiers(['几位']),
+      },
+    },
+    2: {
+      npc: highlightTiers(),
+      options: {
+        A: highlightTiers(['来']),
+        B: highlightTiers(),
+        C: highlightTiers(['来']),
+        D: highlightTiers(),
+      },
+    },
+    3: {
+      npc: highlightTiers(['一共', '打包']),
+      options: {
+        A: highlightTiers(['打包', '刷卡']),
+        B: highlightTiers(['打包', '刷卡']),
+        C: highlightTiers(['刷卡']),
+        D: highlightTiers(['打包']),
+      },
+    },
+  },
+  chapter4: {
+    1: {
+      npc: highlightTiers(['看起来', '迷路了']),
+      options: {
+        A: highlightTiers(['地铁站', '怎么走']),
+        B: highlightTiers(['地铁站']),
+        C: highlightTiers(['地铁站']),
+        D: highlightTiers(['地铁站']),
+      },
+    },
+    2: {
+      npc: highlightTiers(['不远', '一直走', '左转'], ['地铁站']),
+      options: {
+        A: highlightTiers(['没听清楚', '再说一遍']),
+        B: highlightTiers(['再说一遍']),
+        C: highlightTiers(),
+        D: highlightTiers(),
+      },
+    },
+    3: {
+      npc: highlightTiers(['以后', '到'], ['一直走', '左转']),
+      options: {
+        A: highlightTiers([], ['一直走', '左转']),
+        B: highlightTiers(),
+        C: highlightTiers(),
+        D: highlightTiers(['以后', '到'], ['一直走', '左转']),
+      },
+    },
+  },
+  chapter5: {
+    1: {
+      npc: highlightTiers(['打折']),
+      options: {
+        A: highlightTiers(['多少钱']),
+        B: highlightTiers(['多少钱']),
+        C: highlightTiers(),
+        D: highlightTiers(['多少钱']),
+      },
+    },
+    2: {
+      npc: highlightTiers([], ['打折']),
+      options: {
+        A: highlightTiers(['有点儿', '看看别的']),
+        B: highlightTiers(['太贵了']),
+        C: highlightTiers(),
+        D: highlightTiers([], ['多少钱']),
+      },
+    },
+    3: {
+      npc: highlightTiers(['便宜一点']),
+      options: {
+        A: highlightTiers(['刷卡']),
+        B: highlightTiers(['刷卡']),
+        C: highlightTiers(),
+        D: highlightTiers(['刷卡']),
+      },
+    },
+  },
+});
+
+function getAuthoredStoryHighlightTiers(chapterId, nodeId, optionId = null) {
+  const nodeMap = STORY_HIGHLIGHT_MAP[chapterId]?.[nodeId];
+  return optionId == null ? nodeMap?.npc : nodeMap?.options?.[optionId];
+}
+
+function getStoryHighlightSource(chapterId, nodeId, optionId, decisionSupport) {
+  return getAuthoredStoryHighlightTiers(chapterId, nodeId, optionId) || decisionSupport || null;
+}
+
+function resolveStoryHighlightTiers({ chapterId, nodeId, optionId = null, text = '', decisionSupport = null }) {
+  const source = getStoryHighlightSource(chapterId, nodeId, optionId, decisionSupport) || highlightTiers();
+  const primaryGlossaryKeys = (Array.isArray(source.primaryGlossaryKeys) ? source.primaryGlossaryKeys : [])
+    .filter((key) => typeof key === 'string' && text.includes(key));
+  const primarySet = new Set(primaryGlossaryKeys);
+  const recycledGlossaryKeys = (Array.isArray(source.recycledGlossaryKeys) ? source.recycledGlossaryKeys : [])
+    .filter((key) => typeof key === 'string' && text.includes(key) && !primarySet.has(key));
+
+  return { primaryGlossaryKeys, recycledGlossaryKeys };
+}
+
 // Explicit authored pronunciation and meaning support for the Chinese that each
 // Teacher note teaches or contrasts. Nothing here is generated from note prose.
 const TEACHER_NOTE_SUPPORT = Object.freeze({
@@ -3683,70 +3860,126 @@ function validateChapterMemorySupport() {
   });
 }
 
+function forEachStorySentence(inspect) {
+  const inspectNode = (chapter, node, source = 'base') => {
+    if (!node) return;
+    const chapterSupport = getChapterSupport(chapter);
+    const decisionSupport = chapterSupport.stageSupport?.decisionSupport?.[node.id] || null;
+    inspect({
+      chapter,
+      node,
+      option: null,
+      text: node.npcLineZh || '',
+      legacyGlossaryKeys: node.npcGlossary,
+      decisionSupport,
+      source: `${source} NPC`,
+    });
+    (Array.isArray(node.options) ? node.options : []).forEach((option) => inspect({
+      chapter,
+      node,
+      option,
+      text: option?.zh || '',
+      legacyGlossaryKeys: option?.glossary,
+      decisionSupport,
+      source: `${source} option ${option?.id || 'unknown'}`,
+    }));
+  };
+
+  chapters.forEach((chapter) => {
+    chapter.nodes.forEach((node) => inspectNode(chapter, node));
+    const branchesByDecision = getChapterSupport(chapter).branchingSupport?.nodes || {};
+    Object.entries(branchesByDecision).forEach(([decisionKey, branches]) => {
+      const decisionId = Number(decisionKey.replace('decision', ''));
+      const baseNode = chapter.nodes.find((node) => node.id === decisionId);
+      Object.entries(branches || {}).forEach(([branchName, branch]) => {
+        const mergedNode = {
+          ...baseNode,
+          ...branch,
+          id: decisionId,
+          options: branch?.options || baseNode?.options || [],
+        };
+        inspectNode(chapter, mergedNode, `${decisionKey}/${branchName}`);
+      });
+    });
+  });
+}
+
 function collectClickableGlossaryReferences() {
   const references = [];
-  const addMatches = (chapter, text, keys, source) => {
-    if (!text || !Array.isArray(keys)) return;
-    keys.forEach((key) => {
-      if (typeof key === 'string' && text.includes(key)) {
-        references.push({ chapter, highlightedText: key, key, source });
-      }
+  forEachStorySentence(({ chapter, node, option, text, decisionSupport, source }) => {
+    const tiers = resolveStoryHighlightTiers({
+      chapterId: chapter.id,
+      nodeId: node.id,
+      optionId: option?.id ?? null,
+      text,
+      decisionSupport,
     });
-  };
-
-  chapters.forEach((chapter) => {
-    const support = getChapterSupport(chapter);
-    const decisionSupport = support.stageSupport?.decisionSupport;
-    if (decisionSupport) return;
-    chapter.nodes.forEach((node) => {
-      addMatches(chapter.label, node.npcLineZh, node.npcGlossary?.slice(0, 3), `decision ${node.id} NPC`);
-      node.options?.forEach((option) => {
-        addMatches(chapter.label, option.zh, option.glossary?.slice(0, 3), `decision ${node.id} option ${option.id}`);
-      });
+    [...tiers.primaryGlossaryKeys, ...tiers.recycledGlossaryKeys].forEach((key) => {
+      references.push({ chapter: chapter.label, highlightedText: key, key, source: `decision ${node.id} ${source}` });
     });
   });
+  return references;
+}
 
-  chapters.forEach((chapter) => {
-    const support = getChapterSupport(chapter);
-    const decisionSupport = support.stageSupport?.decisionSupport;
-    if (!decisionSupport) return;
-    const textsByDecision = new Map();
-    const addText = (decisionId, text, source) => {
-    if (!text) return;
-    const texts = textsByDecision.get(decisionId) || [];
-    texts.push({ text, source });
-    textsByDecision.set(decisionId, texts);
-  };
-    const inspectBranch = (value, decisionId, source = 'branch') => {
-    if (Array.isArray(value)) {
-      value.forEach((item, index) => inspectBranch(item, decisionId, `${source} ${index + 1}`));
+function validateStoryHighlightMaps() {
+  if (!import.meta.env.DEV) return;
+
+  const errors = [];
+  const addError = (context, message) => errors.push(`${context}: ${message}`);
+
+  forEachStorySentence(({ chapter, node, option, text, legacyGlossaryKeys, decisionSupport, source }) => {
+    const optionId = option?.id ?? null;
+    const context = `${chapter.label} · node ${node.id} · ${source}`;
+    const authored = getAuthoredStoryHighlightTiers(chapter.id, node.id, optionId);
+    const highlightSource = getStoryHighlightSource(chapter.id, node.id, optionId, decisionSupport);
+
+    if (chapter.id !== 'chapter6' && !authored) {
+      addError(context, 'is missing an explicit authored highlight map');
+    }
+    if (!highlightSource && Array.isArray(legacyGlossaryKeys) && legacyGlossaryKeys.length > 0) {
+      addError(context, `would fall back to legacy glossary keys [${legacyGlossaryKeys.join(', ')}]`);
+    }
+    if (highlightSource && (!Array.isArray(highlightSource.primaryGlossaryKeys) || !Array.isArray(highlightSource.recycledGlossaryKeys))) {
+      addError(context, 'must define both primaryGlossaryKeys and recycledGlossaryKeys arrays');
       return;
     }
-    if (!value || typeof value !== 'object') return;
-    if (typeof value.npcLineZh === 'string') addText(decisionId, value.npcLineZh, `${source} NPC`);
-    if (typeof value.zh === 'string') addText(decisionId, value.zh, `${source} option ${value.id || ''}`.trim());
-    Object.values(value).forEach((child) => {
-      if (child && typeof child === 'object') inspectBranch(child, decisionId, source);
-    });
-  };
 
-    chapter.nodes.forEach((node) => {
-      addText(node.id, node.npcLineZh, 'base NPC');
-      node.options?.forEach((option) => addText(node.id, option.zh, `base option ${option.id}`));
-    });
-    Object.entries(support.branchingSupport?.nodes || {}).forEach(([decisionKey, branches]) => {
-      inspectBranch(branches, Number(decisionKey.replace('decision', '')), decisionKey);
-    });
+    const sourcePrimary = highlightSource?.primaryGlossaryKeys || [];
+    const sourceRecycled = highlightSource?.recycledGlossaryKeys || [];
+    const overlap = sourcePrimary.filter((key) => sourceRecycled.includes(key));
+    overlap.forEach((key) => addError(context, `key “${key}” is both Primary and Recycled`));
 
-    Object.entries(decisionSupport).forEach(([decisionId, decision]) => {
-      const keys = [...decision.primaryGlossaryKeys.slice(0, 3), ...decision.recycledGlossaryKeys];
-      (textsByDecision.get(Number(decisionId)) || []).forEach(({ text, source }) => {
-        addMatches(chapter.label, text, keys, `decision ${decisionId} ${source}`);
-      });
+    const tiers = resolveStoryHighlightTiers({
+      chapterId: chapter.id,
+      nodeId: node.id,
+      optionId,
+      text,
+      decisionSupport,
+    });
+    const assignedTiers = authored || tiers;
+    if (assignedTiers.primaryGlossaryKeys.length > 3) {
+      addError(context, `has ${assignedTiers.primaryGlossaryKeys.length} Primary keys; maximum is 3`);
+    }
+
+    [...assignedTiers.primaryGlossaryKeys, ...assignedTiers.recycledGlossaryKeys].forEach((key) => {
+      if (!text.includes(key)) addError(context, `key “${key}” does not occur in “${text}”`);
+      const entry = glossary[key];
+      if (!entry) {
+        addError(context, `key “${key}” has no glossary entry`);
+        return;
+      }
+      const examples = Array.isArray(entry.examples) ? entry.examples : [];
+      const completeExamples = examples.filter(hasCompleteLanguageLayers);
+      if (examples.length !== 5 || completeExamples.length !== 5) {
+        addError(context, `key “${key}” has ${completeExamples.length} complete examples out of ${examples.length}; expected exactly 5 complete examples`);
+      }
     });
   });
 
-  return references;
+  errors.forEach((error) => console.warn(`[Story highlight validation] ${error}`));
+  if (errors.length === 0) {
+    console.info('[Story highlight validation] 0 errors across all current NPC lines and answer options.');
+  }
 }
 
 function validateClickableGlossaryExamples() {
@@ -3835,6 +4068,7 @@ Object.values(CHAPTER6_BRANCH_NODES).forEach((branches) => {
 validateBetterVersionTranslations();
 validateChapter6ContentSupport();
 validateChapterMemorySupport();
+validateStoryHighlightMaps();
 validateClickableGlossaryExamples();
 validateTeacherNoteTermsAndSpeakers();
 
@@ -4135,10 +4369,9 @@ function SaveButton({ saved, onClick, dark = false }) {
   );
 }
 
-function AnnotatedText({ text, glossaryKeys = [], primaryKeys, recycledKeys = [], onOpen, className = '', groupClauses = false, dark = false }) {
-  const effectivePrimaryKeys = primaryKeys ?? glossaryKeys;
+function AnnotatedText({ text, primaryKeys = [], recycledKeys = [], onOpen, className = '', groupClauses = false, dark = false }) {
   const tokens = [
-    ...effectivePrimaryKeys.slice(0, 3).map((key) => ({ key, tone: 'primary' })),
+    ...primaryKeys.slice(0, 3).map((key) => ({ key, tone: 'primary' })),
     ...recycledKeys.map((key) => ({ key, tone: 'recycled' })),
   ]
     .map((token) => ({ ...token, start: text.indexOf(token.key) }))
@@ -4210,8 +4443,7 @@ function StoryLanguageStack({
   en,
   showPinyin,
   showEnglish,
-  glossaryKeys = [],
-  primaryKeys,
+  primaryKeys = [],
   recycledKeys = [],
   onOpen,
   chineseClassName,
@@ -4231,7 +4463,6 @@ function StoryLanguageStack({
           <div className={chineseClassName}>
             <AnnotatedText
               text={clause}
-              glossaryKeys={glossaryKeys}
               primaryKeys={primaryKeys}
               recycledKeys={recycledKeys}
               onOpen={onOpen}
@@ -4245,7 +4476,6 @@ function StoryLanguageStack({
           <div className={chineseClassName}>
             <AnnotatedText
               text={zh}
-              glossaryKeys={glossaryKeys}
               primaryKeys={primaryKeys}
               recycledKeys={recycledKeys}
               onOpen={onOpen}
@@ -4790,6 +5020,12 @@ export default function ChapterUIPrototype() {
       displayId: labels[index] || option.id,
     }));
   }, [currentNode, safeCurrentChapterIndex, safeCurrentNodeIndex]);
+  const npcHighlightTiers = resolveStoryHighlightTiers({
+    chapterId: currentChapter.id,
+    nodeId: baseCurrentNode.id,
+    text: currentNode.npcLineZh,
+    decisionSupport,
+  });
   const selectedOption = useMemo(
     () => (Array.isArray(currentNode.options) ? currentNode.options : []).find((o) => o.id === selectedOptionId) || null,
     [currentNode, selectedOptionId]
@@ -6302,9 +6538,8 @@ export default function ChapterUIPrototype() {
                 en={currentNode.npcLineEn}
                 showPinyin={showPinyin}
                 showEnglish={showEnglish}
-                glossaryKeys={currentNode.npcGlossary}
-                primaryKeys={decisionSupport?.primaryGlossaryKeys}
-                recycledKeys={decisionSupport?.recycledGlossaryKeys}
+                primaryKeys={npcHighlightTiers.primaryGlossaryKeys}
+                recycledKeys={npcHighlightTiers.recycledGlossaryKeys}
                 onOpen={setSelectedGlossaryKey}
                 chineseClassName={`${fontScale === 'sm' ? 'text-2xl sm:text-3xl' : fontScale === 'lg' ? 'text-4xl sm:text-5xl' : 'text-3xl sm:text-4xl'} font-semibold leading-tight tracking-tight text-[#2b241f]`}
                 pinyinClassName="text-sm leading-6 text-neutral-500 md:text-base"
@@ -6345,6 +6580,13 @@ export default function ChapterUIPrototype() {
               {displayOptions.map((option) => {
                 const active = selectedOptionId === option.id;
                 const meaningRevealed = Boolean(revealedOptionMeanings[option.id]);
+                const optionHighlightTiers = resolveStoryHighlightTiers({
+                  chapterId: currentChapter.id,
+                  nodeId: baseCurrentNode.id,
+                  optionId: option.id,
+                  text: option.zh,
+                  decisionSupport,
+                });
                 const optionCollectionItem = createCollectionItem({
                   expression: option.zh,
                   pinyin: option.py,
@@ -6408,9 +6650,8 @@ export default function ChapterUIPrototype() {
                           en={option.en}
                           showPinyin={showPinyin}
                           showEnglish={currentChapterSupport.progressiveOptionMeaning ? meaningRevealed : showEnglish}
-                          glossaryKeys={option.glossary}
-                          primaryKeys={decisionSupport?.primaryGlossaryKeys}
-                          recycledKeys={decisionSupport?.recycledGlossaryKeys}
+                          primaryKeys={optionHighlightTiers.primaryGlossaryKeys}
+                          recycledKeys={optionHighlightTiers.recycledGlossaryKeys}
                           onOpen={setSelectedGlossaryKey}
                           chineseClassName={`${fontScale === 'sm' ? 'text-lg sm:text-xl' : fontScale === 'lg' ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl'} font-semibold leading-snug`}
                           pinyinClassName={`mt-1 text-sm leading-5 ${active ? 'text-white/75' : 'text-neutral-500'}`}
