@@ -242,6 +242,157 @@ const CHAPTER6_STAGE_TRANSITIONS = {
   4: { title: 'Stage 2 complete', message: 'The key details are clear, so the staff can act on the problem.' },
 };
 
+const CHAPTER6_MEMORY_TARGETS = [
+  {
+    id: 'cannot-find',
+    zh: '找不到',
+    py: 'zhǎo bú dào',
+    en: 'cannot find',
+    audioText: '找不到',
+    firstUseDecision: 1,
+    callbackDecision: 5,
+    callbackPurpose: 'Confirm whether the café found the missing item.',
+  },
+  {
+    id: 'ask-for-help',
+    zh: '可以帮我一下吗？',
+    py: 'Kěyǐ bāng wǒ yíxià ma?',
+    en: 'Could you help me for a moment?',
+    audioText: '可以帮我一下吗？',
+    firstUseDecision: 1,
+    callbackDecision: 4,
+    callbackPurpose: 'Turn the general request into a practical request to contact the café.',
+  },
+  {
+    id: 'half-hour-ago',
+    zh: '半小时前',
+    py: 'bàn ge xiǎoshí qián',
+    en: 'half an hour ago',
+    audioText: '半小时前',
+    firstUseDecision: 2,
+    callbackDecision: 3,
+    callbackPurpose: 'Recall the timeline before giving identifying details.',
+  },
+  {
+    id: 'used-at-cafe',
+    zh: '半小时前，我在咖啡馆用过钱包。',
+    py: 'Bàn ge xiǎoshí qián, wǒ zài kāfēiguǎn yòng guo qiánbāo.',
+    en: 'Half an hour ago, I used my wallet at the café.',
+    audioText: '半小时前，我在咖啡馆用过钱包。',
+    firstUseDecision: 2,
+    callbackDecision: 3,
+    callbackPurpose: 'Retrieve the time and place as the staff begins a follow-up check.',
+  },
+  {
+    id: 'what-kind',
+    zh: '什么样',
+    py: 'shénme yàng',
+    en: 'what kind / what does it look like',
+    audioText: '什么样',
+    firstUseDecision: 3,
+    callbackDecision: 5,
+    callbackPurpose: 'Use the description again to verify the café’s possible match.',
+  },
+  {
+    id: 'inside-has',
+    zh: '里面有银行卡和身份证。',
+    py: 'Lǐmiàn yǒu yínhángkǎ hé shēnfènzhèng.',
+    en: 'There is a bank card and an ID inside.',
+    audioText: '里面有银行卡和身份证。',
+    firstUseDecision: 3,
+    callbackDecision: 5,
+    callbackPurpose: 'Repeat identifying contents to confirm the wallet.',
+  },
+  {
+    id: 'not-a-but-b',
+    zh: '不是手机丢了，是钱包丢了。',
+    py: 'Bú shì shǒujī diū le, shì qiánbāo diū le.',
+    en: 'It is not the phone that is lost; it is the wallet.',
+    audioText: '不是手机丢了，是钱包丢了。',
+    firstUseDecision: 4,
+    callbackDecision: 5,
+    callbackPurpose: 'Repair the phone and wallet misunderstanding before confirming details.',
+  },
+  {
+    id: 'contact-cafe',
+    zh: '可以帮我联系一下咖啡馆吗？',
+    py: 'Kěyǐ bāng wǒ liánxì yíxià kāfēiguǎn ma?',
+    en: 'Could you help me contact the café?',
+    audioText: '可以帮我联系一下咖啡馆吗？',
+    firstUseDecision: 4,
+    callbackDecision: 5,
+    callbackPurpose: 'Move from clarification to a concrete recovery action.',
+  },
+  {
+    id: 'confirm',
+    zh: '确认',
+    py: 'quèrèn',
+    en: 'to confirm / verify',
+    audioText: '确认',
+    firstUseDecision: 5,
+    callbackDecision: 6,
+    callbackPurpose: 'Acknowledge the verified result before closing.',
+  },
+  {
+    id: 'polite-close',
+    zh: '太谢谢了，麻烦你了。',
+    py: 'Tài xièxie le, máfan nǐ le.',
+    en: 'Thank you so much. Sorry to trouble you.',
+    audioText: '太谢谢了，麻烦你了。',
+    firstUseDecision: 1,
+    callbackDecision: 6,
+    callbackPurpose: 'Return to the polite language as a natural closing.',
+  },
+];
+
+const CHAPTER6_MEMORY_MOMENTS = [
+  {
+    id: 'recall-time-place',
+    decision: 3,
+    targetId: 'used-at-cafe',
+    label: 'Quick memory moment',
+    context: 'The staff is about to ask what the wallet looks like. First, recall when and where you last used it.',
+    npcContext: '你最后一次看到钱包是什么时候？在哪里？',
+    prompt: 'Say the time, place, and past action before you reveal the model.',
+    firstClue: 'Begin with 半小时前, then name the café.',
+  },
+  {
+    id: 'repair-misunderstanding',
+    decision: 5,
+    targetId: 'not-a-but-b',
+    label: 'Quick memory moment',
+    context: 'Before confirming the café’s result, make sure the staff knows which item is missing.',
+    npcContext: '你丢的是手机，钱包还在，对吗？',
+    prompt: 'Use 不是A，是B to repair the misunderstanding.',
+    firstClue: 'Reject 手机 first, then supply 钱包.',
+  },
+  {
+    id: 'request-contact',
+    decision: 4,
+    targetId: 'contact-cafe',
+    label: 'Story callback',
+    context: 'The café may have the wallet, but the staff still needs a practical next step.',
+    npcContext: '你是说钱包可能落在咖啡馆了，对吗？',
+    prompt: 'Recall the polite request that asks the staff to contact the café.',
+    firstClue: 'Start with 可以帮我…',
+  },
+  {
+    id: 'close-with-thanks',
+    decision: 6,
+    targetId: 'polite-close',
+    label: 'Story callback',
+    context: 'The staff has helped recover the wallet and handled the phone problem.',
+    npcContext: '信息对上了。你可以去拿钱包了。',
+    prompt: 'Say a warm closing that recognizes the staff member’s effort.',
+    firstClue: 'Use stronger thanks, then acknowledge the trouble.',
+  },
+];
+
+const CHAPTER6_RETRIEVAL_BY_DECISION = {
+  3: CHAPTER6_MEMORY_MOMENTS[0],
+  5: CHAPTER6_MEMORY_MOMENTS[1],
+};
+
 function makeChapter6BranchOptions(entries) {
   return ['Natural', 'Stiff', 'Awkward', 'Incorrect'].map((rating) => ({
     ...CHAPTER6_OPTION_META[rating],
@@ -3078,12 +3229,34 @@ function validateChapter6ContentSupport() {
   });
 }
 
+function validateChapter6MemoryTargets() {
+  if (!import.meta.env.DEV) return;
+
+  CHAPTER6_MEMORY_TARGETS.forEach((target) => {
+    const missingField = ['zh', 'py', 'en', 'audioText', 'firstUseDecision', 'callbackDecision']
+      .find((field) => !target[field]);
+    if (missingField) {
+      console.warn(`[Chapter 6 memory] ${target.id || 'Unknown target'} is missing ${missingField}.`);
+    }
+    if (target.firstUseDecision < 1 || target.callbackDecision > 6 || target.callbackDecision < target.firstUseDecision) {
+      console.warn(`[Chapter 6 memory] ${target.id} has an invalid first-use or callback decision.`);
+    }
+  });
+
+  CHAPTER6_MEMORY_MOMENTS.forEach((moment) => {
+    if (!CHAPTER6_MEMORY_TARGETS.some((target) => target.id === moment.targetId)) {
+      console.warn(`[Chapter 6 memory] ${moment.id} references a missing target.`);
+    }
+  });
+}
+
 chapters.forEach((chapter) => chapter.nodes.forEach((node) => applyBetterVersionTranslations(node.options)));
 Object.values(CHAPTER6_BRANCH_NODES).forEach((branches) => {
   Object.values(branches).forEach((branch) => applyBetterVersionTranslations(branch.options));
 });
 validateBetterVersionTranslations();
 validateChapter6ContentSupport();
+validateChapter6MemoryTargets();
 
 function normalizeAudioKey(text = '') {
   return text
@@ -3507,6 +3680,81 @@ function StoryLanguageStack({
   );
 }
 
+function MemoryMomentCard({ moment, target, state = {}, onChange, onDismiss }) {
+  if (!moment || !target) return null;
+  const level = Number.isFinite(state.level) ? state.level : 0;
+  const nextLabels = ['Show first clue', 'Show pinyin', 'Show English', 'Reveal model answer'];
+
+  return (
+    <section className="rounded-[22px] border border-indigo-100 bg-indigo-50/45 p-4 text-left shadow-sm">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700">{moment.label}</div>
+          <p className="mt-1 text-sm leading-6 text-neutral-700">{moment.context}</p>
+        </div>
+        {onDismiss && (
+          <button type="button" onClick={onDismiss} className="min-h-9 rounded-full border border-indigo-100 bg-white/70 px-3 py-1 text-xs font-semibold text-neutral-600">
+            Not now
+          </button>
+        )}
+      </div>
+      {moment.npcContext && <p className="mt-3 border-l-2 border-indigo-200 pl-3 text-sm font-medium leading-6 text-[#2b241f]">{moment.npcContext}</p>}
+      <p className="mt-3 text-sm leading-6 text-neutral-600">{moment.prompt}</p>
+      {level >= 1 && <p className="mt-2 rounded-xl bg-white/70 px-3 py-2 text-sm text-indigo-900"><span className="font-semibold">First clue:</span> {moment.firstClue}</p>}
+      {level >= 2 && <p className="mt-2 text-sm leading-6 text-neutral-500">{target.py}</p>}
+      {level >= 3 && <p className="mt-1 text-sm leading-6 text-neutral-700">{target.en}</p>}
+      {level >= 4 && (
+        <div className="mt-3 rounded-2xl border border-indigo-100 bg-white/80 p-3">
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-xl font-semibold leading-snug text-[#2b241f]">{target.zh}</p>
+            <AudioButton text={target.audioText} small />
+          </div>
+          <p className="mt-2 text-sm leading-6 text-neutral-500">{target.py}</p>
+          <p className="mt-1 text-sm leading-6 text-neutral-700">{target.en}</p>
+        </div>
+      )}
+      {level < 4 && (
+        <button type="button" onClick={() => onChange({ ...state, level: level + 1 })} className="mt-3 min-h-10 rounded-full border border-indigo-200 bg-white px-4 py-2 text-sm font-semibold text-indigo-900 hover:bg-indigo-50">
+          {nextLabels[level]}
+        </button>
+      )}
+    </section>
+  );
+}
+
+function SayBeforeRevealCard({ target, state = {}, onChange, onDismiss }) {
+  if (!target) return null;
+  return (
+    <section className="rounded-[22px] border border-amber-200 bg-amber-50/55 p-4">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-800">Say before reveal</div>
+          <p className="mt-1 text-sm leading-6 text-neutral-700">The wallet has been recovered and the staff has helped with the phone. Say a warm final response aloud.</p>
+        </div>
+        <button type="button" onClick={onDismiss} className="min-h-9 rounded-full border border-amber-200 bg-white/70 px-3 py-1 text-xs font-semibold text-neutral-600">Not now</button>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {!state.said && (
+          <button type="button" onClick={() => onChange({ ...state, said: true })} className="min-h-10 rounded-full bg-[#2b241f] px-4 py-2 text-sm font-semibold text-white">I said it</button>
+        )}
+        {state.said && !state.revealed && (
+          <button type="button" onClick={() => onChange({ ...state, revealed: true })} className="min-h-10 rounded-full border border-amber-300 bg-white px-4 py-2 text-sm font-semibold text-amber-950">Reveal model reply</button>
+        )}
+      </div>
+      {state.revealed && (
+        <div className="mt-3 rounded-2xl border border-amber-200 bg-white/80 p-3">
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-xl font-semibold leading-snug text-[#2b241f]">{target.zh}</p>
+            <AudioButton text={target.audioText} small />
+          </div>
+          <p className="mt-2 text-sm leading-6 text-neutral-500">{target.py}</p>
+          <p className="mt-1 text-sm leading-6 text-neutral-700">{target.en}</p>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function AppSectionButton({ active, icon: Icon, title, subtitle, onClick }) {
   return (
     <button
@@ -3560,6 +3808,11 @@ export default function ChapterUIPrototype() {
   const [betterVersionShowEnglish, setBetterVersionShowEnglish] = useState(true);
   const [revealedOptionMeanings, setRevealedOptionMeanings] = useState({});
   const [optionAssistanceByDecision, setOptionAssistanceByDecision] = useState({});
+  const [memoryMomentState, setMemoryMomentState] = useState({});
+  const [sayBeforeRevealState, setSayBeforeRevealState] = useState({});
+  const [memoryReplayOpen, setMemoryReplayOpen] = useState(false);
+  const [memoryReplayIndex, setMemoryReplayIndex] = useState(0);
+  const [memoryReplayHintState, setMemoryReplayHintState] = useState({});
   const [showPinyin, setShowPinyin] = useState(persisted?.showPinyin ?? true);
   const [showEnglish, setShowEnglish] = useState(persisted?.showEnglish ?? true);
   const [reviewShowPinyin, setReviewShowPinyin] = useState(true);
@@ -3626,6 +3879,17 @@ export default function ChapterUIPrototype() {
   };
   const isChapter6Prototype = currentChapter.id === 'chapter6';
   const chapter6Support = isChapter6Prototype ? CHAPTER6_SUPPORT_MAP[baseCurrentNode.id] : null;
+  const currentMemoryMoment = isChapter6Prototype ? CHAPTER6_RETRIEVAL_BY_DECISION[baseCurrentNode.id] || null : null;
+  const currentMemoryTarget = currentMemoryMoment
+    ? CHAPTER6_MEMORY_TARGETS.find((target) => target.id === currentMemoryMoment.targetId) || null
+    : null;
+  const sayBeforeRevealTarget = isChapter6Prototype && baseCurrentNode.id === 6
+    ? CHAPTER6_MEMORY_TARGETS.find((target) => target.id === 'polite-close') || null
+    : null;
+  const replayMemoryMoment = memoryReplayOpen ? CHAPTER6_MEMORY_MOMENTS[memoryReplayIndex] || null : null;
+  const replayMemoryTarget = replayMemoryMoment
+    ? CHAPTER6_MEMORY_TARGETS.find((target) => target.id === replayMemoryMoment.targetId) || null
+    : null;
   const sceneMetricsBeforeCurrent = useMemo(() => {
     if (!isChapter6Prototype) return { socialComfort: 50, naturalness: 50 };
     const earlierChoices = Object.fromEntries(
@@ -3728,7 +3992,13 @@ export default function ChapterUIPrototype() {
 
   useEffect(() => {
     setRevealedOptionMeanings({});
+    setMemoryMomentState({});
+    setSayBeforeRevealState({});
   }, [safeCurrentChapterIndex, safeCurrentNodeIndex]);
+
+  useEffect(() => {
+    setMemoryReplayHintState({});
+  }, [memoryReplayIndex]);
 
   const chapter6Ending = useMemo(() => {
     if (!isChapter6Prototype || safeCurrentNodeIndex !== 5 || !sceneRun[5]) return null;
@@ -4090,6 +4360,11 @@ export default function ChapterUIPrototype() {
     setBetterVersionShowEnglish(true);
     setRevealedOptionMeanings({});
     setOptionAssistanceByDecision({});
+    setMemoryMomentState({});
+    setSayBeforeRevealState({});
+    setMemoryReplayOpen(false);
+    setMemoryReplayIndex(0);
+    setMemoryReplayHintState({});
     setSceneRun({});
   }, [currentChapter.id]);
 
@@ -4117,6 +4392,11 @@ export default function ChapterUIPrototype() {
     setSceneRun({});
     setRevealedOptionMeanings({});
     setOptionAssistanceByDecision({});
+    setMemoryMomentState({});
+    setSayBeforeRevealState({});
+    setMemoryReplayOpen(false);
+    setMemoryReplayIndex(0);
+    setMemoryReplayHintState({});
     setCurrentChapterIndex(nextChapterIndex);
     setCurrentNodeIndex(0);
     setShowFeedback(false);
@@ -4204,6 +4484,10 @@ export default function ChapterUIPrototype() {
     ));
     setSelectedOptionId(null);
     setRevealedOptionMeanings({});
+    setMemoryMomentState({});
+    setSayBeforeRevealState({});
+    setMemoryReplayOpen(false);
+    setMemoryReplayHintState({});
     setOptionAssistanceByDecision((prev) => Object.fromEntries(
       Object.entries(prev).filter(([key]) => {
         const [chapterId, decisionIndex] = key.split(':');
@@ -4218,6 +4502,11 @@ export default function ChapterUIPrototype() {
     setSceneRun({});
     setRevealedOptionMeanings({});
     setOptionAssistanceByDecision({});
+    setMemoryMomentState({});
+    setSayBeforeRevealState({});
+    setMemoryReplayOpen(false);
+    setMemoryReplayIndex(0);
+    setMemoryReplayHintState({});
     setNodeSelections((prev) => Object.fromEntries(
       Object.entries(prev).filter(([key]) => Number(key.split('-')[0]) !== safeCurrentChapterIndex)
     ));
@@ -5144,6 +5433,29 @@ export default function ChapterUIPrototype() {
               />
             </motion.div>
 
+            {currentMemoryMoment && currentMemoryTarget && !memoryMomentState.dismissed && (
+              <div className="mt-5">
+                <MemoryMomentCard
+                  moment={currentMemoryMoment}
+                  target={currentMemoryTarget}
+                  state={memoryMomentState}
+                  onChange={setMemoryMomentState}
+                  onDismiss={() => setMemoryMomentState((prev) => ({ ...prev, dismissed: true }))}
+                />
+              </div>
+            )}
+
+            {sayBeforeRevealTarget && !sayBeforeRevealState.dismissed && (
+              <div className="mt-5">
+                <SayBeforeRevealCard
+                  target={sayBeforeRevealTarget}
+                  state={sayBeforeRevealState}
+                  onChange={setSayBeforeRevealState}
+                  onDismiss={() => setSayBeforeRevealState((prev) => ({ ...prev, dismissed: true }))}
+                />
+              </div>
+            )}
+
             <div className="mt-6 grid gap-3 md:mt-7">
               <div>
                 <div className="text-sm font-medium text-[#8a6a28]">Your turn</div>
@@ -5932,7 +6244,77 @@ export default function ChapterUIPrototype() {
                       <Button variant="outline" className="min-h-11 rounded-2xl bg-white/75" onClick={() => handleChapter6Rewind(2)}>Rewind to decision 3</Button>
                       <Button variant="outline" className="min-h-11 rounded-2xl bg-white/75" onClick={() => handleChapter6Rewind(4)}>Rewind to decision 5</Button>
                       <Button variant="outline" className="min-h-11 rounded-2xl border-indigo-300 bg-indigo-50 text-indigo-950 hover:bg-indigo-100" onClick={handleChapter6Replay}>Replay with less English support</Button>
+                      <Button
+                        variant="outline"
+                        className="min-h-11 rounded-2xl border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100 sm:col-span-2"
+                        onClick={() => {
+                          setMemoryReplayOpen(true);
+                          setMemoryReplayIndex(0);
+                          setMemoryReplayHintState({});
+                        }}
+                      >
+                        Replay the language moments
+                      </Button>
                     </div>
+                    <AnimatePresence initial={false}>
+                      {memoryReplayOpen && replayMemoryMoment && replayMemoryTarget && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="overflow-hidden border-t border-indigo-200/70 bg-[#fffaf3]/80"
+                        >
+                          <div className="space-y-3 p-3 sm:p-4">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <div>
+                                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700">Memory replay</div>
+                                <div className="mt-0.5 text-sm text-neutral-600">Story moment {memoryReplayIndex + 1}/{CHAPTER6_MEMORY_MOMENTS.length}</div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMemoryReplayOpen(false);
+                                  setMemoryReplayHintState({});
+                                }}
+                                className="min-h-9 rounded-full border border-[#d8cbb8] bg-white px-3 py-1 text-xs font-semibold text-neutral-600"
+                              >
+                                Close replay
+                              </button>
+                            </div>
+                            <MemoryMomentCard
+                              moment={replayMemoryMoment}
+                              target={replayMemoryTarget}
+                              state={memoryReplayHintState}
+                              onChange={setMemoryReplayHintState}
+                            />
+                            <div className="grid grid-cols-2 gap-2">
+                              <Button
+                                variant="outline"
+                                className="min-h-10 rounded-2xl"
+                                disabled={memoryReplayIndex === 0}
+                                onClick={() => {
+                                  setMemoryReplayHintState({});
+                                  setMemoryReplayIndex((index) => Math.max(0, index - 1));
+                                }}
+                              >
+                                Previous moment
+                              </Button>
+                              <Button
+                                variant="outline"
+                                className="min-h-10 rounded-2xl"
+                                disabled={memoryReplayIndex === CHAPTER6_MEMORY_MOMENTS.length - 1}
+                                onClick={() => {
+                                  setMemoryReplayHintState({});
+                                  setMemoryReplayIndex((index) => Math.min(CHAPTER6_MEMORY_MOMENTS.length - 1, index + 1));
+                                }}
+                              >
+                                Next moment
+                              </Button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </motion.section>
                 )}
               </AnimatePresence>
