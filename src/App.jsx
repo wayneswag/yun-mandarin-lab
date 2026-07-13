@@ -3318,25 +3318,95 @@ function validateChapter6MemoryTargets() {
   });
 }
 
-function validateChapter6GlossaryExamples() {
-  if (!import.meta.env.DEV) return;
-
-  const validateExamples = (key, expectedCount, minimumOnly = false) => {
-    const examples = Array.isArray(glossary[key]?.examples) ? glossary[key].examples : [];
-    const countIsInvalid = minimumOnly ? examples.length < expectedCount : examples.length !== expectedCount;
-    if (countIsInvalid) {
-      console.warn(`[Chapter 6 glossary] ${key} has ${examples.length} examples; expected ${minimumOnly ? 'at least ' : ''}${expectedCount}.`);
-    }
-    examples.forEach((example, index) => {
-      if (!example?.zh || !example?.py || !example?.en) {
-        console.warn(`[Chapter 6 glossary] ${key} example ${index + 1} is missing Chinese, pinyin, or English.`);
+function collectClickableGlossaryReferences() {
+  const references = [];
+  const addMatches = (chapter, text, keys, source) => {
+    if (!text || !Array.isArray(keys)) return;
+    keys.forEach((key) => {
+      if (typeof key === 'string' && text.includes(key)) {
+        references.push({ chapter, highlightedText: key, key, source });
       }
     });
   };
 
-  CHAPTER6_CORE_GLOSSARY_KEYS.forEach((key) => validateExamples(key, 5));
-  CHAPTER6_GRAMMAR_GLOSSARY_KEYS.forEach((key) => validateExamples(key, 5));
-  CHAPTER6_RECYCLED_GLOSSARY_KEYS.forEach((key) => validateExamples(key, 2, true));
+  chapters.filter((chapter) => chapter.id !== 'chapter6').forEach((chapter) => {
+    chapter.nodes.forEach((node) => {
+      addMatches(chapter.label, node.npcLineZh, node.npcGlossary?.slice(0, 3), `decision ${node.id} NPC`);
+      node.options?.forEach((option) => {
+        addMatches(chapter.label, option.zh, option.glossary?.slice(0, 3), `decision ${node.id} option ${option.id}`);
+      });
+    });
+  });
+
+  const chapter6TextsByDecision = new Map();
+  const addChapter6Text = (decisionId, text, source) => {
+    if (!text) return;
+    const texts = chapter6TextsByDecision.get(decisionId) || [];
+    texts.push({ text, source });
+    chapter6TextsByDecision.set(decisionId, texts);
+  };
+  const inspectChapter6Branch = (value, decisionId, source = 'branch') => {
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => inspectChapter6Branch(item, decisionId, `${source} ${index + 1}`));
+      return;
+    }
+    if (!value || typeof value !== 'object') return;
+    if (typeof value.npcLineZh === 'string') addChapter6Text(decisionId, value.npcLineZh, `${source} NPC`);
+    if (typeof value.zh === 'string') addChapter6Text(decisionId, value.zh, `${source} option ${value.id || ''}`.trim());
+    Object.values(value).forEach((child) => {
+      if (child && typeof child === 'object') inspectChapter6Branch(child, decisionId, source);
+    });
+  };
+
+  const chapter6 = chapters.find((chapter) => chapter.id === 'chapter6');
+  chapter6?.nodes.forEach((node) => {
+    addChapter6Text(node.id, node.npcLineZh, 'base NPC');
+    node.options?.forEach((option) => addChapter6Text(node.id, option.zh, `base option ${option.id}`));
+  });
+  Object.entries(CHAPTER6_BRANCH_NODES).forEach(([decisionKey, branches]) => {
+    inspectChapter6Branch(branches, Number(decisionKey.replace('decision', '')), decisionKey);
+  });
+
+  Object.entries(CHAPTER6_SUPPORT_MAP).forEach(([decisionId, support]) => {
+    const keys = [...support.primaryGlossaryKeys.slice(0, 3), ...support.recycledGlossaryKeys];
+    (chapter6TextsByDecision.get(Number(decisionId)) || []).forEach(({ text, source }) => {
+      addMatches('Chapter 6', text, keys, `decision ${decisionId} ${source}`);
+    });
+  });
+
+  return references;
+}
+
+function validateClickableGlossaryExamples() {
+  if (!import.meta.env.DEV) return;
+
+  collectClickableGlossaryReferences().forEach(({ chapter, highlightedText, key, source }) => {
+    const entry = glossary[key];
+    const context = `${chapter} · ${source} · “${highlightedText}” · key “${key}”`;
+    if (!entry) {
+      console.warn(`[Glossary validation] ${context} has no glossary entry.`);
+      return;
+    }
+
+    const examples = Array.isArray(entry.examples) ? entry.examples : [];
+    if (examples.length !== 5) {
+      console.warn(`[Glossary validation] ${context} resolves to ${examples.length} examples; expected exactly 5.`);
+    }
+
+    const seenExamples = new Set();
+    examples.forEach((example, index) => {
+      const exampleContext = `[Glossary validation] ${context} · example ${index + 1}`;
+      if (!example?.zh) console.warn(`${exampleContext} is missing Chinese.`);
+      if (!example?.py) console.warn(`${exampleContext} is missing pinyin.`);
+      if (!example?.en) console.warn(`${exampleContext} is missing English.`);
+
+      const duplicateKey = `${example?.zh || ''}\u0000${example?.py || ''}\u0000${example?.en || ''}`;
+      if (seenExamples.has(duplicateKey)) {
+        console.warn(`${exampleContext} duplicates an earlier example.`);
+      }
+      seenExamples.add(duplicateKey);
+    });
+  });
 }
 
 chapters.forEach((chapter) => chapter.nodes.forEach((node) => applyBetterVersionTranslations(node.options)));
@@ -3346,7 +3416,7 @@ Object.values(CHAPTER6_BRANCH_NODES).forEach((branches) => {
 validateBetterVersionTranslations();
 validateChapter6ContentSupport();
 validateChapter6MemoryTargets();
-validateChapter6GlossaryExamples();
+validateClickableGlossaryExamples();
 
 function normalizeAudioKey(text = '') {
   return text
@@ -4105,13 +4175,10 @@ export default function ChapterUIPrototype() {
     : null;
   const selectedGlossary = selectedGlossaryKey ? glossary[selectedGlossaryKey] : null;
   const selectedGlossaryExamples = Array.isArray(selectedGlossary?.examples) ? selectedGlossary.examples : [];
-  const selectedGlossaryIsChapter6Core = isChapter6Prototype && CHAPTER6_CORE_GLOSSARY_KEYS.includes(selectedGlossaryKey);
-  const selectedGlossaryIsChapter6Recycled = isChapter6Prototype && CHAPTER6_RECYCLED_GLOSSARY_KEYS.includes(selectedGlossaryKey);
-  const visibleGlossaryExamples = selectedGlossaryIsChapter6Core
-    ? (glossaryExamplesExpanded ? selectedGlossaryExamples : selectedGlossaryExamples.slice(0, 2))
-    : selectedGlossaryIsChapter6Recycled
-    ? selectedGlossaryExamples.slice(0, 2)
-    : selectedGlossaryExamples;
+  const glossaryExamplesForDisplay = selectedGlossaryExamples.slice(0, 5);
+  const visibleGlossaryExamples = glossaryExamplesExpanded
+    ? glossaryExamplesForDisplay
+    : glossaryExamplesForDisplay.slice(0, 2);
 
   useEffect(() => {
     if (!chapter6PrimaryNote) return;
@@ -6625,13 +6692,13 @@ export default function ChapterUIPrototype() {
                     );
                   })}
                 </div>
-                {selectedGlossaryIsChapter6Core && selectedGlossaryExamples.length > 2 && (
+                {glossaryExamplesForDisplay.length > 2 && (
                   <button
                     type="button"
                     onClick={() => setGlossaryExamplesExpanded((expanded) => !expanded)}
                     className="mt-3 min-h-10 rounded-full border border-[#d8cbb8] bg-white px-4 py-2 text-sm font-semibold text-[#6f6257]"
                   >
-                    {glossaryExamplesExpanded ? 'Show fewer' : `Show ${selectedGlossaryExamples.length - 2} more`}
+                    {glossaryExamplesExpanded ? 'Show fewer' : `Show ${glossaryExamplesForDisplay.length - 2} more`}
                   </button>
                 )}
               </div>
