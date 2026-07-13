@@ -3443,6 +3443,70 @@ function AnnotatedText({ text, glossaryKeys = [], primaryKeys, recycledKeys = []
   );
 }
 
+function splitChineseClauses(text = '') {
+  return text.match(/[^。！？]+[。！？]?/g)?.map((clause) => clause.trim()).filter(Boolean) || [text];
+}
+
+function splitPinyinClauses(text = '') {
+  return text.match(/[^.!?]+[.!?]?/g)?.map((clause) => clause.trim()).filter(Boolean) || [text];
+}
+
+function StoryLanguageStack({
+  zh,
+  py,
+  en,
+  showPinyin,
+  showEnglish,
+  glossaryKeys = [],
+  primaryKeys,
+  recycledKeys = [],
+  onOpen,
+  chineseClassName,
+  pinyinClassName,
+  englishClassName,
+  alignClauses = false,
+  dark = false,
+}) {
+  const chineseClauses = splitChineseClauses(zh);
+  const pinyinClauses = splitPinyinClauses(py);
+  const safelyAligned = alignClauses && chineseClauses.length > 1 && chineseClauses.length === pinyinClauses.length;
+
+  return (
+    <div className={safelyAligned ? 'space-y-2.5' : ''}>
+      {safelyAligned ? chineseClauses.map((clause, index) => (
+        <div key={`${clause}-${index}`} className="space-y-1">
+          <div className={chineseClassName}>
+            <AnnotatedText
+              text={clause}
+              glossaryKeys={glossaryKeys}
+              primaryKeys={primaryKeys}
+              recycledKeys={recycledKeys}
+              onOpen={onOpen}
+              dark={dark}
+            />
+          </div>
+          {showPinyin && <div className={pinyinClassName}>{pinyinClauses[index]}</div>}
+        </div>
+      )) : (
+        <>
+          <div className={chineseClassName}>
+            <AnnotatedText
+              text={zh}
+              glossaryKeys={glossaryKeys}
+              primaryKeys={primaryKeys}
+              recycledKeys={recycledKeys}
+              onOpen={onOpen}
+              dark={dark}
+            />
+          </div>
+          {showPinyin && <div className={pinyinClassName}>{py}</div>}
+        </>
+      )}
+      {showEnglish && <div className={englishClassName}>{en}</div>}
+    </div>
+  );
+}
+
 function AppSectionButton({ active, icon: Icon, title, subtitle, onClick }) {
   return (
     <button
@@ -3494,6 +3558,8 @@ export default function ChapterUIPrototype() {
   const [betterVersionOpen, setBetterVersionOpen] = useState(true);
   const [betterVersionShowPinyin, setBetterVersionShowPinyin] = useState(true);
   const [betterVersionShowEnglish, setBetterVersionShowEnglish] = useState(true);
+  const [revealedOptionMeanings, setRevealedOptionMeanings] = useState({});
+  const [optionAssistanceByDecision, setOptionAssistanceByDecision] = useState({});
   const [showPinyin, setShowPinyin] = useState(persisted?.showPinyin ?? true);
   const [showEnglish, setShowEnglish] = useState(persisted?.showEnglish ?? true);
   const [reviewShowPinyin, setReviewShowPinyin] = useState(true);
@@ -3609,6 +3675,15 @@ export default function ChapterUIPrototype() {
     [currentNode, selectedOptionId]
   );
   const currentNodeAudioPrefix = `${currentChapter.id}.node${currentNode.id}${currentNode.branchKey ? `.${currentNode.branchKey}` : ''}`;
+  const currentAssistanceDecisionKey = `${currentChapter.id}:${safeCurrentNodeIndex}`;
+  const optionEnglishRevealCount = Object.values(optionAssistanceByDecision)
+    .reduce((total, optionIds) => total + optionIds.length, 0);
+  const optionEnglishDecisionCount = Object.keys(optionAssistanceByDecision).length;
+  const completionSupportLabel = optionEnglishRevealCount > 0
+    ? 'English-supported'
+    : showPinyin
+    ? 'Pinyin-supported'
+    : 'Independent';
   const sceneMetrics = useMemo(() => calculateSceneRunMetrics(sceneRun), [sceneRun]);
   const chapter6LatestRating = useMemo(() => {
     const submittedIndexes = Object.keys(sceneRun).map(Number).sort((a, b) => b - a);
@@ -3629,13 +3704,16 @@ export default function ChapterUIPrototype() {
   const chapter6PrimaryNote = chapter6Support
     ? currentChapter.grammarNotes.find((note) => chapter6Support.primaryNoteIds.includes(note.id)) || currentChapter.grammarNotes[0]
     : null;
-  const visibleTeacherNote = chapter6PrimaryNote || activeNote;
+  const visibleTeacherNote = chapter6PrimaryNote && (!chapter6MoreNotesOpen || activeNote.id === chapter6PrimaryNote.id)
+    ? chapter6PrimaryNote
+    : activeNote;
   const chapter6MoreNotes = chapter6PrimaryNote
     ? currentChapter.grammarNotes.filter((note) => note.id !== chapter6PrimaryNote.id)
     : [];
+  const visibleTeacherNoteExamples = Array.isArray(visibleTeacherNote.examples) ? visibleTeacherNote.examples : [];
   const visibleQuickExamples = isChapter6Prototype && !chapter6QuickExamplesExpanded
-    ? visibleTeacherNote.examples.slice(0, 2)
-    : visibleTeacherNote.examples;
+    ? visibleTeacherNoteExamples.slice(0, 2)
+    : visibleTeacherNoteExamples;
   const chapter6StageTransition = isChapter6Prototype && sceneRun[safeCurrentNodeIndex]
     ? CHAPTER6_STAGE_TRANSITIONS[baseCurrentNode.id] || null
     : null;
@@ -3647,6 +3725,10 @@ export default function ChapterUIPrototype() {
     setChapter6MoreNotesOpen(false);
     setChapter6QuickExamplesExpanded(false);
   }, [chapter6PrimaryNote?.id]);
+
+  useEffect(() => {
+    setRevealedOptionMeanings({});
+  }, [safeCurrentChapterIndex, safeCurrentNodeIndex]);
 
   const chapter6Ending = useMemo(() => {
     if (!isChapter6Prototype || safeCurrentNodeIndex !== 5 || !sceneRun[5]) return null;
@@ -3677,17 +3759,22 @@ export default function ChapterUIPrototype() {
     const choices = Object.values(sceneRun);
     const incorrectCount = choices.filter((choice) => choice.rating === 'Incorrect').length;
     const naturalCount = choices.filter((choice) => choice.rating === 'Natural').length;
+    const supportSummary = `${optionEnglishRevealCount} option meaning${optionEnglishRevealCount === 1 ? '' : 's'} across ${optionEnglishDecisionCount} decision${optionEnglishDecisionCount === 1 ? '' : 's'}`;
     if (sceneMetrics.socialComfort < 40 || sceneMetrics.naturalness < 40 || incorrectCount >= 2) {
-      return CHAPTER6_TIER_REWARDS.needsRepair;
+      return { ...CHAPTER6_TIER_REWARDS.needsRepair, supportSummary, supportRule: 'Scene repair comes first; English help did not lower either scene metric.' };
     }
     if (sceneMetrics.socialComfort >= 80 && sceneMetrics.naturalness >= 80 && incorrectCount === 0 && naturalCount >= 2) {
-      return CHAPTER6_TIER_REWARDS.nativeRecovery;
+      return optionEnglishRevealCount <= 1
+        ? { ...CHAPTER6_TIER_REWARDS.nativeRecovery, supportSummary, supportRule: 'Tier 4 combines excellent scene results with no more than one English-option reveal.' }
+        : { ...CHAPTER6_TIER_REWARDS.strongRecovery, supportSummary, supportRule: 'Excellent scene results earned Tier 3; replay with one or fewer English-option reveals to reach the language-reward Tier 4.' };
     }
     if (sceneMetrics.socialComfort >= 65 && sceneMetrics.naturalness >= 65 && incorrectCount < 2) {
-      return CHAPTER6_TIER_REWARDS.strongRecovery;
+      return optionEnglishRevealCount <= 2
+        ? { ...CHAPTER6_TIER_REWARDS.strongRecovery, supportSummary, supportRule: 'Tier 3 combines strong scene results with no more than two English-option reveals.' }
+        : { ...CHAPTER6_TIER_REWARDS.usefulRecovery, supportSummary, supportRule: 'The result stayed workable with support; replay with two or fewer English-option reveals for Tier 3.' };
     }
-    return CHAPTER6_TIER_REWARDS.usefulRecovery;
-  }, [sceneMetrics, sceneRun, safeCurrentNodeIndex, isChapter6Prototype, isLastNode]);
+    return { ...CHAPTER6_TIER_REWARDS.usefulRecovery, supportSummary, supportRule: 'English help is allowed and never changes the scene result; stronger metrics or less support can raise the language-reward tier.' };
+  }, [sceneMetrics, sceneRun, safeCurrentNodeIndex, isChapter6Prototype, isLastNode, optionEnglishDecisionCount, optionEnglishRevealCount]);
   const chapterOverview = useMemo(() => {
     const overview = chapters.map((chapter, index) => {
       const completed = chapter.nodes.filter((_, nodeIndex) => nodeSelections[makeNodeKey(index, nodeIndex)]).length;
@@ -4001,6 +4088,8 @@ export default function ChapterUIPrototype() {
     setBetterVersionOpen(true);
     setBetterVersionShowPinyin(true);
     setBetterVersionShowEnglish(true);
+    setRevealedOptionMeanings({});
+    setOptionAssistanceByDecision({});
     setSceneRun({});
   }, [currentChapter.id]);
 
@@ -4010,9 +4099,24 @@ export default function ChapterUIPrototype() {
     setNodeSelections((prev) => ({ ...prev, [key]: optionId }));
   };
 
+  const handleOptionMeaningToggle = (optionId, event) => {
+    event.stopPropagation();
+    const willReveal = !revealedOptionMeanings[optionId];
+    setRevealedOptionMeanings((prev) => ({ ...prev, [optionId]: willReveal }));
+    if (!willReveal) return;
+
+    setOptionAssistanceByDecision((prev) => {
+      const usedOptionIds = prev[currentAssistanceDecisionKey] || [];
+      if (usedOptionIds.includes(optionId)) return prev;
+      return { ...prev, [currentAssistanceDecisionKey]: [...usedOptionIds, optionId] };
+    });
+  };
+
   const switchChapter = (index) => {
     const nextChapterIndex = clampArrayIndex(index, chapters.length);
     setSceneRun({});
+    setRevealedOptionMeanings({});
+    setOptionAssistanceByDecision({});
     setCurrentChapterIndex(nextChapterIndex);
     setCurrentNodeIndex(0);
     setShowFeedback(false);
@@ -4099,12 +4203,21 @@ export default function ChapterUIPrototype() {
       })
     ));
     setSelectedOptionId(null);
+    setRevealedOptionMeanings({});
+    setOptionAssistanceByDecision((prev) => Object.fromEntries(
+      Object.entries(prev).filter(([key]) => {
+        const [chapterId, decisionIndex] = key.split(':');
+        return chapterId !== currentChapter.id || Number(decisionIndex) < safeNodeIndex;
+      })
+    ));
     setShowFeedback(false);
     setCurrentNodeIndex(safeNodeIndex);
   };
 
   const handleChapter6Replay = () => {
     setSceneRun({});
+    setRevealedOptionMeanings({});
+    setOptionAssistanceByDecision({});
     setNodeSelections((prev) => Object.fromEntries(
       Object.entries(prev).filter(([key]) => Number(key.split('-')[0]) !== safeCurrentChapterIndex)
     ));
@@ -5014,20 +5127,21 @@ export default function ChapterUIPrototype() {
                   <AudioButton audioId={`${currentNodeAudioPrefix}.npc`} text={currentNode.npcLineZh} />
                 </div>
               </div>
-              <div className="space-y-3">
-                <div className={`${fontScale === 'sm' ? 'text-2xl sm:text-3xl' : fontScale === 'lg' ? 'text-4xl sm:text-5xl' : 'text-3xl sm:text-4xl'} font-semibold leading-tight tracking-tight text-[#2b241f]`}>
-                  <AnnotatedText
-                    text={currentNode.npcLineZh}
-                    glossaryKeys={currentNode.npcGlossary}
-                    primaryKeys={chapter6Support?.primaryGlossaryKeys}
-                    recycledKeys={chapter6Support?.recycledGlossaryKeys}
-                    onOpen={setSelectedGlossaryKey}
-                    groupClauses={isChapter6Prototype}
-                  />
-                </div>
-                {showPinyin && <p className="text-sm leading-6 text-neutral-500 md:text-base">{currentNode.npcLinePy}</p>}
-                {showEnglish && <p className="text-sm leading-5 text-neutral-600">{currentNode.npcLineEn}</p>}
-              </div>
+              <StoryLanguageStack
+                zh={currentNode.npcLineZh}
+                py={currentNode.npcLinePy}
+                en={currentNode.npcLineEn}
+                showPinyin={showPinyin}
+                showEnglish={showEnglish}
+                glossaryKeys={currentNode.npcGlossary}
+                primaryKeys={chapter6Support?.primaryGlossaryKeys}
+                recycledKeys={chapter6Support?.recycledGlossaryKeys}
+                onOpen={setSelectedGlossaryKey}
+                chineseClassName={`${fontScale === 'sm' ? 'text-2xl sm:text-3xl' : fontScale === 'lg' ? 'text-4xl sm:text-5xl' : 'text-3xl sm:text-4xl'} font-semibold leading-tight tracking-tight text-[#2b241f]`}
+                pinyinClassName="text-sm leading-6 text-neutral-500 md:text-base"
+                englishClassName="mt-2 text-sm leading-5 text-neutral-600"
+                alignClauses={isChapter6Prototype}
+              />
             </motion.div>
 
             <div className="mt-6 grid gap-3 md:mt-7">
@@ -5037,6 +5151,7 @@ export default function ChapterUIPrototype() {
               </div>
               {displayOptions.map((option) => {
                 const active = selectedOptionId === option.id;
+                const meaningRevealed = Boolean(revealedOptionMeanings[option.id]);
                 const optionCollectionItem = createCollectionItem({
                   expression: option.zh,
                   pinyin: option.py,
@@ -5050,9 +5165,17 @@ export default function ChapterUIPrototype() {
                 const optionSaved = isCollected(optionCollectionItem.id);
 
                 return (
-                  <button
+                  <div
                     key={option.id}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => handleSelectOption(option.id)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        handleSelectOption(option.id);
+                      }
+                    }}
                     className={`rounded-[22px] border p-3.5 text-left transition active:scale-[0.99] sm:p-4 md:rounded-[26px] md:p-5 ${
                       active
                         ? 'border-[#8a6a28] bg-[#5a3f30] text-white shadow-[0_16px_35px_rgba(90,63,48,0.18)]'
@@ -5061,9 +5184,17 @@ export default function ChapterUIPrototype() {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 w-full">
-                        <div className="mb-3 flex items-center justify-between gap-2 text-sm font-medium opacity-80">
+                        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-sm font-medium opacity-90">
                           <span>{active ? 'Selected reply' : `Reply ${option.displayId}`}</span>
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={(event) => handleOptionMeaningToggle(option.id, event)}
+                              className={`min-h-9 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${active ? 'border-white/30 bg-white/10 text-white hover:bg-white/20' : 'border-[#d8cbb8] bg-[#fffaf3] text-[#6f6257] hover:bg-[#f3eadf]'}`}
+                              aria-expanded={meaningRevealed}
+                            >
+                              {meaningRevealed ? 'Hide meaning' : 'Show meaning'}
+                            </button>
                             <span className="hidden text-xs sm:inline">Listen</span>
                             <AudioButton audioId={`${currentNodeAudioPrefix}.option.${option.rating.toLowerCase()}`} text={option.zh} dark={active} small />
                             <SaveButton
@@ -5076,22 +5207,25 @@ export default function ChapterUIPrototype() {
                           />
                           </div>
                         </div>
-                        <div className={`${fontScale === 'sm' ? 'text-lg sm:text-xl' : fontScale === 'lg' ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl'} font-semibold leading-snug`}>
-                          <AnnotatedText
-                            text={option.zh}
-                            glossaryKeys={option.glossary}
-                            primaryKeys={chapter6Support?.primaryGlossaryKeys}
-                            recycledKeys={chapter6Support?.recycledGlossaryKeys}
-                            onOpen={setSelectedGlossaryKey}
-                            groupClauses={isChapter6Prototype}
-                            dark={active}
-                          />
-                        </div>
-                        {showPinyin && <div className={`mt-2 text-sm leading-5 ${active ? 'text-white/75' : 'text-neutral-500'}`}>{option.py}</div>}
-                        {showEnglish && <div className={`mt-1 text-sm leading-5 ${active ? 'text-white/85' : 'text-neutral-700'}`}>{option.en}</div>}
+                        <StoryLanguageStack
+                          zh={option.zh}
+                          py={option.py}
+                          en={option.en}
+                          showPinyin={showPinyin}
+                          showEnglish={meaningRevealed}
+                          glossaryKeys={option.glossary}
+                          primaryKeys={chapter6Support?.primaryGlossaryKeys}
+                          recycledKeys={chapter6Support?.recycledGlossaryKeys}
+                          onOpen={setSelectedGlossaryKey}
+                          chineseClassName={`${fontScale === 'sm' ? 'text-lg sm:text-xl' : fontScale === 'lg' ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl'} font-semibold leading-snug`}
+                          pinyinClassName={`mt-1 text-sm leading-5 ${active ? 'text-white/75' : 'text-neutral-500'}`}
+                          englishClassName={`mt-2 rounded-xl px-3 py-2 text-sm leading-5 ${active ? 'bg-white/10 text-white/90' : 'bg-[#f5efe7] text-neutral-700'}`}
+                          alignClauses={isChapter6Prototype}
+                          dark={active}
+                        />
                       </div>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
@@ -5101,6 +5235,21 @@ export default function ChapterUIPrototype() {
                 <BrainCircuit className="h-4 w-4 shrink-0" />
                 <span className="min-w-0">Natural Chinese is about the relationship, not just the words.</span>
               </div>
+
+              <AnimatePresence>
+                {chapter6StageTransition && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.28, ease: 'easeOut' }}
+                    className="border-l-2 border-indigo-300 px-3 py-1 text-sm text-neutral-600"
+                  >
+                    <span className="font-semibold text-indigo-800">{chapter6StageTransition.title}</span>
+                    <span className="ml-2">{chapter6StageTransition.message}</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <div className="grid w-full grid-cols-2 gap-3">
                 <Button
@@ -5138,29 +5287,51 @@ export default function ChapterUIPrototype() {
             <p className="mt-1 text-sm leading-6 text-neutral-600">Use these notes after the main practice when you want a little more support.</p>
           </div>
 
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {currentChapter.grammarNotes.map((note) => (
+          {isChapter6Prototype ? (
+            <div className="space-y-2">
               <button
-                key={note.id}
-                onClick={() => setActiveNoteId(note.id)}
-                className={`rounded-2xl border px-3 py-2 text-left text-sm transition ${
-                  activeNote.id === note.id
-                    ? 'border-[#d6a856] bg-[#f3eadf] text-[#2b241f]'
-                    : 'border-[#eadfce] bg-[#fffaf3]/75 text-neutral-600 hover:border-[#d6a856]'
-                }`}
+                type="button"
+                onClick={() => setActiveNoteId(chapter6PrimaryNote.id)}
+                className="w-full rounded-2xl border border-[#d6a856] bg-[#f3eadf] px-3 py-2 text-left text-sm font-semibold text-[#2b241f]"
               >
-                {note.title}
+                Current focus · {chapter6PrimaryNote.title}
               </button>
-            ))}
-          </div>
+              <button
+                type="button"
+                onClick={() => setChapter6MoreNotesOpen((open) => !open)}
+                className="flex min-h-10 w-full items-center justify-between rounded-2xl border border-[#eadfce] bg-white/65 px-3 py-2 text-left text-sm text-neutral-600"
+                aria-expanded={chapter6MoreNotesOpen}
+              >
+                More notes
+                {chapter6MoreNotesOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </button>
+              {chapter6MoreNotesOpen && (
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {chapter6MoreNotes.map((note) => (
+                    <button key={note.id} type="button" onClick={() => setActiveNoteId(note.id)} className={`rounded-2xl border px-3 py-2 text-left text-sm transition ${activeNote.id === note.id ? 'border-[#d6a856] bg-[#f3eadf]' : 'border-[#eadfce] bg-white/65 text-neutral-600'}`}>
+                      {note.title}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {currentChapter.grammarNotes.map((note) => (
+                <button key={note.id} onClick={() => setActiveNoteId(note.id)} className={`rounded-2xl border px-3 py-2 text-left text-sm transition ${activeNote.id === note.id ? 'border-[#d6a856] bg-[#f3eadf] text-[#2b241f]' : 'border-[#eadfce] bg-[#fffaf3]/75 text-neutral-600 hover:border-[#d6a856]'}`}>
+                  {note.title}
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="border-l-2 border-[#d6a856] bg-white/60 py-3 pl-4 pr-3">
-            <h4 className="font-semibold">{activeNote.title}</h4>
-            <p className="mt-1 text-sm leading-6 text-neutral-600">{activeNote.short}</p>
+            <h4 className="font-semibold">{visibleTeacherNote.title}</h4>
+            <p className="mt-1 text-sm leading-6 text-neutral-600">{visibleTeacherNote.short}</p>
           </div>
 
           <div className="space-y-3 text-sm leading-6 text-neutral-700">
-            {activeNote.body.map((paragraph) => (
+            {visibleTeacherNote.body.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}
           </div>
@@ -5175,14 +5346,14 @@ export default function ChapterUIPrototype() {
             </div>
 
             <div className="space-y-2">
-              {activeNote.examples.map((example, index) => {
+              {visibleQuickExamples.map((example, index) => {
                 const quickExampleItem = createCollectionItem({
                   expression: example.zh,
                   pinyin: example.py,
                   english: example.en,
-                  audioId: `${currentChapter.id}.grammar.${activeNote.id}.ex${index + 1}`,
+                  audioId: `${currentChapter.id}.grammar.${visibleTeacherNote.id}.ex${index + 1}`,
                   type: 'quick-example',
-                  source: `${activeNote.title} - Quick example`,
+                  source: `${visibleTeacherNote.title} - Quick example`,
                   chapter: currentChapter.shortTitle,
                 });
                 const quickSaved = isCollected(quickExampleItem.id);
@@ -5191,7 +5362,7 @@ export default function ChapterUIPrototype() {
                     <div className="flex items-start justify-between gap-2">
                       <div className="font-semibold leading-snug text-[#2b241f]">{example.zh}</div>
                       <div className="flex shrink-0 items-center gap-1">
-                        <AudioButton audioId={`${currentChapter.id}.grammar.${activeNote.id}.ex${index + 1}`} text={example.zh} small />
+                        <AudioButton audioId={`${currentChapter.id}.grammar.${visibleTeacherNote.id}.ex${index + 1}`} text={example.zh} small />
                         <SaveButton saved={quickSaved} onClick={() => toggleCollected(quickExampleItem)} />
                       </div>
                     </div>
@@ -5201,6 +5372,11 @@ export default function ChapterUIPrototype() {
                 );
               })}
             </div>
+            {isChapter6Prototype && visibleTeacherNoteExamples.length > 2 && (
+              <button type="button" onClick={() => setChapter6QuickExamplesExpanded((expanded) => !expanded)} className="min-h-10 rounded-full border border-[#d8cbb8] bg-white/70 px-3 py-2 text-sm font-semibold text-[#6f6257]">
+                {chapter6QuickExamplesExpanded ? 'Show fewer' : `Show ${visibleTeacherNoteExamples.length - 2} more`}
+              </button>
+            )}
           </div>
         </section>
       </div>
@@ -5281,29 +5457,42 @@ export default function ChapterUIPrototype() {
             <p className="text-sm text-neutral-500">Grammar is explained where the learner is most likely to get stuck.</p>
           </CardHeader>
           <CardContent>
-            <div className="mb-4 grid grid-cols-2 gap-2">
-              {currentChapter.grammarNotes.map((note) => (
-                <button
-                  key={note.id}
-                  onClick={() => setActiveNoteId(note.id)}
-                  className={`rounded-2xl border px-3 py-2 text-left text-sm transition ${
-                    activeNote.id === note.id
-                      ? 'border-[#d6a856] bg-[#f3eadf] text-[#2b241f]'
-                      : 'border-[#eadfce] bg-[#fffaf3]/75 text-neutral-600 hover:border-[#d6a856]'
-                  }`}
-                >
-                  {note.title}
+            {isChapter6Prototype ? (
+              <div className="mb-4 space-y-2">
+                <button type="button" onClick={() => setActiveNoteId(chapter6PrimaryNote.id)} className="w-full rounded-2xl border border-[#d6a856] bg-[#f3eadf] px-3 py-2 text-left text-sm font-semibold text-[#2b241f]">
+                  Current focus · {chapter6PrimaryNote.title}
                 </button>
-              ))}
-            </div>
+                <button type="button" onClick={() => setChapter6MoreNotesOpen((open) => !open)} className="flex min-h-10 w-full items-center justify-between rounded-2xl border border-[#eadfce] bg-white/65 px-3 py-2 text-left text-sm text-neutral-600" aria-expanded={chapter6MoreNotesOpen}>
+                  More notes
+                  {chapter6MoreNotesOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </button>
+                {chapter6MoreNotesOpen && (
+                  <div className="space-y-2">
+                    {chapter6MoreNotes.map((note) => (
+                      <button key={note.id} type="button" onClick={() => setActiveNoteId(note.id)} className={`w-full rounded-2xl border px-3 py-2 text-left text-sm ${activeNote.id === note.id ? 'border-[#d6a856] bg-[#f3eadf]' : 'border-[#eadfce] bg-white/65 text-neutral-600'}`}>
+                        {note.title}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="mb-4 grid grid-cols-2 gap-2">
+                {currentChapter.grammarNotes.map((note) => (
+                  <button key={note.id} onClick={() => setActiveNoteId(note.id)} className={`rounded-2xl border px-3 py-2 text-left text-sm transition ${activeNote.id === note.id ? 'border-[#d6a856] bg-[#f3eadf] text-[#2b241f]' : 'border-[#eadfce] bg-[#fffaf3]/75 text-neutral-600 hover:border-[#d6a856]'}`}>
+                    {note.title}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div className="rounded-2xl bg-[#f3eadf]/80 p-4">
-              <h4 className="font-semibold">{activeNote.title}</h4>
-              <p className="mt-1 text-sm text-neutral-600">{activeNote.short}</p>
+              <h4 className="font-semibold">{visibleTeacherNote.title}</h4>
+              <p className="mt-1 text-sm text-neutral-600">{visibleTeacherNote.short}</p>
             </div>
 
             <div className="mt-4 space-y-3 text-sm leading-6 text-neutral-700">
-              {activeNote.body.map((paragraph) => (
+              {visibleTeacherNote.body.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
               ))}
             </div>
@@ -5317,14 +5506,14 @@ export default function ChapterUIPrototype() {
                 </div>
               </div>
               <div className="space-y-2">
-                {activeNote.examples.map((example, index) => {
+                {visibleQuickExamples.map((example, index) => {
                   const quickExampleItem = createCollectionItem({
                     expression: example.zh,
                     pinyin: example.py,
                     english: example.en,
-                    audioId: `${currentChapter.id}.grammar.${activeNote.id}.ex${index + 1}`,
+                    audioId: `${currentChapter.id}.grammar.${visibleTeacherNote.id}.ex${index + 1}`,
                     type: 'quick-example',
-                    source: `${activeNote.title} · Quick example`,
+                    source: `${visibleTeacherNote.title} · Quick example`,
                     chapter: currentChapter.shortTitle,
                   });
                   const quickSaved = isCollected(quickExampleItem.id);
@@ -5333,7 +5522,7 @@ export default function ChapterUIPrototype() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="font-medium">{example.zh}</div>
                         <div className="flex items-center gap-1">
-                          <AudioButton audioId={`${currentChapter.id}.grammar.${activeNote.id}.ex${index + 1}`} text={example.zh} small />
+                          <AudioButton audioId={`${currentChapter.id}.grammar.${visibleTeacherNote.id}.ex${index + 1}`} text={example.zh} small />
                           <SaveButton saved={quickSaved} onClick={() => toggleCollected(quickExampleItem)} />
                         </div>
                       </div>
@@ -5343,6 +5532,11 @@ export default function ChapterUIPrototype() {
                   );
                 })}
               </div>
+              {isChapter6Prototype && visibleTeacherNoteExamples.length > 2 && (
+                <button type="button" onClick={() => setChapter6QuickExamplesExpanded((expanded) => !expanded)} className="mt-2 min-h-10 rounded-full border border-[#d8cbb8] bg-white/70 px-3 py-2 text-sm font-semibold text-[#6f6257]">
+                  {chapter6QuickExamplesExpanded ? 'Show fewer' : `Show ${visibleTeacherNoteExamples.length - 2} more`}
+                </button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -5609,7 +5803,14 @@ export default function ChapterUIPrototype() {
               <div className="mt-6 grid gap-4 md:grid-cols-2">
                 <div className="border-l-2 border-[#d6a856] bg-white/60 py-3 pl-4 pr-3">
                   <div className="mb-2 text-sm font-medium">Teacher note</div>
-                  <p className="text-sm leading-6 text-neutral-700">{selectedOption.explanation}</p>
+                  {selectedOption.rating === 'Natural' ? (
+                    <p className="text-sm leading-6 text-neutral-700">{selectedOption.explanation}</p>
+                  ) : (
+                    <div className="space-y-1.5 text-sm leading-6 text-neutral-700">
+                      <p className="font-medium">{visibleTeacherNote.short}</p>
+                      <p className="text-neutral-600">{selectedOption.explanation}</p>
+                    </div>
+                  )}
                 </div>
                 <div className="border-l-2 border-[#d6a856] bg-white/60 py-3 pl-4 pr-3">
                   <div className="mb-2 text-sm font-medium">How it lands</div>
@@ -5633,6 +5834,13 @@ export default function ChapterUIPrototype() {
               <div className="mt-4">
                 <StorySceneMetrics metrics={sceneMetrics} transition={sceneMetricTransition} compact />
               </div>
+
+              {isLastNode && (
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-[#d8cbb8] bg-white/60 px-4 py-3 text-sm">
+                  <span className="font-semibold text-[#2b241f]">Completion support</span>
+                  <span className="rounded-full bg-[#f3eadf] px-3 py-1 font-semibold text-[#6f6257]">{completionSupportLabel}</span>
+                </div>
+              )}
 
               {betterVersion && (
                 <div className="mt-4 overflow-hidden rounded-[24px] border border-[#d8cbb8] bg-white/60">
@@ -5723,7 +5931,7 @@ export default function ChapterUIPrototype() {
                       <Button variant="outline" className="min-h-11 rounded-2xl bg-white/75" onClick={() => handleChapter6Rewind(0)}>Rewind to decision 1</Button>
                       <Button variant="outline" className="min-h-11 rounded-2xl bg-white/75" onClick={() => handleChapter6Rewind(2)}>Rewind to decision 3</Button>
                       <Button variant="outline" className="min-h-11 rounded-2xl bg-white/75" onClick={() => handleChapter6Rewind(4)}>Rewind to decision 5</Button>
-                      <Button variant="outline" className="min-h-11 rounded-2xl border-indigo-300 bg-indigo-50 text-indigo-950 hover:bg-indigo-100" onClick={handleChapter6Replay}>Replay scene</Button>
+                      <Button variant="outline" className="min-h-11 rounded-2xl border-indigo-300 bg-indigo-50 text-indigo-950 hover:bg-indigo-100" onClick={handleChapter6Replay}>Replay with less English support</Button>
                     </div>
                   </motion.section>
                 )}
@@ -5748,6 +5956,10 @@ export default function ChapterUIPrototype() {
                   </div>
                   <div className="space-y-3 px-4 py-4">
                     <p className="text-sm leading-6 text-neutral-700">{chapter6ResultTier.intro}</p>
+                    <div className="rounded-2xl border border-indigo-100 bg-white/65 px-3 py-2 text-sm leading-5 text-neutral-600">
+                      <div className="font-semibold text-[#25222f]">{completionSupportLabel} · {chapter6ResultTier.supportSummary}</div>
+                      <div className="mt-1">{chapter6ResultTier.supportRule}</div>
+                    </div>
                     <div className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-800">What you earned in this run</div>
                     <div className="text-sm font-semibold text-[#25222f]">{chapter6ResultTier.title}</div>
                     {chapter6ResultTier.examples ? (
