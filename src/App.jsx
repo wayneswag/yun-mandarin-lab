@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   CheckCircle2,
+  X,
   XCircle,
   AlertTriangle,
   ChevronDown,
@@ -2889,6 +2890,46 @@ function RatingBadge({ rating }) {
   );
 }
 
+function firstAvailableText(...values) {
+  return values.find((value) => typeof value === 'string' && value.trim()) || '';
+}
+
+function resolveBetterVersion({ selectedOption, currentNode, currentNodeAudioPrefix }) {
+  const zh = firstAvailableText(selectedOption?.correction);
+  if (!zh) return null;
+
+  const options = Array.isArray(currentNode?.options) ? currentNode.options : [];
+  const matchingOption = options.find((option) => option?.zh === zh) || null;
+  const matchingNaturalOption = options.find(
+    (option) => option?.rating === 'Natural' && option?.zh === zh
+  ) || null;
+  const sourceOption = matchingOption || matchingNaturalOption;
+  const legacyDetails = CHAPTER6_CORRECTION_DETAILS[zh] || {};
+  const audioRole = firstAvailableText(sourceOption?.rating, selectedOption?.rating, 'correction').toLowerCase();
+
+  return {
+    zh,
+    py: firstAvailableText(
+      selectedOption?.correctionPinyin,
+      selectedOption?.correctionPy,
+      sourceOption?.py,
+      legacyDetails.py
+    ),
+    en: firstAvailableText(
+      selectedOption?.correctionEnglish,
+      selectedOption?.correctionEn,
+      sourceOption?.en,
+      legacyDetails.en
+    ),
+    audioText: zh,
+    audioId: firstAvailableText(
+      selectedOption?.correctionAudioId,
+      selectedOption?.betterVersionAudioId,
+      `${currentNodeAudioPrefix}.correction.${audioRole}`
+    ),
+  };
+}
+
 function SceneMetricBar({ icon: Icon, label, value, previousValue, tone }) {
   const changed = Number.isFinite(previousValue);
   const delta = changed ? value - previousValue : 0;
@@ -3076,6 +3117,8 @@ export default function ChapterUIPrototype() {
   const [showFeedback, setShowFeedback] = useState(false);
   const [sceneRun, setSceneRun] = useState({});
   const [betterVersionOpen, setBetterVersionOpen] = useState(true);
+  const [betterVersionShowPinyin, setBetterVersionShowPinyin] = useState(true);
+  const [betterVersionShowEnglish, setBetterVersionShowEnglish] = useState(true);
   const [showPinyin, setShowPinyin] = useState(persisted?.showPinyin ?? true);
   const [showEnglish, setShowEnglish] = useState(persisted?.showEnglish ?? true);
   const [reviewShowPinyin, setReviewShowPinyin] = useState(true);
@@ -3200,9 +3243,12 @@ export default function ChapterUIPrototype() {
         naturalness: sceneMetricTransition.newMetrics.naturalness - sceneMetricTransition.previousMetrics.naturalness,
       }
     : null;
-  const correctionDetails = isChapter6Prototype && selectedOption?.correction
-    ? CHAPTER6_CORRECTION_DETAILS[selectedOption.correction] || null
-    : null;
+  const betterVersion = useMemo(
+    () => resolveBetterVersion({ selectedOption, currentNode, currentNodeAudioPrefix }),
+    [currentNode, currentNodeAudioPrefix, selectedOption]
+  );
+  const betterVersionHasPinyin = Boolean(betterVersion?.py);
+  const betterVersionHasEnglish = Boolean(betterVersion?.en);
   const activeNote = currentChapter.grammarNotes.find((note) => note.id === activeNoteId) || currentChapter.grammarNotes[0];
   const selectedGlossary = selectedGlossaryKey ? glossary[selectedGlossaryKey] : null;
 
@@ -3545,7 +3591,20 @@ export default function ChapterUIPrototype() {
   }, [nodeSelections, safeCurrentChapterIndex, safeCurrentNodeIndex]);
 
   useEffect(() => {
+    if (!showFeedback) return undefined;
+
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setShowFeedback(false);
+    };
+
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [showFeedback]);
+
+  useEffect(() => {
     setBetterVersionOpen(true);
+    setBetterVersionShowPinyin(true);
+    setBetterVersionShowEnglish(true);
     setSceneRun({});
   }, [currentChapter.id]);
 
@@ -3586,9 +3645,9 @@ export default function ChapterUIPrototype() {
         };
       });
     }
-    if (isChapter6Prototype) {
-      setBetterVersionOpen(selectedOption.rating !== 'Natural');
-    }
+    setBetterVersionOpen(selectedOption.rating !== 'Natural');
+    setBetterVersionShowPinyin(true);
+    setBetterVersionShowEnglish(true);
     setShowFeedback(true);
     setTrust((prev) => Math.max(0, Math.min(100, prev + selectedOption.relationship)));
     setMastery((prev) => Math.max(0, Math.min(100, prev + selectedOption.score * 8)));
@@ -3929,6 +3988,8 @@ export default function ChapterUIPrototype() {
     setShowFeedback(false);
     setSceneRun({});
     setBetterVersionOpen(true);
+    setBetterVersionShowPinyin(true);
+    setBetterVersionShowEnglish(true);
     setShowPinyin(true);
     setShowEnglish(true);
     setTrust(30);
@@ -5090,15 +5151,27 @@ export default function ChapterUIPrototype() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 p-0 md:items-center md:p-6"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) setShowFeedback(false);
+            }}
           >
             <motion.div
               initial={{ y: 24, opacity: 0, scale: 0.98 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 12, opacity: 0, scale: 0.98 }}
-              className="max-h-[88vh] w-full overflow-y-auto rounded-t-[30px] bg-[#fffaf3] p-4 shadow-[0_-18px_50px_rgba(43,36,31,0.24)] sm:p-5 md:max-w-2xl md:rounded-[30px] md:p-6 md:shadow-2xl"
+              onClick={(event) => event.stopPropagation()}
+              className="relative max-h-[88vh] w-full overflow-y-auto rounded-t-[30px] bg-[#fffaf3] p-4 shadow-[0_-18px_50px_rgba(43,36,31,0.24)] sm:p-5 md:max-w-2xl md:rounded-[30px] md:p-6 md:shadow-2xl"
             >
               <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[#d8c9b8] md:hidden" />
-              <div className="flex items-start justify-between gap-4">
+              <button
+                type="button"
+                onClick={() => setShowFeedback(false)}
+                className="absolute right-3 top-3 z-10 rounded-full border border-[#d8cbb8] bg-white/85 p-2 text-[#6f6257] transition hover:bg-[#fff8ef] hover:text-[#2b241f] sm:right-4 sm:top-4"
+                aria-label="Close feedback"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              <div className="flex items-start justify-between gap-4 pr-10">
                 {isChapter6Prototype && <StaffAvatar rating={selectedOption.rating} compact />}
                 <div className="min-w-0 flex-1">
                   <div className="mb-2 text-sm font-medium text-[#8a6a28]">Teacher feedback</div>
@@ -5150,51 +5223,61 @@ export default function ChapterUIPrototype() {
                 <StorySceneMetrics metrics={sceneMetrics} transition={sceneMetricTransition} compact />
               </div>
 
-              {selectedOption.correction && (
-                isChapter6Prototype ? (
-                  <div className="mt-4 overflow-hidden rounded-[24px] border border-[#d8cbb8] bg-white/60">
-                    <button
-                      type="button"
-                      onClick={() => setBetterVersionOpen((open) => !open)}
-                      className="flex min-h-12 w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm font-semibold text-[#2b241f] transition hover:bg-[#fff8ef]"
-                      aria-expanded={betterVersionOpen}
-                    >
-                      <span>Try this more natural version</span>
-                      <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-[#6f6257]">
+              {betterVersion && (
+                <div className="mt-4 overflow-hidden rounded-[24px] border border-[#d8cbb8] bg-white/60">
+                  <div className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-sm font-semibold text-[#2b241f]">Try this more natural version</span>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setBetterVersionShowPinyin((visible) => !visible)}
+                        disabled={!betterVersionHasPinyin}
+                        className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${betterVersionHasPinyin && betterVersionShowPinyin ? 'border-amber-300 bg-amber-50 text-amber-900' : 'border-[#d8cbb8] bg-white/70 text-[#6f6257]'} ${!betterVersionHasPinyin ? 'cursor-not-allowed opacity-60' : ''}`}
+                        aria-pressed={betterVersionHasPinyin && betterVersionShowPinyin}
+                      >
+                        Pinyin {betterVersionHasPinyin ? (betterVersionShowPinyin ? 'On' : 'Off') : 'Unavailable'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBetterVersionShowEnglish((visible) => !visible)}
+                        disabled={!betterVersionHasEnglish}
+                        className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${betterVersionHasEnglish && betterVersionShowEnglish ? 'border-indigo-300 bg-indigo-50 text-indigo-900' : 'border-[#d8cbb8] bg-white/70 text-[#6f6257]'} ${!betterVersionHasEnglish ? 'cursor-not-allowed opacity-60' : ''}`}
+                        aria-pressed={betterVersionHasEnglish && betterVersionShowEnglish}
+                      >
+                        English {betterVersionHasEnglish ? (betterVersionShowEnglish ? 'On' : 'Off') : 'Unavailable'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBetterVersionOpen((open) => !open)}
+                        className="flex items-center gap-1 rounded-full border border-[#d8cbb8] bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[#6f6257] transition hover:bg-[#fff8ef]"
+                        aria-expanded={betterVersionOpen}
+                      >
                         {betterVersionOpen ? 'Close' : 'Open'}
-                        {betterVersionOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                      </span>
-                    </button>
-                    <AnimatePresence initial={false}>
-                      {betterVersionOpen && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.24, ease: 'easeOut' }}
-                          className="overflow-hidden"
-                        >
-                          <div className="border-t border-[#e7dccd] px-4 pb-4 pt-3">
-                            <div className="flex items-start justify-between gap-3">
-                              <p className="text-xl font-semibold leading-snug text-[#2b241f]">{selectedOption.correction}</p>
-                              <AudioButton audioId={`${currentNodeAudioPrefix}.correction.${selectedOption.rating.toLowerCase()}`} text={selectedOption.correction} small />
-                            </div>
-                            {showPinyin && correctionDetails?.py && <p className="mt-2 text-sm leading-6 text-neutral-500">{correctionDetails.py}</p>}
-                            {showEnglish && correctionDetails?.en && <p className="mt-1 text-sm leading-6 text-neutral-700">{correctionDetails.en}</p>}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                ) : (
-                  <div className="mt-4 rounded-[24px] border border-dashed border-[#d8cbb8] bg-white/55 p-4">
-                    <div className="mb-2 flex items-center justify-between gap-2 text-sm font-medium">
-                      <span>Try this more natural version</span>
-                      <AudioButton audioId={`${currentNodeAudioPrefix}.correction.${selectedOption.rating.toLowerCase()}`} text={selectedOption.correction} small />
+                        {betterVersionOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                      </button>
                     </div>
-                    <p className="text-xl font-semibold leading-snug">{selectedOption.correction}</p>
                   </div>
-                )
+                  <AnimatePresence initial={false}>
+                    {betterVersionOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.24, ease: 'easeOut' }}
+                        className="overflow-hidden"
+                      >
+                        <div className="border-t border-[#e7dccd] px-4 pb-4 pt-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <p className="text-xl font-semibold leading-snug text-[#2b241f]">{betterVersion.zh}</p>
+                            <AudioButton audioId={betterVersion.audioId} text={betterVersion.audioText} small />
+                          </div>
+                          {betterVersionShowPinyin && betterVersion.py && <p className="mt-2 text-sm leading-6 text-neutral-500">{betterVersion.py}</p>}
+                          {betterVersionShowEnglish && betterVersion.en && <p className="mt-1 text-sm leading-6 text-neutral-700">{betterVersion.en}</p>}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               )}
 
               <AnimatePresence mode="wait">
