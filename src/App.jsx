@@ -109,6 +109,139 @@ const CHAPTER6_OPTION_META = {
   Incorrect: { id: 'D', score: 0, relationship: -10 },
 };
 
+// Every student-facing correction has authored language layers. These are kept
+// separate from option wording so a correction can be shared across scenes.
+const BETTER_VERSION_TRANSLATIONS = {
+  '半小时前，我在咖啡馆看到过钱包。': { correctionPy: 'Bàn ge xiǎoshí qián, wǒ zài kāfēiguǎn kàn dào guo qiánbāo.', correctionEn: 'Half an hour ago, I saw my wallet at the café.' },
+  '半小时前，我在咖啡馆用过钱包。': { correctionPy: 'Bàn ge xiǎoshí qián, wǒ zài kāfēiguǎn yòng guo qiánbāo.', correctionEn: 'Half an hour ago, I used my wallet at the café.' },
+  '不好意思，可以说慢一点吗？': { correctionPy: 'Bù hǎoyìsi, kěyǐ shuō màn yìdiǎn ma?', correctionEn: 'Sorry, could you speak a little more slowly?' },
+  '不好意思，我没听清楚。可以再说一遍吗？': { correctionPy: 'Bù hǎoyìsi, wǒ méi tīng qīngchu. Kěyǐ zài shuō yí biàn ma?', correctionEn: 'Sorry, I did not hear clearly. Could you say that again?' },
+  '不好意思，我明天可能会晚一点。要不然我们改时间吧？': { correctionPy: 'Bù hǎoyìsi, wǒ míngtiān kěnéng huì wǎn yìdiǎn. Yàoburan wǒmen gǎi shíjiān ba?', correctionEn: 'Sorry, I may be a little late tomorrow. How about we change the time?' },
+  '不好意思，我明天可能会晚一点到。要不然我们改时间吧？': { correctionPy: 'Bù hǎoyìsi, wǒ míngtiān kěnéng huì wǎn yìdiǎn dào. Yàoburan wǒmen gǎi shíjiān ba?', correctionEn: 'Sorry, I may arrive a little late tomorrow. How about we change the time?' },
+  '不是手机，是我的钱包丢了。': { correctionPy: 'Bú shì shǒujī, shì wǒ de qiánbāo diū le.', correctionEn: 'It is not my phone; it is my wallet that is lost.' },
+  '不是手机丢了，是钱包丢了。': { correctionPy: 'Bú shì shǒujī diū le, shì qiánbāo diū le.', correctionEn: 'It is not that the phone is lost; the wallet is lost.' },
+  '大概半小时前，我在那边的咖啡馆买过东西。': { correctionPy: 'Dàgài bàn ge xiǎoshí qián, wǒ zài nàbiān de kāfēiguǎn mǎi guo dōngxi.', correctionEn: 'About half an hour ago, I bought something at the café over there.' },
+  '丢的是钱包，手机还在。': { correctionPy: 'Diū de shì qiánbāo. Shǒujī hái zài.', correctionEn: 'It is the wallet that is lost. I still have my phone.' },
+  '对，可能在咖啡馆。可以帮我联系一下吗？': { correctionPy: 'Duì, kěnéng zài kāfēiguǎn. Kěyǐ bāng wǒ liánxì yíxià ma?', correctionEn: 'Yes, it may be at the café. Could you help me contact them?' },
+  '对，我的钱包可能在咖啡馆。': { correctionPy: 'Duì, wǒ de qiánbāo kěnéng zài kāfēiguǎn.', correctionEn: 'Yes, my wallet may be at the café.' },
+  '对，我可能把钱包忘在咖啡馆了。': { correctionPy: 'Duì, wǒ kěnéng bǎ qiánbāo wàng zài kāfēiguǎn le.', correctionEn: 'Yes, I may have left my wallet at the café.' },
+  '好，麻烦你帮我打电话。': { correctionPy: 'Hǎo, máfan nǐ bāng wǒ dǎ diànhuà.', correctionEn: 'Okay, please help me make the call.' },
+  '好，麻烦你给咖啡馆打电话问一下钱包。': { correctionPy: 'Hǎo, máfan nǐ gěi kāfēiguǎn dǎ diànhuà wèn yíxià qiánbāo.', correctionEn: 'Okay, please call the café and ask about the wallet.' },
+  '好，谢谢。麻烦你帮我安排一下。': { correctionPy: 'Hǎo, xièxie. Máfan nǐ bāng wǒ ānpái yíxià.', correctionEn: 'Okay, thanks. Please help me arrange it.' },
+  '好的，请给我一张表格。': { correctionPy: 'Hǎo de, qǐng gěi wǒ yì zhāng biǎogé.', correctionEn: 'Okay, please give me a form.' },
+  '好的，我等你们以后通知我。': { correctionPy: 'Hǎo de, wǒ děng nǐmen yǐhòu tōngzhī wǒ.', correctionEn: 'Okay, I will wait for you to notify me later.' },
+  '好的，我去咖啡馆确认一下。': { correctionPy: 'Hǎo de, wǒ qù kāfēiguǎn quèrèn yíxià.', correctionEn: 'Okay, I will go to the café to confirm it.' },
+  '好的，我先填写表格。': { correctionPy: 'Hǎo de, wǒ xiān tiánxiě biǎogé.', correctionEn: 'Okay, I will fill out the form first.' },
+  '好的，我先一直走，然后左转。谢谢你！': { correctionPy: 'Hǎo de, wǒ xiān yìzhí zǒu, ránhòu zuǒ zhuǎn. Xièxie!', correctionEn: 'Okay, I will go straight first, then turn left. Thank you!' },
+  '好的，谢谢。我会等你们的通知。': { correctionPy: 'Hǎo de, xièxie. Wǒ huì děng nǐmen de tōngzhī.', correctionEn: 'Okay, thank you. I will wait for your notification.' },
+  '可以啊，你明天几点有时间？': { correctionPy: 'Kěyǐ a, nǐ míngtiān jǐ diǎn yǒu shíjiān?', correctionEn: 'Sure. What time are you free tomorrow?' },
+  '可以刷卡吗？': { correctionPy: 'Kěyǐ shuākǎ ma?', correctionEn: 'Can I pay by card?' },
+  '里面有银行卡和身份证。': { correctionPy: 'Lǐmiàn yǒu yínhángkǎ hé shēnfènzhèng.', correctionEn: 'There is a bank card and an ID inside.' },
+  '里面有银行卡和我的身份证。': { correctionPy: 'Lǐmiàn yǒu yínhángkǎ hé wǒ de shēnfènzhèng.', correctionEn: 'There is a bank card and my ID inside.' },
+  '两位。请问有没有靠窗的位子？': { correctionPy: 'Liǎng wèi. Qǐngwèn yǒu méiyǒu kào chuāng de wèizi?', correctionEn: 'Two people. Do you have a window seat?' },
+  '麻烦你帮我安排去取钱包。': { correctionPy: 'Máfan nǐ bāng wǒ ānpái qù qǔ qiánbāo.', correctionEn: 'Please help me arrange for me to collect the wallet.' },
+  '麻烦你帮我给咖啡馆打电话。': { correctionPy: 'Máfan nǐ bāng wǒ gěi kāfēiguǎn dǎ diànhuà.', correctionEn: 'Please help me call the café.' },
+  '明白了，谢谢你帮我确认。': { correctionPy: 'Míngbai le, xièxie nǐ bāng wǒ quèrèn.', correctionEn: 'I understand. Thank you for helping me confirm it.' },
+  '那我们明天下午三点见面吧。': { correctionPy: 'Nà wǒmen míngtiān xiàwǔ sān diǎn jiànmiàn ba.', correctionEn: 'Then let us meet tomorrow at 3 p.m.' },
+  '你好，对，我是新来的室友。': { correctionPy: 'Nǐ hǎo, duì, wǒ shì xīn lái de shìyǒu.', correctionEn: 'Hi, yes, I am the new roommate.' },
+  '你明天有时间吗？': { correctionPy: 'Nǐ míngtiān yǒu shíjiān ma?', correctionEn: 'Are you free tomorrow?' },
+  '钱包是黑色的，里面有银行卡。': { correctionPy: 'Qiánbāo shì hēisè de, lǐmiàn yǒu yínhángkǎ.', correctionEn: 'The wallet is black, with a bank card inside.' },
+  '请给我失物登记表。': { correctionPy: 'Qǐng gěi wǒ shīwù dēngjìbiǎo.', correctionEn: 'Please give me a lost-property form.' },
+  '请问，地铁站怎么走？': { correctionPy: 'Qǐngwèn, dìtiě zhàn zěnme zǒu?', correctionEn: 'Excuse me, how do I get to the subway station?' },
+  '请问，这个包多少钱？': { correctionPy: 'Qǐngwèn, zhège bāo duōshao qián?', correctionEn: 'Excuse me, how much is this bag?' },
+  '是一个小黑色钱包，里面有银行卡。': { correctionPy: 'Shì yí ge xiǎo hēisè qiánbāo, lǐmiàn yǒu yínhángkǎ.', correctionEn: 'It is a small black wallet with a bank card inside.' },
+  '太好了，真的谢谢你！': { correctionPy: 'Tài hǎo le, zhēn de xièxie nǐ!', correctionEn: 'That is great, thank you so much!' },
+  '太好了，真的谢谢你帮了我这么多。': { correctionPy: 'Tài hǎo le, zhēn de xièxie nǐ bāng le wǒ zhème duō.', correctionEn: 'That is great, thank you so much for helping me this much.' },
+  '我的钱包是黑色的，里面有银行卡。': { correctionPy: 'Wǒ de qiánbāo shì hēisè de, lǐmiàn yǒu yínhángkǎ.', correctionEn: 'My wallet is black, with a bank card inside.' },
+  '我的钱包找不到了，手机也快没电了。可以帮我一下吗？': { correctionPy: 'Wǒ de qiánbāo zhǎo bú dào le, shǒujī yě kuài méi diàn le. Kěyǐ bāng wǒ yíxià ma?', correctionEn: 'I cannot find my wallet, and my phone is nearly out of battery. Could you help me?' },
+  '我叫 Alex，很高兴认识你。': { correctionPy: 'Wǒ jiào Alex, hěn gāoxìng rènshi nǐ.', correctionEn: 'My name is Alex. Nice to meet you.' },
+  '我叫 Alex。': { correctionPy: 'Wǒ jiào Alex.', correctionEn: 'My name is Alex.' },
+  '我来填写失物登记表。': { correctionPy: 'Wǒ lái tiánxiě shīwù dēngjìbiǎo.', correctionEn: 'I will fill out the lost-property form.' },
+  '我来自美国。/ 我是美国人。 我会说一点中文。': { correctionPy: 'Wǒ láizì Měiguó. / Wǒ shì Měiguó rén. Wǒ huì shuō yìdiǎn Zhōngwén.', correctionEn: 'I am from the United States. / I am American. I can speak a little Chinese.' },
+  '我们明天下午三点见面吧。': { correctionPy: 'Wǒmen míngtiān xiàwǔ sān diǎn jiànmiàn ba.', correctionEn: 'We will meet tomorrow at 3 p.m.' },
+  '我们先来一份牛肉面，再来一盘青菜。': { correctionPy: 'Wǒmen xiān lái yí fèn niúròu miàn, zài lái yì pán qīngcài.', correctionEn: 'We will start with one beef noodle dish, then another plate of greens.' },
+  '我明天可能会晚一点到。': { correctionPy: 'Wǒ míngtiān kěnéng huì wǎn yìdiǎn dào.', correctionEn: 'I might arrive a little late tomorrow.' },
+  '我是美国人，我会说一点中文。': { correctionPy: 'Wǒ shì Měiguó rén, wǒ huì shuō yìdiǎn Zhōngwén.', correctionEn: 'I am American, and I can speak a little Chinese.' },
+  '我是新来的室友。': { correctionPy: 'Wǒ shì xīn lái de shìyǒu.', correctionEn: 'I am the new roommate.' },
+  '我先一直走，然后左转。谢谢你！': { correctionPy: 'Wǒ xiān yìzhí zǒu, ránhòu zuǒ zhuǎn. Xièxie!', correctionEn: 'I will go straight first, then turn left. Thank you!' },
+  '我要这个。可以刷卡吗？': { correctionPy: 'Wǒ yào zhège. Kěyǐ shuākǎ ma?', correctionEn: 'I want this one. Can I pay by card?' },
+  '现在明白了，我去确认钱包。': { correctionPy: 'Xiànzài míngbai le, wǒ qù quèrèn qiánbāo.', correctionEn: 'Now I understand. I will go confirm the wallet.' },
+  '谢谢，麻烦你帮我安排去取钱包。': { correctionPy: 'Xièxie, máfan nǐ bāng wǒ ānpái qù qǔ qiánbāo.', correctionEn: 'Thanks. Please help me arrange for me to collect the wallet.' },
+  '要打包。可以刷卡吗？': { correctionPy: 'Yào dǎbāo. Kěyǐ shuākǎ ma?', correctionEn: 'I need it to go. Can I pay by card?' },
+  '有点儿贵，我想看看别的。': { correctionPy: 'Yǒudiǎnr guì, wǒ xiǎng kànkan bié de.', correctionEn: 'It is a little expensive. I would like to look at something else.' },
+  '这个包多少钱？': { correctionPy: 'Zhège bāo duōshao qián?', correctionEn: 'How much is this bag?' },
+  '真的谢谢你帮了我这么多。': { correctionPy: 'Zhēn de xièxie nǐ bāng le wǒ zhème duō.', correctionEn: 'Thank you so much for helping me this much.' },
+};
+
+const CHAPTER6_NEW_CORE_LANGUAGE = [
+  '快没电了',
+  '半小时前',
+  '咖啡馆',
+  'V过',
+  '什么样',
+  '里面有',
+  '不是A，是B',
+  '联系',
+  '确认',
+  '失物登记表',
+];
+
+const CHAPTER6_SUPPORT_MAP = {
+  1: {
+    stage: 1,
+    stageLabel: 'Explain the problem',
+    focus: 'Explain the missing wallet and low phone battery.',
+    primaryGlossaryKeys: ['没电了'],
+    recycledGlossaryKeys: ['钱包', '手机', '找不到', '帮我一下'],
+    primaryNoteIds: ['zhao-bu-dao'],
+  },
+  2: {
+    stage: 1,
+    stageLabel: 'Explain the problem',
+    focus: 'Say when and where the wallet was last used.',
+    primaryGlossaryKeys: ['半小时前', '咖啡馆', '过'],
+    recycledGlossaryKeys: ['钱包'],
+    primaryNoteIds: ['time-place-guo'],
+  },
+  3: {
+    stage: 2,
+    stageLabel: 'Give details and repair confusion',
+    focus: 'Describe the wallet and what is inside.',
+    primaryGlossaryKeys: ['什么样', '里面有'],
+    recycledGlossaryKeys: ['钱包', '咖啡馆'],
+    primaryNoteIds: ['describe-object'],
+  },
+  4: {
+    stage: 2,
+    stageLabel: 'Give details and repair confusion',
+    focus: 'Clarify the missing item and move toward contact.',
+    primaryGlossaryKeys: ['不是', '联系'],
+    recycledGlossaryKeys: ['钱包', '手机', '咖啡馆'],
+    primaryNoteIds: ['clarify-not-a'],
+  },
+  5: {
+    stage: 3,
+    stageLabel: 'Resolve the problem',
+    focus: 'Confirm identifying details and the practical next step.',
+    primaryGlossaryKeys: ['确认', '失物登记表'],
+    recycledGlossaryKeys: ['里面有', '联系', '咖啡馆', '钱包'],
+    primaryNoteIds: ['practical-next-step'],
+  },
+  6: {
+    stage: 3,
+    stageLabel: 'Resolve the problem',
+    focus: 'Respond to the result and close naturally.',
+    primaryGlossaryKeys: [],
+    recycledGlossaryKeys: ['确认', '咖啡馆', '钱包', '手机', '麻烦你了', '没电了'],
+    primaryNoteIds: ['thank-after-help'],
+  },
+};
+
+const CHAPTER6_STAGE_TRANSITIONS = {
+  2: { title: 'Stage 1 complete', message: 'The staff now understands what is missing and where to look.' },
+  4: { title: 'Stage 2 complete', message: 'The key details are clear, so the staff can act on the problem.' },
+};
+
 function makeChapter6BranchOptions(entries) {
   return ['Natural', 'Stiff', 'Awkward', 'Incorrect'].map((rating) => ({
     ...CHAPTER6_OPTION_META[rating],
@@ -913,6 +1046,96 @@ const glossary = {
       { zh: '耳机没电了。', py: 'Ěrjī méi diàn le.', en: 'The earphones are out of battery.' },
       { zh: '不好意思，我的手机没电了。', py: 'Bù hǎoyìsi, wǒ de shǒujī méi diàn le.', en: 'Sorry, my phone is out of battery.' },
       { zh: '手机快没电了。', py: 'Shǒujī kuài méi diàn le.', en: 'The phone is almost out of battery.' },
+    ],
+  },
+  '半小时前': {
+    title: '半小时前',
+    pinyin: 'bàn ge xiǎoshí qián',
+    translation: 'half an hour ago',
+    explanation: '半小时前 places the time before the place and action when you explain when something happened.',
+    examples: [
+      { zh: '半小时前，我还在咖啡馆。', py: 'Bàn ge xiǎoshí qián, wǒ hái zài kāfēiguǎn.', en: 'Half an hour ago, I was still at the café.' },
+      { zh: '我半小时前看到过钱包。', py: 'Wǒ bàn ge xiǎoshí qián kàn dào guo qiánbāo.', en: 'I saw the wallet half an hour ago.' },
+    ],
+  },
+  '咖啡馆': {
+    title: '咖啡馆',
+    pinyin: 'kāfēiguǎn',
+    translation: 'café',
+    explanation: '咖啡馆 means café. Use 在咖啡馆 to place an action at the café.',
+    examples: [
+      { zh: '我在咖啡馆买过东西。', py: 'Wǒ zài kāfēiguǎn mǎi guo dōngxi.', en: 'I bought something at the café.' },
+      { zh: '钱包可能在咖啡馆。', py: 'Qiánbāo kěnéng zài kāfēiguǎn.', en: 'The wallet may be at the café.' },
+    ],
+  },
+  '过': {
+    title: 'V过',
+    pinyin: 'V guo',
+    translation: 'have done / did before',
+    explanation: '过 after a verb marks past experience. In this scene, 买过 and 用过 help explain what happened before now.',
+    examples: [
+      { zh: '我在这里买过东西。', py: 'Wǒ zài zhèlǐ mǎi guo dōngxi.', en: 'I have bought something here.' },
+      { zh: '我用过这个钱包。', py: 'Wǒ yòng guo zhège qiánbāo.', en: 'I have used this wallet.' },
+    ],
+  },
+  '什么样': {
+    title: '什么样',
+    pinyin: 'shénme yàng',
+    translation: 'what kind / what does it look like',
+    explanation: '什么样 asks for identifying qualities such as size, color, or shape.',
+    examples: [
+      { zh: '钱包是什么样的？', py: 'Qiánbāo shì shénme yàng de?', en: 'What does the wallet look like?' },
+      { zh: '你喜欢什么样的包？', py: 'Nǐ xǐhuan shénme yàng de bāo?', en: 'What kind of bag do you like?' },
+    ],
+  },
+  '里面有': {
+    title: '里面有',
+    pinyin: 'lǐmiàn yǒu',
+    translation: 'there is / are inside',
+    explanation: '里面有 introduces the contents of an object clearly.',
+    examples: [
+      { zh: '里面有银行卡。', py: 'Lǐmiàn yǒu yínhángkǎ.', en: 'There is a bank card inside.' },
+      { zh: '钱包里面有身份证。', py: 'Qiánbāo lǐmiàn yǒu shēnfènzhèng.', en: 'There is an ID inside the wallet.' },
+    ],
+  },
+  '不是': {
+    title: '不是A，是B',
+    pinyin: 'bú shì A, shì B',
+    translation: 'not A, but B',
+    explanation: '不是A，是B corrects a misunderstanding by rejecting the wrong detail before supplying the right one.',
+    examples: [
+      { zh: '不是手机，是钱包。', py: 'Bú shì shǒujī, shì qiánbāo.', en: 'It is not the phone; it is the wallet.' },
+      { zh: '不是今天，是明天。', py: 'Bú shì jīntiān, shì míngtiān.', en: 'It is not today; it is tomorrow.' },
+    ],
+  },
+  '联系': {
+    title: '联系',
+    pinyin: 'liánxì',
+    translation: 'to contact',
+    explanation: '联系 means to contact a person or place to get information or arrange the next step.',
+    examples: [
+      { zh: '可以帮我联系咖啡馆吗？', py: 'Kěyǐ bāng wǒ liánxì kāfēiguǎn ma?', en: 'Could you help me contact the café?' },
+      { zh: '我会联系他们。', py: 'Wǒ huì liánxì tāmen.', en: 'I will contact them.' },
+    ],
+  },
+  '确认': {
+    title: '确认',
+    pinyin: 'quèrèn',
+    translation: 'to confirm / verify',
+    explanation: '确认 means to check that information or an item is correct before acting.',
+    examples: [
+      { zh: '请确认里面的东西。', py: 'Qǐng quèrèn lǐmiàn de dōngxi.', en: 'Please confirm what is inside.' },
+      { zh: '我去咖啡馆确认一下。', py: 'Wǒ qù kāfēiguǎn quèrèn yíxià.', en: 'I will go to the café to confirm it.' },
+    ],
+  },
+  '失物登记表': {
+    title: '失物登记表',
+    pinyin: 'shīwù dēngjìbiǎo',
+    translation: 'lost-property form',
+    explanation: '失物登记表 is a form used to record details about a lost item.',
+    examples: [
+      { zh: '请给我失物登记表。', py: 'Qǐng gěi wǒ shīwù dēngjìbiǎo.', en: 'Please give me a lost-property form.' },
+      { zh: '我先填写失物登记表。', py: 'Wǒ xiān tiánxiě shīwù dēngjìbiǎo.', en: 'I will fill out the lost-property form first.' },
     ],
   },
   '充电': {
@@ -2487,6 +2710,62 @@ const chapters = [
         ],
       },
       {
+        id: 'time-place-guo',
+        title: 'Time + place + V过',
+        short: 'Put the time first, then the place, then the past action with 过.',
+        body: [
+          'A clear order is: 半小时前 + 我在咖啡馆 + 买过东西。',
+          'Time and place orient the listener before the action.',
+          '过 marks an experience or action that happened before now.',
+        ],
+        examples: [
+          { zh: '半小时前，我在咖啡馆买过东西。', py: 'Bàn ge xiǎoshí qián, wǒ zài kāfēiguǎn mǎi guo dōngxi.', en: 'Half an hour ago, I bought something at the café.' },
+          { zh: '昨天，我在这里用过钱包。', py: 'Zuótiān, wǒ zài zhèlǐ yòng guo qiánbāo.', en: 'Yesterday, I used my wallet here.' },
+        ],
+      },
+      {
+        id: 'describe-object',
+        title: 'Describe an object clearly',
+        short: 'Give its appearance first, then identify what is inside.',
+        body: [
+          'Use 是一个 + size or color + noun to identify the object.',
+          'Then use 里面有 to list details that can verify it.',
+          'Two concrete details are usually more useful than a long description.',
+        ],
+        examples: [
+          { zh: '是一个小黑色钱包。', py: 'Shì yí ge xiǎo hēisè qiánbāo.', en: 'It is a small black wallet.' },
+          { zh: '里面有银行卡和身份证。', py: 'Lǐmiàn yǒu yínhángkǎ hé shēnfènzhèng.', en: 'There is a bank card and an ID inside.' },
+        ],
+      },
+      {
+        id: 'clarify-not-a',
+        title: 'Use 不是A，是B to clarify',
+        short: 'Reject the mistaken detail, then immediately give the correct one.',
+        body: [
+          '不是A identifies what the listener misunderstood.',
+          '是B supplies the correct information without restarting the whole story.',
+          'Keep the repair short so the conversation can move forward.',
+        ],
+        examples: [
+          { zh: '不是手机，是钱包。', py: 'Bú shì shǒujī, shì qiánbāo.', en: 'It is not the phone; it is the wallet.' },
+          { zh: '不是手机丢了，是钱包丢了。', py: 'Bú shì shǒujī diū le, shì qiánbāo diū le.', en: 'It is not the phone that is lost; it is the wallet.' },
+        ],
+      },
+      {
+        id: 'practical-next-step',
+        title: 'Ask for the practical next step',
+        short: 'Confirm the useful detail, then make one polite, actionable request.',
+        body: [
+          '确认 checks that the information matches the missing item.',
+          '联系 or a polite request tells the staff what action would help next.',
+          'If the item cannot be confirmed, a 失物登记表 records the details clearly.',
+        ],
+        examples: [
+          { zh: '可以帮我联系一下吗？', py: 'Kěyǐ bāng wǒ liánxì yíxià ma?', en: 'Could you help me contact them?' },
+          { zh: '好的，我先填写失物登记表。', py: 'Hǎo de, wǒ xiān tiánxiě shīwù dēngjìbiǎo.', en: 'Okay, I will fill out the lost-property form first.' },
+        ],
+      },
+      {
         id: 'thank-after-help',
         title: 'How to thank someone after help',
         short: '太谢谢了 and 麻烦你了 make your thanks sound warmer and more natural.',
@@ -2729,6 +3008,83 @@ const chapters = [
   },
 ];
 
+function applyBetterVersionTranslations(options) {
+  if (!Array.isArray(options)) return;
+
+  options.forEach((option) => {
+    if (!option?.correction) return;
+    const translation = BETTER_VERSION_TRANSLATIONS[option.correction];
+    if (!translation) return;
+
+    option.correctionPy ||= translation.correctionPy;
+    option.correctionEn ||= translation.correctionEn;
+  });
+}
+
+function validateBetterVersionTranslations() {
+  if (!import.meta.env.DEV) return;
+
+  const missing = [];
+  const inspect = (options, location) => {
+    options?.forEach((option) => {
+      if (option?.correction && (!option.correctionPy || !option.correctionEn)) {
+        missing.push(`${location}: ${option.correction}`);
+      }
+    });
+  };
+
+  chapters.forEach((chapter) => chapter.nodes.forEach((node) => inspect(node.options, `Chapter ${chapter.id}, decision ${node.id}`)));
+  Object.entries(CHAPTER6_BRANCH_NODES).forEach(([decisionKey, branches]) => {
+    Object.entries(branches).forEach(([branchKey, branch]) => inspect(branch.options, `Chapter 6, ${decisionKey}/${branchKey}`));
+  });
+
+  missing.forEach((entry) => console.warn(`[Better version] Missing authored pinyin or English: ${entry}`));
+}
+
+function validateChapter6ContentSupport() {
+  if (!import.meta.env.DEV) return;
+
+  if (CHAPTER6_NEW_CORE_LANGUAGE.length > 12) {
+    console.warn(`[Chapter 6 support] New-core inventory has ${CHAPTER6_NEW_CORE_LANGUAGE.length} items; maximum is 12.`);
+  }
+
+  Object.entries(CHAPTER6_SUPPORT_MAP).forEach(([decisionId, support]) => {
+    if (support.primaryNoteIds.length > 1) {
+      console.warn(`[Chapter 6 support] Decision ${decisionId} has more than one primary Teacher note.`);
+    }
+  });
+
+  const inspectText = (text, decisionId, location) => {
+    if (!text) return;
+    const support = CHAPTER6_SUPPORT_MAP[decisionId];
+    const highlighted = support.primaryGlossaryKeys.filter((key) => text.includes(key));
+    if (highlighted.length > 3) {
+      console.warn(`[Chapter 6 support] Decision ${decisionId} ${location} has ${highlighted.length} primary highlights.`);
+    }
+  };
+  const inspectNode = (node, decisionId, location) => {
+    inspectText(node.npcLineZh, decisionId, `${location} NPC line`);
+    node.options?.forEach((option) => {
+      inspectText(option.zh, decisionId, `${location} option ${option.id}`);
+      inspectText(option.correction, decisionId, `${location} option ${option.id} correction`);
+    });
+  };
+
+  const chapter6 = chapters.find((chapter) => chapter.id === 'chapter6');
+  chapter6?.nodes.forEach((node) => inspectNode(node, node.id, 'base'));
+  Object.entries(CHAPTER6_BRANCH_NODES).forEach(([decisionKey, branches]) => {
+    const decisionId = Number(decisionKey.replace('decision', ''));
+    Object.entries(branches).forEach(([branchKey, branch]) => inspectNode(branch, decisionId, branchKey));
+  });
+}
+
+chapters.forEach((chapter) => chapter.nodes.forEach((node) => applyBetterVersionTranslations(node.options)));
+Object.values(CHAPTER6_BRANCH_NODES).forEach((branches) => {
+  Object.values(branches).forEach((branch) => applyBetterVersionTranslations(branch.options));
+});
+validateBetterVersionTranslations();
+validateChapter6ContentSupport();
+
 function normalizeAudioKey(text = '') {
   return text
     .normalize('NFD')
@@ -2904,20 +3260,21 @@ function resolveBetterVersion({ selectedOption, currentNode, currentNodeAudioPre
     (option) => option?.rating === 'Natural' && option?.zh === zh
   ) || null;
   const sourceOption = matchingOption || matchingNaturalOption;
+  const authoredDetails = BETTER_VERSION_TRANSLATIONS[zh] || {};
   const legacyDetails = CHAPTER6_CORRECTION_DETAILS[zh] || {};
   const audioRole = firstAvailableText(sourceOption?.rating, selectedOption?.rating, 'correction').toLowerCase();
 
   return {
     zh,
     py: firstAvailableText(
-      selectedOption?.correctionPinyin,
       selectedOption?.correctionPy,
+      authoredDetails.correctionPy,
       sourceOption?.py,
       legacyDetails.py
     ),
     en: firstAvailableText(
-      selectedOption?.correctionEnglish,
       selectedOption?.correctionEn,
+      authoredDetails.correctionEn,
       sourceOption?.en,
       legacyDetails.en
     ),
@@ -3025,20 +3382,27 @@ function SaveButton({ saved, onClick, dark = false }) {
   );
 }
 
-function AnnotatedText({ text, glossaryKeys = [], onOpen, className = '' }) {
-  if (!glossaryKeys.length) return <span className={className}>{text}</span>;
+function AnnotatedText({ text, glossaryKeys = [], primaryKeys, recycledKeys = [], onOpen, className = '', groupClauses = false, dark = false }) {
+  const effectivePrimaryKeys = primaryKeys ?? glossaryKeys;
+  const tokens = [
+    ...effectivePrimaryKeys.slice(0, 3).map((key) => ({ key, tone: 'primary' })),
+    ...recycledKeys.map((key) => ({ key, tone: 'recycled' })),
+  ]
+    .map((token) => ({ ...token, start: text.indexOf(token.key) }))
+    .filter((token) => token.start >= 0)
+    .sort((a, b) => a.start - b.start || b.key.length - a.key.length || (a.tone === 'primary' ? -1 : 1));
 
-  const sorted = [...glossaryKeys].sort((a, b) => text.indexOf(a) - text.indexOf(b));
+  if (!tokens.length) return <span className={className}>{text}</span>;
+
   const parts = [];
   let cursor = 0;
 
-  sorted.forEach((key, index) => {
-    const start = text.indexOf(key, cursor);
-    if (start === -1) return;
+  tokens.forEach(({ key, tone, start }, index) => {
+    if (start < cursor) return;
     if (start > cursor) {
       parts.push({ type: 'text', value: text.slice(cursor, start), id: `t-${index}-${cursor}` });
     }
-    parts.push({ type: 'token', value: key, id: `k-${index}-${start}` });
+    parts.push({ type: 'token', value: key, tone, id: `k-${index}-${start}` });
     cursor = start + key.length;
   });
 
@@ -3056,12 +3420,23 @@ function AnnotatedText({ text, glossaryKeys = [], onOpen, className = '' }) {
               e.stopPropagation();
               onOpen(part.value);
             }}
-            className="rounded-md bg-[#dbe8f6] px-1 py-0.5 font-semibold text-[#1f4e79] underline decoration-dotted underline-offset-4 transition hover:bg-[#c9dced]"
+            className={part.tone === 'primary'
+              ? 'rounded-md bg-[#dbe8f6] px-1 py-0.5 font-semibold text-[#1f4e79] underline decoration-dotted underline-offset-4 transition hover:bg-[#c9dced]'
+              : `rounded-sm border-b border-dashed px-0.5 py-0.5 font-medium underline-offset-4 transition ${dark ? 'border-white/55 bg-white/10 text-white hover:bg-white/15' : 'border-[#91a4b6] bg-[#eef3f7]/65 text-[#526779] hover:bg-[#e2eaf0]'}`}
           >
             {part.value}
           </button>
         ) : (
-          <span key={part.id}>{part.value}</span>
+          <React.Fragment key={part.id}>
+            {groupClauses
+              ? part.value.split(/([。！？])/).map((segment, segmentIndex) => (
+                  <React.Fragment key={`${part.id}-${segmentIndex}`}>
+                    {segment}
+                    {/[。！？]/.test(segment) && text.indexOf(segment) < text.length - 1 ? <br /> : null}
+                  </React.Fragment>
+                ))
+              : <span>{part.value}</span>}
+          </React.Fragment>
         )
       )}
     </span>
@@ -3133,6 +3508,8 @@ export default function ChapterUIPrototype() {
   const [glossaryShowEnglish, setGlossaryShowEnglish] = useState(true);
   const [quickExamplesShowPinyin, setQuickExamplesShowPinyin] = useState(persisted?.quickExamplesShowPinyin ?? true);
   const [quickExamplesShowEnglish, setQuickExamplesShowEnglish] = useState(persisted?.quickExamplesShowEnglish ?? true);
+  const [chapter6MoreNotesOpen, setChapter6MoreNotesOpen] = useState(false);
+  const [chapter6QuickExamplesExpanded, setChapter6QuickExamplesExpanded] = useState(false);
   const [audioRate, setAudioRate] = useState(persisted?.audioRate ?? 0.75);
   const [fontScale, setFontScale] = useState(persisted?.fontScale || 'md');
   const [session, setSession] = useState(null);
@@ -3182,6 +3559,7 @@ export default function ChapterUIPrototype() {
     options: [],
   };
   const isChapter6Prototype = currentChapter.id === 'chapter6';
+  const chapter6Support = isChapter6Prototype ? CHAPTER6_SUPPORT_MAP[baseCurrentNode.id] : null;
   const sceneMetricsBeforeCurrent = useMemo(() => {
     if (!isChapter6Prototype) return { socialComfort: 50, naturalness: 50 };
     const earlierChoices = Object.fromEntries(
@@ -3247,10 +3625,28 @@ export default function ChapterUIPrototype() {
     () => resolveBetterVersion({ selectedOption, currentNode, currentNodeAudioPrefix }),
     [currentNode, currentNodeAudioPrefix, selectedOption]
   );
-  const betterVersionHasPinyin = Boolean(betterVersion?.py);
-  const betterVersionHasEnglish = Boolean(betterVersion?.en);
   const activeNote = currentChapter.grammarNotes.find((note) => note.id === activeNoteId) || currentChapter.grammarNotes[0];
+  const chapter6PrimaryNote = chapter6Support
+    ? currentChapter.grammarNotes.find((note) => chapter6Support.primaryNoteIds.includes(note.id)) || currentChapter.grammarNotes[0]
+    : null;
+  const visibleTeacherNote = chapter6PrimaryNote || activeNote;
+  const chapter6MoreNotes = chapter6PrimaryNote
+    ? currentChapter.grammarNotes.filter((note) => note.id !== chapter6PrimaryNote.id)
+    : [];
+  const visibleQuickExamples = isChapter6Prototype && !chapter6QuickExamplesExpanded
+    ? visibleTeacherNote.examples.slice(0, 2)
+    : visibleTeacherNote.examples;
+  const chapter6StageTransition = isChapter6Prototype && sceneRun[safeCurrentNodeIndex]
+    ? CHAPTER6_STAGE_TRANSITIONS[baseCurrentNode.id] || null
+    : null;
   const selectedGlossary = selectedGlossaryKey ? glossary[selectedGlossaryKey] : null;
+
+  useEffect(() => {
+    if (!chapter6PrimaryNote) return;
+    setActiveNoteId(chapter6PrimaryNote.id);
+    setChapter6MoreNotesOpen(false);
+    setChapter6QuickExamplesExpanded(false);
+  }, [chapter6PrimaryNote?.id]);
 
   const chapter6Ending = useMemo(() => {
     if (!isChapter6Prototype || safeCurrentNodeIndex !== 5 || !sceneRun[5]) return null;
@@ -4620,7 +5016,14 @@ export default function ChapterUIPrototype() {
               </div>
               <div className="space-y-3">
                 <div className={`${fontScale === 'sm' ? 'text-2xl sm:text-3xl' : fontScale === 'lg' ? 'text-4xl sm:text-5xl' : 'text-3xl sm:text-4xl'} font-semibold leading-tight tracking-tight text-[#2b241f]`}>
-                  <AnnotatedText text={currentNode.npcLineZh} glossaryKeys={currentNode.npcGlossary} onOpen={setSelectedGlossaryKey} />
+                  <AnnotatedText
+                    text={currentNode.npcLineZh}
+                    glossaryKeys={currentNode.npcGlossary}
+                    primaryKeys={chapter6Support?.primaryGlossaryKeys}
+                    recycledKeys={chapter6Support?.recycledGlossaryKeys}
+                    onOpen={setSelectedGlossaryKey}
+                    groupClauses={isChapter6Prototype}
+                  />
                 </div>
                 {showPinyin && <p className="text-sm leading-6 text-neutral-500 md:text-base">{currentNode.npcLinePy}</p>}
                 {showEnglish && <p className="text-sm leading-5 text-neutral-600">{currentNode.npcLineEn}</p>}
@@ -4674,7 +5077,15 @@ export default function ChapterUIPrototype() {
                           </div>
                         </div>
                         <div className={`${fontScale === 'sm' ? 'text-lg sm:text-xl' : fontScale === 'lg' ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl'} font-semibold leading-snug`}>
-                          <AnnotatedText text={option.zh} glossaryKeys={option.glossary} onOpen={setSelectedGlossaryKey} />
+                          <AnnotatedText
+                            text={option.zh}
+                            glossaryKeys={option.glossary}
+                            primaryKeys={chapter6Support?.primaryGlossaryKeys}
+                            recycledKeys={chapter6Support?.recycledGlossaryKeys}
+                            onOpen={setSelectedGlossaryKey}
+                            groupClauses={isChapter6Prototype}
+                            dark={active}
+                          />
                         </div>
                         {showPinyin && <div className={`mt-2 text-sm leading-5 ${active ? 'text-white/75' : 'text-neutral-500'}`}>{option.py}</div>}
                         {showEnglish && <div className={`mt-1 text-sm leading-5 ${active ? 'text-white/85' : 'text-neutral-700'}`}>{option.en}</div>}
@@ -5231,20 +5642,18 @@ export default function ChapterUIPrototype() {
                       <button
                         type="button"
                         onClick={() => setBetterVersionShowPinyin((visible) => !visible)}
-                        disabled={!betterVersionHasPinyin}
-                        className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${betterVersionHasPinyin && betterVersionShowPinyin ? 'border-amber-300 bg-amber-50 text-amber-900' : 'border-[#d8cbb8] bg-white/70 text-[#6f6257]'} ${!betterVersionHasPinyin ? 'cursor-not-allowed opacity-60' : ''}`}
-                        aria-pressed={betterVersionHasPinyin && betterVersionShowPinyin}
+                        className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${betterVersionShowPinyin ? 'border-amber-300 bg-amber-50 text-amber-900' : 'border-[#d8cbb8] bg-white/70 text-[#6f6257]'}`}
+                        aria-pressed={betterVersionShowPinyin}
                       >
-                        Pinyin {betterVersionHasPinyin ? (betterVersionShowPinyin ? 'On' : 'Off') : 'Unavailable'}
+                        Pinyin {betterVersionShowPinyin ? 'On' : 'Off'}
                       </button>
                       <button
                         type="button"
                         onClick={() => setBetterVersionShowEnglish((visible) => !visible)}
-                        disabled={!betterVersionHasEnglish}
-                        className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${betterVersionHasEnglish && betterVersionShowEnglish ? 'border-indigo-300 bg-indigo-50 text-indigo-900' : 'border-[#d8cbb8] bg-white/70 text-[#6f6257]'} ${!betterVersionHasEnglish ? 'cursor-not-allowed opacity-60' : ''}`}
-                        aria-pressed={betterVersionHasEnglish && betterVersionShowEnglish}
+                        className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${betterVersionShowEnglish ? 'border-indigo-300 bg-indigo-50 text-indigo-900' : 'border-[#d8cbb8] bg-white/70 text-[#6f6257]'}`}
+                        aria-pressed={betterVersionShowEnglish}
                       >
-                        English {betterVersionHasEnglish ? (betterVersionShowEnglish ? 'On' : 'Off') : 'Unavailable'}
+                        English {betterVersionShowEnglish ? 'On' : 'Off'}
                       </button>
                       <button
                         type="button"
