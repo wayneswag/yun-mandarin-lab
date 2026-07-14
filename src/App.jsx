@@ -472,21 +472,21 @@ const CHAPTER1_BRANCH_NODES = {
   decision5: {
     strong: {
       branchKey: 'warm-help-offer',
-      npcLineZh: '你刚搬来，对这里还不太熟悉吧？需要我带你看看吗？',
-      npcLinePy: 'Nǐ gāng bān lái, duì zhèlǐ hái bú tài shúxī ba? Xūyào wǒ dài nǐ kànkan ma?',
-      npcLineEn: 'You just moved in and aren’t very familiar with the place yet, right? Would you like me to show you around?',
+      npcLineZh: '那要不要我带你看看？',
+      npcLinePy: 'Nà yào bú yào wǒ dài nǐ kànkan?',
+      npcLineEn: 'Then would you like me to show you around?',
     },
     mixed: {
       branchKey: 'reserved-help-offer',
-      npcLineZh: '如果你对这里不熟悉，我可以带你看看。',
-      npcLinePy: 'Rúguǒ nǐ duì zhèlǐ bù shúxī, wǒ kěyǐ dài nǐ kànkan.',
-      npcLineEn: 'If you are not familiar with this place, I can show you around.',
+      npcLineZh: '我可以带你看看。你需要吗？',
+      npcLinePy: 'Wǒ kěyǐ dài nǐ kànkan. Nǐ xūyào ma?',
+      npcLineEn: 'I can show you around. Would you like that?',
     },
     weak: {
       branchKey: 'uncertain-help-offer',
-      npcLineZh: '你需要我帮你吗？还是想自己看看？',
-      npcLinePy: 'Nǐ xūyào wǒ bāng nǐ ma? Háishi xiǎng zìjǐ kànkan?',
-      npcLineEn: 'Do you need me to help you, or would you rather look around yourself?',
+      npcLineZh: '我没太听明白。你需要我帮忙吗？',
+      npcLinePy: 'Wǒ méi tài tīng míngbai. Nǐ xūyào wǒ bāngmáng ma?',
+      npcLineEn: 'I didn’t quite understand. Do you need my help?',
     },
   },
   decision6: {
@@ -4043,7 +4043,7 @@ const STORY_HIGHLIGHT_MAP = Object.freeze({
       },
     },
     5: {
-      npc: highlightTiers([], ['刚搬来', '不太熟悉']),
+      npc: highlightTiers(),
       options: {
         A: highlightTiers(['麻烦你了', '一起']),
         B: highlightTiers(),
