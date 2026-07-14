@@ -173,6 +173,386 @@ const BETTER_VERSION_TRANSLATIONS = {
   '真的谢谢你帮了我这么多。': { correctionPy: 'Zhēn de xièxie nǐ bāng le wǒ zhème duō.', correctionEn: 'Thank you so much for helping me this much.' },
 };
 
+const CHAPTER1_NEW_CORE_LANGUAGE = [
+  '新来的',
+  '室友',
+  '我叫……',
+  '很高兴认识你',
+  '哪国人',
+  '会说一点……',
+  '说得不太好',
+  '刚搬来',
+  '不太熟悉',
+  '麻烦你了',
+  '一起',
+];
+
+const CHAPTER1_SUPPORT_MAP = {
+  1: {
+    stage: 1,
+    stageLabel: 'First contact',
+    focus: 'Confirm identity and introduce names.',
+    primaryGlossaryKeys: ['新来的', '室友'],
+    recycledGlossaryKeys: [],
+    primaryNoteIds: ['newlai'],
+  },
+  2: {
+    stage: 1,
+    stageLabel: 'First contact',
+    focus: 'Confirm identity and introduce names.',
+    primaryGlossaryKeys: ['我叫', '很高兴认识你'],
+    recycledGlossaryKeys: ['室友'],
+    primaryNoteIds: ['introduce-name'],
+  },
+  3: {
+    stage: 2,
+    stageLabel: 'Learn about each other',
+    focus: 'Explain background, Chinese ability, and that you are new here.',
+    primaryGlossaryKeys: ['哪国人', '会说一点', '说得怎么样', '说得不太好'],
+    recycledGlossaryKeys: ['中文'],
+    primaryNoteIds: ['shuode'],
+  },
+  4: {
+    stage: 2,
+    stageLabel: 'Learn about each other',
+    focus: 'Explain background, Chinese ability, and that you are new here.',
+    primaryGlossaryKeys: ['刚搬来', '不太熟悉'],
+    recycledGlossaryKeys: ['会说一点', '说得怎么样'],
+    primaryNoteIds: ['just-moved'],
+  },
+  5: {
+    stage: 3,
+    stageLabel: 'Settle in',
+    focus: 'Accept the roommate’s help and close the first meeting naturally.',
+    primaryGlossaryKeys: ['麻烦你了', '一起'],
+    recycledGlossaryKeys: ['刚搬来', '不太熟悉'],
+    primaryNoteIds: ['polite-trouble'],
+  },
+  6: {
+    stage: 3,
+    stageLabel: 'Settle in',
+    focus: 'Accept the roommate’s help and close the first meeting naturally.',
+    primaryGlossaryKeys: [],
+    recycledGlossaryKeys: ['很高兴认识你', '麻烦你了'],
+    primaryNoteIds: ['first-meeting-recap'],
+  },
+};
+
+const CHAPTER1_STAGE_TRANSITIONS = {
+  2: { title: 'Stage 1 complete', message: 'You and your roommate have introduced yourselves.' },
+  4: { title: 'Stage 2 complete', message: 'Your roommate now understands your background and that you are new here.' },
+};
+
+const CHAPTER1_MEMORY_TARGETS = [
+  {
+    id: 'confirm-roommate',
+    zh: '你好，对，我是新来的室友。',
+    py: 'Nǐ hǎo, duì, wǒ shì xīn lái de shìyǒu.',
+    en: 'Hi, yes, I’m the new roommate.',
+    audioText: '你好，对，我是新来的室友。',
+    firstUseDecision: 1,
+    callbackDecision: 6,
+  },
+  {
+    id: 'introduce-name',
+    zh: '我叫 Alex，很高兴认识你。',
+    py: 'Wǒ jiào Alex, hěn gāoxìng rènshi nǐ.',
+    en: 'My name is Alex. Nice to meet you.',
+    audioText: '我叫 Alex，很高兴认识你。',
+    firstUseDecision: 2,
+    callbackDecision: 6,
+  },
+  {
+    id: 'describe-ability',
+    zh: '我会说一点中文，不过说得不太好。',
+    py: 'Wǒ huì shuō yìdiǎn Zhōngwén, búguò shuō de bú tài hǎo.',
+    en: 'I can speak a little Chinese, but not very well.',
+    audioText: '我会说一点中文，不过说得不太好。',
+    firstUseDecision: 3,
+    callbackDecision: 4,
+  },
+  {
+    id: 'accept-help',
+    zh: '好啊，麻烦你了。我们一起看看吧。',
+    py: 'Hǎo a, máfan nǐ le. Wǒmen yìqǐ kànkan ba.',
+    en: 'Sure. Sorry to trouble you. Let’s take a look together.',
+    audioText: '好啊，麻烦你了。我们一起看看吧。',
+    firstUseDecision: 5,
+    callbackDecision: 6,
+  },
+  {
+    id: 'strong-close',
+    zh: '谢谢你，很高兴认识你！',
+    py: 'Xièxie nǐ, hěn gāoxìng rènshi nǐ!',
+    en: 'Thank you. Nice to meet you!',
+    audioText: '谢谢你，很高兴认识你！',
+    firstUseDecision: 2,
+    callbackDecision: 6,
+  },
+  {
+    id: 'mixed-close',
+    zh: '好的，谢谢你。麻烦你了。',
+    py: 'Hǎo de, xièxie nǐ. Máfan nǐ le.',
+    en: 'Okay, thank you. Sorry to trouble you.',
+    audioText: '好的，谢谢你。麻烦你了。',
+    firstUseDecision: 5,
+    callbackDecision: 6,
+  },
+  {
+    id: 'weak-repair',
+    zh: '不好意思，我需要帮忙。麻烦你带我看看吧。',
+    py: 'Bù hǎoyìsi, wǒ xūyào bāngmáng. Máfan nǐ dài wǒ kànkan ba.',
+    en: 'Sorry, I do need help. Please show me around.',
+    audioText: '不好意思，我需要帮忙。麻烦你带我看看吧。',
+    firstUseDecision: 5,
+    callbackDecision: 6,
+  },
+];
+
+const CHAPTER1_MEMORY_MOMENTS = [
+  {
+    id: 'recall-chinese-ability',
+    decision: 4,
+    targetId: 'describe-ability',
+    label: 'Quick memory moment',
+    context: 'The roommate remembers where you are from, but not how much Chinese you speak.',
+    npcContext: '你会说多少中文？',
+    npcContextPy: 'Nǐ huì shuō duōshao Zhōngwén?',
+    npcContextEn: 'How much Chinese can you speak?',
+    contextAudioText: '你会说多少中文？',
+    patternCueZh: '会说一点……',
+    patternCuePy: 'huì shuō yìdiǎn...',
+    patternCueEn: 'can speak a little...',
+    prompt: 'Recall how to describe a small amount of ability.',
+    firstClue: 'Start with 我会说一点, then name the language.',
+  },
+  {
+    id: 'recall-polite-acceptance',
+    decision: 6,
+    targetId: 'accept-help',
+    label: 'Quick memory moment',
+    context: 'Your roommate offers to show you around. Accept politely.',
+    npcContext: '需要我带你看看吗？',
+    npcContextPy: 'Xūyào wǒ dài nǐ kànkan ma?',
+    npcContextEn: 'Would you like me to show you around?',
+    contextAudioText: '需要我带你看看吗？',
+    patternCueZh: '麻烦你了 + 一起……',
+    patternCuePy: 'máfan nǐ le + yìqǐ...',
+    patternCueEn: 'sorry to trouble you + together...',
+    prompt: 'Accept the offer, acknowledge the help, and suggest doing it together.',
+    firstClue: 'Use 麻烦你了, then add 我们一起……',
+  },
+];
+
+const CHAPTER1_RETRIEVAL_BY_DECISION = {
+  4: CHAPTER1_MEMORY_MOMENTS[0],
+  6: CHAPTER1_MEMORY_MOMENTS[1],
+};
+
+const CHAPTER1_MEMORY_REPLAY_MOMENTS = [
+  {
+    id: 'replay-confirm-roommate',
+    decision: 1,
+    targetId: 'confirm-roommate',
+    label: 'Language moment 1',
+    npcContext: '你好，你是新来的室友吗？',
+    npcContextPy: 'Nǐ hǎo, nǐ shì xīn lái de shìyǒu ma?',
+    npcContextEn: 'Hi, are you the new roommate?',
+    contextAudioText: '你好，你是新来的室友吗？',
+    patternCueZh: '你好 + 对 + 我是……',
+    patternCuePy: 'nǐ hǎo + duì + wǒ shì...',
+    patternCueEn: 'hello + yes + I am...',
+    prompt: 'Confirm politely that you are the new roommate.',
+    firstClue: 'Begin with 你好，对, then identify yourself.',
+  },
+  {
+    id: 'replay-introduce-name',
+    decision: 2,
+    targetId: 'introduce-name',
+    label: 'Language moment 2',
+    npcContext: '我叫李明。你叫什么名字？',
+    npcContextPy: 'Wǒ jiào Lǐ Míng. Nǐ jiào shénme míngzi?',
+    npcContextEn: 'My name is Li Ming. What’s your name?',
+    contextAudioText: '我叫李明。你叫什么名字？',
+    patternCueZh: '我叫…… + 很高兴认识你',
+    patternCuePy: 'wǒ jiào... + hěn gāoxìng rènshi nǐ',
+    patternCueEn: 'my name is... + nice to meet you',
+    prompt: 'Give your name and respond warmly.',
+    firstClue: 'Start with 我叫, then add the first-meeting phrase.',
+  },
+  {
+    id: 'replay-describe-ability',
+    decision: 3,
+    targetId: 'describe-ability',
+    label: 'Language moment 3',
+    npcContext: '中文说得怎么样？',
+    npcContextPy: 'Zhōngwén shuō de zěnmeyàng?',
+    npcContextEn: 'How well do you speak Chinese?',
+    contextAudioText: '中文说得怎么样？',
+    patternCueZh: '会说一点…… + 说得不太好',
+    patternCuePy: 'huì shuō yìdiǎn... + shuō de bú tài hǎo',
+    patternCueEn: 'can speak a little... + do not speak very well',
+    prompt: 'Describe a small amount of Chinese ability naturally.',
+    firstClue: 'Use 我会说一点中文 before qualifying how well you speak.',
+  },
+  {
+    id: 'replay-accept-help',
+    decision: 5,
+    targetId: 'accept-help',
+    label: 'Language moment 4',
+    npcContext: '需要我带你看看吗？',
+    npcContextPy: 'Xūyào wǒ dài nǐ kànkan ma?',
+    npcContextEn: 'Would you like me to show you around?',
+    contextAudioText: '需要我带你看看吗？',
+    patternCueZh: '麻烦你了 + 一起……',
+    patternCuePy: 'máfan nǐ le + yìqǐ...',
+    patternCueEn: 'sorry to trouble you + together...',
+    prompt: 'Accept politely and suggest looking around together.',
+    firstClue: 'Acknowledge the help with 麻烦你了, then use 一起.',
+  },
+];
+
+const CHAPTER1_OPTION_META = {
+  Natural: { id: 'A', score: 3, relationship: 14 },
+  Stiff: { id: 'B', score: 2, relationship: 3 },
+  Awkward: { id: 'C', score: 1, relationship: -5 },
+  Incorrect: { id: 'D', score: 0, relationship: -10 },
+};
+
+function makeChapter1BranchOptions(entries) {
+  return ['Natural', 'Stiff', 'Awkward', 'Incorrect'].map((rating) => ({
+    ...CHAPTER1_OPTION_META[rating],
+    ...entries[rating],
+    rating,
+    glossary: entries[rating].glossary || [],
+  }));
+}
+
+const CHAPTER1_BRANCH_NODES = {
+  decision2: {
+    strong: {
+      branchKey: 'warm-introduction',
+      npcLineZh: '太好了，我叫李明。你叫什么名字？',
+      npcLinePy: 'Tài hǎo le, wǒ jiào Lǐ Míng. Nǐ jiào shénme míngzi?',
+      npcLineEn: 'Great! My name is Li Ming. What’s your name?',
+    },
+    mixed: {
+      branchKey: 'reserved-introduction',
+      npcLineZh: '好，我叫李明。你呢？',
+      npcLinePy: 'Hǎo, wǒ jiào Lǐ Míng. Nǐ ne?',
+      npcLineEn: 'Okay. My name is Li Ming. What about you?',
+    },
+    weak: {
+      branchKey: 'confirming-introduction',
+      npcLineZh: '你是新室友，对吗？你叫什么名字？',
+      npcLinePy: 'Nǐ shì xīn shìyǒu, duì ma? Nǐ jiào shénme míngzi?',
+      npcLineEn: 'You’re the new roommate, right? What’s your name?',
+    },
+  },
+  decision4: {
+    strong: {
+      branchKey: 'encouraging-move-in',
+      npcLineZh: '你中文说得不错！你今天刚搬来吗？',
+      npcLinePy: 'Nǐ Zhōngwén shuō de búcuò! Nǐ jīntiān gāng bān lái ma?',
+      npcLineEn: 'Your Chinese is pretty good! Did you just move in today?',
+    },
+    mixed: {
+      branchKey: 'confirming-move-in',
+      npcLineZh: '你会说一点中文，对吗？你今天刚搬来吗？',
+      npcLinePy: 'Nǐ huì shuō yìdiǎn Zhōngwén, duì ma? Nǐ jīntiān gāng bān lái ma?',
+      npcLineEn: 'You can speak a little Chinese, right? Did you just move in today?',
+    },
+    weak: {
+      branchKey: 'clarifying-move-in',
+      npcLineZh: '你的意思是你会说一点中文吗？你刚搬来吗？',
+      npcLinePy: 'Nǐ de yìsi shì nǐ huì shuō yìdiǎn Zhōngwén ma? Nǐ gāng bān lái ma?',
+      npcLineEn: 'Do you mean that you can speak a little Chinese? Did you just move in?',
+    },
+  },
+  decision5: {
+    strong: {
+      branchKey: 'warm-help-offer',
+      npcLineZh: '你刚搬来，对这里还不太熟悉吧？需要我带你看看吗？',
+      npcLinePy: 'Nǐ gāng bān lái, duì zhèlǐ hái bú tài shúxī ba? Xūyào wǒ dài nǐ kànkan ma?',
+      npcLineEn: 'You just moved in and aren’t very familiar with the place yet, right? Would you like me to show you around?',
+    },
+    mixed: {
+      branchKey: 'reserved-help-offer',
+      npcLineZh: '如果你对这里不熟悉，我可以带你看看。',
+      npcLinePy: 'Rúguǒ nǐ duì zhèlǐ bù shúxī, wǒ kěyǐ dài nǐ kànkan.',
+      npcLineEn: 'If you are not familiar with this place, I can show you around.',
+    },
+    weak: {
+      branchKey: 'uncertain-help-offer',
+      npcLineZh: '你需要我帮你吗？还是想自己看看？',
+      npcLinePy: 'Nǐ xūyào wǒ bāng nǐ ma? Háishi xiǎng zìjǐ kànkan?',
+      npcLineEn: 'Do you need me to help you, or would you rather look around yourself?',
+    },
+  },
+  decision6: {
+    strong: {
+      branchKey: 'warm-close',
+      npcLineZh: '没问题，我带你看看。欢迎你搬进来！',
+      npcLinePy: 'Méi wèntí, wǒ dài nǐ kànkan. Huānyíng nǐ bān jìnlái!',
+      npcLineEn: 'No problem. I’ll show you around. Welcome to the apartment!',
+      options: makeChapter1BranchOptions({
+        Natural: { zh: '谢谢你，很高兴认识你！', py: 'Xièxie nǐ, hěn gāoxìng rènshi nǐ!', en: 'Thank you. Nice to meet you!', explanation: 'Natural and warm. It thanks your roommate and closes the first meeting with familiar language.', correction: null },
+        Stiff: { zh: '好，谢谢。', py: 'Hǎo, xièxie.', en: 'Okay, thanks.', explanation: 'Correct, but brief for a warm welcome.', correction: '谢谢你，很高兴认识你！', correctionPy: 'Xièxie nǐ, hěn gāoxìng rènshi nǐ!', correctionEn: 'Thank you. Nice to meet you!' },
+        Awkward: { zh: '谢谢，你很好认识。', py: 'Xièxie, nǐ hěn hǎo rènshi.', en: 'Thanks. You are very good to know.', explanation: 'The thanks is clear, but the first-meeting phrase is formed incorrectly.', correction: '很高兴认识你，谢谢你！', correctionPy: 'Hěn gāoxìng rènshi nǐ, xièxie nǐ!', correctionEn: 'Nice to meet you. Thank you!' },
+        Incorrect: { zh: '你叫什么名字？', py: 'Nǐ jiào shénme míngzi?', en: 'What is your name?', explanation: 'This restarts an introduction that has already been completed.', correction: '谢谢你，很高兴认识你！', correctionPy: 'Xièxie nǐ, hěn gāoxìng rènshi nǐ!', correctionEn: 'Thank you. Nice to meet you!' },
+      }),
+    },
+    mixed: {
+      branchKey: 'polite-close',
+      npcLineZh: '好，我先带你看看。',
+      npcLinePy: 'Hǎo, wǒ xiān dài nǐ kànkan.',
+      npcLineEn: 'Okay, I’ll show you around first.',
+      options: makeChapter1BranchOptions({
+        Natural: { zh: '好的，谢谢你。麻烦你了。', py: 'Hǎo de, xièxie nǐ. Máfan nǐ le.', en: 'Okay, thank you. Sorry to trouble you.', explanation: 'Natural and considerate. It thanks your roommate and acknowledges the help.', correction: null },
+        Stiff: { zh: '好，谢谢。', py: 'Hǎo, xièxie.', en: 'Okay, thanks.', explanation: 'Correct, but the closing remains reserved.', correction: '好的，谢谢你。麻烦你了。', correctionPy: 'Hǎo de, xièxie nǐ. Máfan nǐ le.', correctionEn: 'Okay, thank you. Sorry to trouble you.' },
+        Awkward: { zh: '我谢谢你帮助看。', py: 'Wǒ xièxie nǐ bāngzhù kàn.', en: 'I thank you help look.', explanation: 'The gratitude is visible, but the help and looking-around phrase is not natural.', correction: '谢谢你带我看看。', correctionPy: 'Xièxie nǐ dài wǒ kànkan.', correctionEn: 'Thank you for showing me around.' },
+        Incorrect: { zh: '不用了，我走了。', py: 'Bú yòng le, wǒ zǒu le.', en: 'No need. I’m leaving.', explanation: 'This rejects the accepted help and ends the meeting abruptly.', correction: '好的，谢谢你。麻烦你了。', correctionPy: 'Hǎo de, xièxie nǐ. Máfan nǐ le.', correctionEn: 'Okay, thank you. Sorry to trouble you.' },
+      }),
+    },
+    weak: {
+      branchKey: 'repair-close',
+      npcLineZh: '你如果不需要帮忙，我就先回房间了。',
+      npcLinePy: 'Nǐ rúguǒ bù xūyào bāngmáng, wǒ jiù xiān huí fángjiān le.',
+      npcLineEn: 'If you don’t need help, I’ll go back to my room.',
+      options: makeChapter1BranchOptions({
+        Natural: { zh: '不好意思，我需要帮忙。麻烦你带我看看吧。', py: 'Bù hǎoyìsi, wǒ xūyào bāngmáng. Máfan nǐ dài wǒ kànkan ba.', en: 'Sorry, I do need help. Please show me around.', explanation: 'Natural repair. It corrects the misunderstanding and clearly accepts the help.', correction: null },
+        Stiff: { zh: '我需要帮忙。', py: 'Wǒ xūyào bāngmáng.', en: 'I need help.', explanation: 'Clear, but abrupt after a misunderstanding.', correction: '不好意思，我需要帮忙。', correctionPy: 'Bù hǎoyìsi, wǒ xūyào bāngmáng.', correctionEn: 'Sorry, I need help.' },
+        Awkward: { zh: '不好意思，我帮忙需要你。', py: 'Bù hǎoyìsi, wǒ bāngmáng xūyào nǐ.', en: 'Sorry, I help need you.', explanation: 'The need for help is guessable, but the word order is unnatural.', correction: '不好意思，我需要你帮忙。', correctionPy: 'Bù hǎoyìsi, wǒ xūyào nǐ bāngmáng.', correctionEn: 'Sorry, I need your help.' },
+        Incorrect: { zh: '你不需要帮忙。', py: 'Nǐ bù xūyào bāngmáng.', en: 'You do not need help.', explanation: 'This reverses who needs help and does not repair the interaction.', correction: '不好意思，我需要帮忙。麻烦你带我看看吧。', correctionPy: 'Bù hǎoyìsi, wǒ xūyào bāngmáng. Máfan nǐ dài wǒ kànkan ba.', correctionEn: 'Sorry, I do need help. Please show me around.' },
+      }),
+    },
+  },
+};
+
+const CHAPTER1_ENDINGS = {
+  smooth: {
+    label: 'Warm beginning',
+    zh: '你们很快熟悉起来。室友愿意带你看看房子，你们的第一次见面很顺利。',
+    py: 'Nǐmen hěn kuài shúxī qǐlái. Shìyǒu yuànyì dài nǐ kànkan fángzi, nǐmen de dì yī cì jiànmiàn hěn shùnlì.',
+    en: 'You quickly became more comfortable with each other. Your roommate offered to show you around, and the first meeting went smoothly.',
+    audioText: '你们很快熟悉起来。室友愿意带你看看房子，你们的第一次见面很顺利。',
+  },
+  clarified: {
+    label: 'Polite but reserved',
+    zh: '你们完成了基本介绍，室友也愿意帮忙，不过交流还有一点拘谨。',
+    py: 'Nǐmen wánchéng le jīběn jièshào, shìyǒu yě yuànyì bāngmáng, búguò jiāoliú hái yǒu yìdiǎn jūjǐn.',
+    en: 'You completed the basic introductions, and your roommate was willing to help, but the interaction was still a little reserved.',
+    audioText: '你们完成了基本介绍，室友也愿意帮忙，不过交流还有一点拘谨。',
+  },
+  delayed: {
+    label: 'Needs clarification',
+    zh: '室友大概明白了你的情况，不过几次表达让交流有些不顺。',
+    py: 'Shìyǒu dàgài míngbai le nǐ de qíngkuàng, búguò jǐ cì biǎodá ràng jiāoliú yǒuxiē bù shùn.',
+    en: 'Your roommate mostly understood your situation, but several replies made the conversation less smooth.',
+    audioText: '室友大概明白了你的情况，不过几次表达让交流有些不顺。',
+  },
+};
+
 const CHAPTER6_NEW_CORE_LANGUAGE = [
   '快没电了',
   '半小时前',
@@ -691,6 +1071,40 @@ function clampArrayIndex(index, length) {
   return Math.max(0, Math.min(length - 1, index));
 }
 
+function normalizeRestoredNodeIndex(chapterIndex, nodeIndex, nodeSelections) {
+  const safeChapterIndex = clampArrayIndex(chapterIndex, chapters.length);
+  const safeNodeIndex = clampArrayIndex(nodeIndex, chapters[safeChapterIndex].nodes.length);
+  const completedLegacyChapter1 = safeChapterIndex === 0
+    && safeNodeIndex === 2
+    && [0, 1, 2].every((decisionIndex) => Boolean(nodeSelections?.[`0-${decisionIndex}`]))
+    && [3, 4, 5].every((decisionIndex) => !nodeSelections?.[`0-${decisionIndex}`]);
+  return completedLegacyChapter1 ? 3 : safeNodeIndex;
+}
+
+function restoreSceneRunFromSelections(chapter, chapterIndex, nodeSelections) {
+  if (chapter?.id !== 'chapter1' || !nodeSelections || typeof nodeSelections !== 'object') return {};
+
+  let metrics = { socialComfort: 50, naturalness: 50 };
+  const restoredRun = {};
+  chapter.nodes.forEach((node, nodeIndex) => {
+    const optionId = nodeSelections[`${chapterIndex}-${nodeIndex}`];
+    const option = node.options.find((candidate) => candidate.id === optionId);
+    if (!option) return;
+    const previousMetrics = metrics;
+    const newMetrics = applySceneMetricChoice(previousMetrics, option);
+    restoredRun[nodeIndex] = {
+      optionId: option.id,
+      rating: option.rating,
+      relationship: option.relationship,
+      branchKey: 'restored',
+      previousMetrics,
+      newMetrics,
+    };
+    metrics = newMetrics;
+  });
+  return restoredRun;
+}
+
 function PasswordInput({ value, onChange, placeholder, visible, onToggle }) {
   return (
     <div className="relative">
@@ -915,6 +1329,123 @@ const glossary = {
       { zh: '你法语说得怎么样？', py: 'Nǐ Fǎyǔ shuō de zěnmeyàng?', en: 'How well do you speak French?' },
       { zh: '她汉语说得越来越自然了。', py: 'Tā Hànyǔ shuō de yuèláiyuè zìrán le.', en: 'Her Chinese is sounding more and more natural.' },
       { zh: '你今天说得很流利。', py: 'Nǐ jīntiān shuō de hěn liúlì.', en: 'You spoke very fluently today.' },
+    ],
+  },
+  '室友': {
+    title: '室友',
+    pinyin: 'shìyǒu',
+    translation: 'roommate',
+    explanation: '室友 is someone who shares your room or home. In this story it refers to the learner’s new apartment roommate.',
+    examples: [
+      { zh: '他是我的室友。', py: 'Tā shì wǒ de shìyǒu.', en: 'He is my roommate.' },
+      { zh: '我的室友叫李明。', py: 'Wǒ de shìyǒu jiào Lǐ Míng.', en: 'My roommate is called Li Ming.' },
+      { zh: '新来的室友很友好。', py: 'Xīn lái de shìyǒu hěn yǒuhǎo.', en: 'The new roommate is very friendly.' },
+      { zh: '我和室友一起吃饭。', py: 'Wǒ hé shìyǒu yìqǐ chīfàn.', en: 'My roommate and I eat together.' },
+      { zh: '室友带我看了看房子。', py: 'Shìyǒu dài wǒ kàn le kan fángzi.', en: 'My roommate showed me around the apartment.' },
+    ],
+  },
+  '我叫': {
+    title: '我叫',
+    pinyin: 'wǒ jiào',
+    translation: 'my name is / I am called',
+    explanation: 'Use 我叫 directly before your name. Chinese does not normally add 是 between 我 and 叫 in a simple introduction.',
+    examples: [
+      { zh: '我叫 Alex。', py: 'Wǒ jiào Alex.', en: 'My name is Alex.' },
+      { zh: '我叫李明。', py: 'Wǒ jiào Lǐ Míng.', en: 'My name is Li Ming.' },
+      { zh: '你好，我叫王雨。', py: 'Nǐ hǎo, wǒ jiào Wáng Yǔ.', en: 'Hello, my name is Wang Yu.' },
+      { zh: '我叫小云，你呢？', py: 'Wǒ jiào Xiǎo Yún, nǐ ne?', en: 'My name is Xiao Yun. What about you?' },
+      { zh: '我叫陈安，很高兴认识你。', py: 'Wǒ jiào Chén Ān, hěn gāoxìng rènshi nǐ.', en: 'My name is Chen An. Nice to meet you.' },
+    ],
+  },
+  '很高兴认识你': {
+    title: '很高兴认识你',
+    pinyin: 'hěn gāoxìng rènshi nǐ',
+    translation: 'nice to meet you',
+    explanation: 'This is a warm, standard phrase for a first meeting. It literally expresses being happy to get to know the other person.',
+    examples: [
+      { zh: '很高兴认识你。', py: 'Hěn gāoxìng rènshi nǐ.', en: 'Nice to meet you.' },
+      { zh: '我叫 Alex，很高兴认识你。', py: 'Wǒ jiào Alex, hěn gāoxìng rènshi nǐ.', en: 'My name is Alex. Nice to meet you.' },
+      { zh: '你好，很高兴认识你。', py: 'Nǐ hǎo, hěn gāoxìng rènshi nǐ.', en: 'Hello, nice to meet you.' },
+      { zh: '我也很高兴认识你。', py: 'Wǒ yě hěn gāoxìng rènshi nǐ.', en: 'Nice to meet you too.' },
+      { zh: '谢谢你，很高兴认识你！', py: 'Xièxie nǐ, hěn gāoxìng rènshi nǐ!', en: 'Thank you. Nice to meet you!' },
+    ],
+  },
+  '哪国人': {
+    title: '哪国人',
+    pinyin: 'nǎ guó rén',
+    translation: 'person of which country / what nationality',
+    explanation: '哪国人 asks someone’s nationality. Use it in 你是哪国人？ and answer with 我是 + country + 人.',
+    examples: [
+      { zh: '你是哪国人？', py: 'Nǐ shì nǎ guó rén?', en: 'What country are you from?' },
+      { zh: '他是哪国人？', py: 'Tā shì nǎ guó rén?', en: 'What nationality is he?' },
+      { zh: '你的室友是哪国人？', py: 'Nǐ de shìyǒu shì nǎ guó rén?', en: 'What country is your roommate from?' },
+      { zh: '老师问我是哪国人。', py: 'Lǎoshī wèn wǒ shì nǎ guó rén.', en: 'The teacher asked what country I was from.' },
+      { zh: '我不知道她是哪国人。', py: 'Wǒ bù zhīdào tā shì nǎ guó rén.', en: 'I do not know what nationality she is.' },
+    ],
+  },
+  '会说一点': {
+    title: '会说一点',
+    pinyin: 'huì shuō yìdiǎn',
+    translation: 'can speak a little',
+    explanation: 'Use 会说一点 before a language to describe a small amount of speaking ability.',
+    examples: [
+      { zh: '我会说一点中文。', py: 'Wǒ huì shuō yìdiǎn Zhōngwén.', en: 'I can speak a little Chinese.' },
+      { zh: '她会说一点英文。', py: 'Tā huì shuō yìdiǎn Yīngwén.', en: 'She can speak a little English.' },
+      { zh: '你会说一点日语吗？', py: 'Nǐ huì shuō yìdiǎn Rìyǔ ma?', en: 'Can you speak a little Japanese?' },
+      { zh: '我的室友会说一点法语。', py: 'Wǒ de shìyǒu huì shuō yìdiǎn Fǎyǔ.', en: 'My roommate can speak a little French.' },
+      { zh: '我只会说一点中文。', py: 'Wǒ zhǐ huì shuō yìdiǎn Zhōngwén.', en: 'I can only speak a little Chinese.' },
+    ],
+  },
+  '说得不太好': {
+    title: '说得不太好',
+    pinyin: 'shuō de bú tài hǎo',
+    translation: 'do not speak very well',
+    explanation: '说得 describes how well someone speaks. 不太好 gives a modest, softened negative assessment: “not very well.”',
+    examples: [
+      { zh: '我的中文说得不太好。', py: 'Wǒ de Zhōngwén shuō de bú tài hǎo.', en: 'I do not speak Chinese very well.' },
+      { zh: '我会说一点，不过说得不太好。', py: 'Wǒ huì shuō yìdiǎn, búguò shuō de bú tài hǎo.', en: 'I can speak a little, but not very well.' },
+      { zh: '他英文说得不太好。', py: 'Tā Yīngwén shuō de bú tài hǎo.', en: 'He does not speak English very well.' },
+      { zh: '我今天说得不太好。', py: 'Wǒ jīntiān shuō de bú tài hǎo.', en: 'I did not speak very well today.' },
+      { zh: '她说得不太好，但是听得懂。', py: 'Tā shuō de bú tài hǎo, dànshì tīng de dǒng.', en: 'She does not speak very well, but she can understand.' },
+    ],
+  },
+  '刚搬来': {
+    title: '刚搬来',
+    pinyin: 'gāng bān lái',
+    translation: 'just moved here / just moved in',
+    explanation: '刚 marks a very recent action. 搬来 describes moving toward or into the current place.',
+    examples: [
+      { zh: '我今天刚搬来。', py: 'Wǒ jīntiān gāng bān lái.', en: 'I just moved in today.' },
+      { zh: '你刚搬来吗？', py: 'Nǐ gāng bān lái ma?', en: 'Did you just move here?' },
+      { zh: '新室友昨天刚搬来。', py: 'Xīn shìyǒu zuótiān gāng bān lái.', en: 'The new roommate just moved in yesterday.' },
+      { zh: '她刚搬来这个城市。', py: 'Tā gāng bān lái zhège chéngshì.', en: 'She just moved to this city.' },
+      { zh: '因为我刚搬来，所以还不太熟悉。', py: 'Yīnwèi wǒ gāng bān lái, suǒyǐ hái bú tài shúxī.', en: 'Because I just moved here, I am still not very familiar with it.' },
+    ],
+  },
+  '不太熟悉': {
+    title: '不太熟悉',
+    pinyin: 'bú tài shúxī',
+    translation: 'not very familiar with',
+    explanation: '不太 softens the negative meaning. 熟悉 means to know a place, person, or situation well.',
+    examples: [
+      { zh: '我对这里还不太熟悉。', py: 'Wǒ duì zhèlǐ hái bú tài shúxī.', en: 'I am still not very familiar with this place.' },
+      { zh: '他对学校不太熟悉。', py: 'Tā duì xuéxiào bú tài shúxī.', en: 'He is not very familiar with the school.' },
+      { zh: '我不太熟悉这条路。', py: 'Wǒ bú tài shúxī zhè tiáo lù.', en: 'I am not very familiar with this road.' },
+      { zh: '新室友对附近还不太熟悉。', py: 'Xīn shìyǒu duì fùjìn hái bú tài shúxī.', en: 'The new roommate is still not very familiar with the neighborhood.' },
+      { zh: '如果你不太熟悉，我可以帮你。', py: 'Rúguǒ nǐ bú tài shúxī, wǒ kěyǐ bāng nǐ.', en: 'If you are not very familiar with it, I can help you.' },
+    ],
+  },
+  '一起': {
+    title: '一起',
+    pinyin: 'yìqǐ',
+    translation: 'together',
+    explanation: '一起 normally comes before the action: 我们一起看看 means “let’s take a look together.”',
+    examples: [
+      { zh: '我们一起看看吧。', py: 'Wǒmen yìqǐ kànkan ba.', en: 'Let’s take a look together.' },
+      { zh: '我和室友一起吃饭。', py: 'Wǒ hé shìyǒu yìqǐ chīfàn.', en: 'My roommate and I eat together.' },
+      { zh: '明天我们一起去学校。', py: 'Míngtiān wǒmen yìqǐ qù xuéxiào.', en: 'Tomorrow we will go to school together.' },
+      { zh: '大家一起帮新来的同学。', py: 'Dàjiā yìqǐ bāng xīn lái de tóngxué.', en: 'Everyone helps the new student together.' },
+      { zh: '你想一起喝咖啡吗？', py: 'Nǐ xiǎng yìqǐ hē kāfēi ma?', en: 'Would you like to have coffee together?' },
     ],
   },
   '有时间': {
@@ -1657,6 +2188,8 @@ const chapters = [
     level: 'HSK 2–3',
     icon: Home,
     scene: 'Apartment Living Room',
+    speakerRole: 'Roommate',
+    avatarLabel: 'RO',
     goals: [
       'Introduce yourself naturally',
       'Say where you are from',
@@ -1710,6 +2243,55 @@ const chapters = [
           { zh: '他汉语说得怎么样？', py: 'Tā Hànyǔ shuō de zěnmeyàng?', en: 'How well does he speak Chinese?' },
         ],
       },
+      {
+        id: 'introduce-name',
+        title: 'How to introduce your name with 我叫',
+        short: 'Use 我叫 + name, without 是.',
+        body: [
+          'The normal learner pattern is 我叫 + name: “I am called…” or “My name is…”',
+          'Do not insert 是 between 我 and 叫. 我是叫 Alex is not the normal introduction pattern.',
+        ],
+        examples: [
+          { zh: '我叫 Alex。', py: 'Wǒ jiào Alex.', en: 'My name is Alex.' },
+          { zh: '我叫王雨，很高兴认识你。', py: 'Wǒ jiào Wáng Yǔ, hěn gāoxìng rènshi nǐ.', en: 'My name is Wang Yu. Nice to meet you.' },
+        ],
+      },
+      {
+        id: 'just-moved',
+        title: 'How 刚 + Verb and 不太 + adjective work',
+        short: '刚 marks a very recent action; 不太 softens a negative description.',
+        body: [
+          '刚 + verb means the action happened only a short time ago.',
+          '不太 + adjective means “not very…”',
+        ],
+        examples: [
+          { zh: '我刚搬来。', py: 'Wǒ gāng bān lái.', en: 'I just moved in.' },
+          { zh: '我对这里还不太熟悉。', py: 'Wǒ duì zhèlǐ hái bú tài shúxī.', en: 'I am still not very familiar with this place.' },
+        ],
+      },
+      {
+        id: 'polite-trouble',
+        title: 'What 麻烦你了 means in a polite request',
+        short: 'It acknowledges the effort you are asking someone to make.',
+        body: [
+          'It does not literally mean “you are troublesome.”',
+          'Here it shows: I know I am asking you to do something, and thank you for the trouble.',
+        ],
+        examples: [
+          { zh: '麻烦你了。', py: 'Máfan nǐ le.', en: 'Sorry to trouble you; thank you for the effort.' },
+          { zh: '麻烦你带我看看。', py: 'Máfan nǐ dài wǒ kànkan.', en: 'Please show me around.' },
+        ],
+      },
+      {
+        id: 'first-meeting-recap',
+        title: 'Close with familiar first-meeting language',
+        short: 'Reuse thanks, 很高兴认识你, or 麻烦你了 to close naturally.',
+        body: ['Decision 6 adds no major new pattern. Choose familiar language that fits the roommate’s final line.'],
+        examples: [
+          { zh: '谢谢你，很高兴认识你！', py: 'Xièxie nǐ, hěn gāoxìng rènshi nǐ!', en: 'Thank you. Nice to meet you!' },
+          { zh: '好的，谢谢你。麻烦你了。', py: 'Hǎo de, xièxie nǐ. Máfan nǐ le.', en: 'Okay, thank you. Sorry to trouble you.' },
+        ],
+      },
     ],
     nodes: [
       {
@@ -1719,7 +2301,7 @@ const chapters = [
         npcLineZh: '你好，你是新来的室友吗？',
         npcLinePy: 'Nǐ hǎo, nǐ shì xīn lái de shìyǒu ma?',
         npcLineEn: 'Hi, are you the new roommate?',
-        npcGlossary: ['新来的'],
+        npcGlossary: ['新来的', '室友'],
         options: [
           {
             id: 'A',
@@ -1731,7 +2313,7 @@ const chapters = [
             relationship: 12,
             explanation: 'Natural and polite. It answers the question clearly and sounds normal in a first meeting.',
             correction: null,
-            glossary: ['新来的'],
+            glossary: ['新来的', '室友'],
           },
           {
             id: 'B',
@@ -1743,6 +2325,8 @@ const chapters = [
             relationship: 2,
             explanation: 'Correct, but too short for a first meeting. It sounds cold rather than friendly.',
             correction: '你好，对，我是新来的室友。',
+            correctionPy: 'Nǐ hǎo, duì, wǒ shì xīn lái de shìyǒu.',
+            correctionEn: 'Hi, yes, I’m the new roommate.',
             glossary: [],
           },
           {
@@ -1755,6 +2339,8 @@ const chapters = [
             relationship: -4,
             explanation: 'The listener may guess your meaning, but the word order is not Chinese. This looks like English logic pushed into Chinese.',
             correction: '我是新来的室友。',
+            correctionPy: 'Wǒ shì xīn lái de shìyǒu.',
+            correctionEn: 'I’m the new roommate.',
             glossary: [],
           },
           {
@@ -1767,18 +2353,20 @@ const chapters = [
             relationship: -10,
             explanation: 'You repeated the question instead of answering it.',
             correction: '你好，对，我是新来的室友。',
-            glossary: ['新来的'],
+            correctionPy: 'Nǐ hǎo, duì, wǒ shì xīn lái de shìyǒu.',
+            correctionEn: 'Hi, yes, I’m the new roommate.',
+            glossary: ['新来的', '室友'],
           },
         ],
       },
       {
         id: 2,
-        mission: 'Introduce yourself naturally.',
+        mission: 'Introduce your name and respond warmly.',
         npc: 'Roommate',
         npcLineZh: '我叫李明，你呢？',
         npcLinePy: 'Wǒ jiào Lǐ Míng, nǐ ne?',
         npcLineEn: 'My name is Li Ming. What about you?',
-        npcGlossary: [],
+        npcGlossary: ['我叫'],
         options: [
           {
             id: 'A',
@@ -1788,9 +2376,9 @@ const chapters = [
             rating: 'Natural',
             score: 3,
             relationship: 12,
-            explanation: 'Good first-meeting Chinese. It gives your name and adds a polite closing line.',
+            explanation: 'Natural and friendly. It gives your name and adds an appropriate first-meeting phrase.',
             correction: null,
-            glossary: [],
+            glossary: ['我叫', '很高兴认识你'],
           },
           {
             id: 'B',
@@ -1800,9 +2388,11 @@ const chapters = [
             rating: 'Stiff',
             score: 2,
             relationship: 3,
-            explanation: 'Correct, but plain. In this situation, one more polite phrase sounds better.',
+            explanation: 'Correct, but brief. Adding 很高兴认识你 makes the first meeting warmer.',
             correction: '我叫 Alex，很高兴认识你。',
-            glossary: [],
+            correctionPy: 'Wǒ jiào Alex, hěn gāoxìng rènshi nǐ.',
+            correctionEn: 'My name is Alex. Nice to meet you.',
+            glossary: ['我叫'],
           },
           {
             id: 'C',
@@ -1812,8 +2402,10 @@ const chapters = [
             rating: 'Awkward',
             score: 1,
             relationship: -4,
-            explanation: 'This is influenced by English. Chinese usually says 我叫 Alex, not 我是叫 Alex.',
+            explanation: 'This follows English-style structure. Chinese normally says 我叫 Alex, without 是.',
             correction: '我叫 Alex。',
+            correctionPy: 'Wǒ jiào Alex.',
+            correctionEn: 'My name is Alex.',
             glossary: [],
           },
           {
@@ -1824,32 +2416,34 @@ const chapters = [
             rating: 'Incorrect',
             score: 0,
             relationship: -8,
-            explanation: 'The sentence is missing a verb. You need 叫 or 是 here.',
+            explanation: 'The sentence is missing the verb 叫.',
             correction: '我叫 Alex。',
+            correctionPy: 'Wǒ jiào Alex.',
+            correctionEn: 'My name is Alex.',
             glossary: [],
           },
         ],
       },
       {
         id: 3,
-        mission: 'Say where you are from and how your Chinese is.',
+        mission: 'Say where you are from and describe your Chinese ability.',
         npc: 'Roommate',
         npcLineZh: '你是哪国人？中文说得怎么样？',
         npcLinePy: 'Nǐ shì nǎ guó rén? Zhōngwén shuō de zěnmeyàng?',
-        npcLineEn: 'Where are you from? How is your Chinese?',
-        npcGlossary: ['中文', '说得怎么样'],
+        npcLineEn: 'Where are you from? How well do you speak Chinese?',
+        npcGlossary: ['哪国人', '中文', '说得怎么样'],
         options: [
           {
             id: 'A',
-            zh: '我是美国人，我会说一点中文，不过说得不太好。',
-            py: 'Wǒ shì Měiguó rén, wǒ huì shuō yìdiǎn Zhōngwén, búguò shuō de bú tài hǎo.',
+            zh: '我是美国人。我会说一点中文，不过说得不太好。',
+            py: 'Wǒ shì Měiguó rén. Wǒ huì shuō yìdiǎn Zhōngwén, búguò shuō de bú tài hǎo.',
             en: 'I’m American. I can speak a little Chinese, but not very well.',
             rating: 'Natural',
             score: 3,
             relationship: 12,
-            explanation: 'Natural, complete, and very close to real life speech.',
+            explanation: 'Natural and complete. It answers both questions clearly and sounds realistic for a learner.',
             correction: null,
-            glossary: ['会', '中文'],
+            glossary: ['会说一点', '中文', '说得不太好'],
           },
           {
             id: 'B',
@@ -1860,8 +2454,10 @@ const chapters = [
             score: 2,
             relationship: 3,
             explanation: 'Understandable, but 我会说一点中文 sounds more natural than 我会一点中文.',
-            correction: '我是美国人，我会说一点中文。',
-            glossary: ['会', '中文'],
+            correction: '我是美国人。我会说一点中文。',
+            correctionPy: 'Wǒ shì Měiguó rén. Wǒ huì shuō yìdiǎn Zhōngwén.',
+            correctionEn: 'I’m American. I can speak a little Chinese.',
+            glossary: ['中文'],
           },
           {
             id: 'C',
@@ -1871,9 +2467,11 @@ const chapters = [
             rating: 'Awkward',
             score: 1,
             relationship: -5,
-            explanation: 'This combines two common learner errors: 来自美国人 and English-like word order.',
-            correction: '我来自美国。/ 我是美国人。 我会说一点中文。',
-            glossary: ['会', '中文'],
+            explanation: 'This combines 来自美国人 with English-like word order.',
+            correction: '我是美国人。我会说一点中文。',
+            correctionPy: 'Wǒ shì Měiguó rén. Wǒ huì shuō yìdiǎn Zhōngwén.',
+            correctionEn: 'I’m American. I can speak a little Chinese.',
+            glossary: ['中文'],
           },
           {
             id: 'D',
@@ -1883,11 +2481,153 @@ const chapters = [
             rating: 'Incorrect',
             score: 0,
             relationship: -10,
-            explanation: 'Nationality and language ability need to be expressed separately in Chinese.',
-            correction: '我是美国人，我会说一点中文。',
+            explanation: 'Nationality and language ability must be expressed separately.',
+            correction: '我是美国人。我会说一点中文。',
+            correctionPy: 'Wǒ shì Měiguó rén. Wǒ huì shuō yìdiǎn Zhōngwén.',
+            correctionEn: 'I’m American. I can speak a little Chinese.',
             glossary: ['中文'],
           },
         ],
+      },
+      {
+        id: 4,
+        mission: 'Explain that you just moved in and are not familiar with the apartment yet.',
+        npc: 'Roommate',
+        npcLineZh: '你今天刚搬来吗？',
+        npcLinePy: 'Nǐ jīntiān gāng bān lái ma?',
+        npcLineEn: 'Did you just move in today?',
+        npcGlossary: ['刚搬来'],
+        options: [
+          {
+            id: 'A',
+            zh: '对，我今天刚搬来，对这里还不太熟悉。',
+            py: 'Duì, wǒ jīntiān gāng bān lái, duì zhèlǐ hái bú tài shúxī.',
+            en: 'Yes, I just moved in today, so I’m still not very familiar with this place.',
+            rating: 'Natural',
+            score: 3,
+            relationship: 12,
+            explanation: 'Natural and useful. It answers the question and explains why you may need help.',
+            correction: null,
+            glossary: ['刚搬来', '不太熟悉'],
+          },
+          {
+            id: 'B',
+            zh: '对，我今天刚搬来。',
+            py: 'Duì, wǒ jīntiān gāng bān lái.',
+            en: 'Yes, I just moved in today.',
+            rating: 'Stiff',
+            score: 2,
+            relationship: 3,
+            explanation: 'Correct, but it does not explain that the place is still unfamiliar.',
+            correction: '对，我今天刚搬来，对这里还不太熟悉。',
+            correctionPy: 'Duì, wǒ jīntiān gāng bān lái, duì zhèlǐ hái bú tài shúxī.',
+            correctionEn: 'Yes, I just moved in today, so I’m still not very familiar with this place.',
+            glossary: ['刚搬来'],
+          },
+          {
+            id: 'C',
+            zh: '对，我今天来搬，还是不熟悉这里。',
+            py: 'Duì, wǒ jīntiān lái bān, háishi bù shúxī zhèlǐ.',
+            en: 'Yes, I come move today and still unfamiliar here.',
+            rating: 'Awkward',
+            score: 1,
+            relationship: -5,
+            explanation: 'The meaning is guessable, but 来搬 and the word order are not natural here.',
+            correction: '对，我今天刚搬来，对这里还不太熟悉。',
+            correctionPy: 'Duì, wǒ jīntiān gāng bān lái, duì zhèlǐ hái bú tài shúxī.',
+            correctionEn: 'Yes, I just moved in today, so I’m still not very familiar with this place.',
+            glossary: [],
+          },
+          {
+            id: 'D',
+            zh: '我不是今天，我是美国人。',
+            py: 'Wǒ bú shì jīntiān, wǒ shì Měiguó rén.',
+            en: 'I am not today. I am American.',
+            rating: 'Incorrect',
+            score: 0,
+            relationship: -10,
+            explanation: 'This does not answer whether you just moved in.',
+            correction: '对，我今天刚搬来。',
+            correctionPy: 'Duì, wǒ jīntiān gāng bān lái.',
+            correctionEn: 'Yes, I just moved in today.',
+            glossary: [],
+          },
+        ],
+      },
+      {
+        id: 5,
+        mission: 'Accept your roommate’s offer to help.',
+        npc: 'Roommate',
+        npcLineZh: '需要我带你看看吗？',
+        npcLinePy: 'Xūyào wǒ dài nǐ kànkan ma?',
+        npcLineEn: 'Would you like me to show you around?',
+        npcGlossary: [],
+        options: [
+          {
+            id: 'A',
+            zh: '好啊，麻烦你了。我们一起看看吧。',
+            py: 'Hǎo a, máfan nǐ le. Wǒmen yìqǐ kànkan ba.',
+            en: 'Sure. Sorry to trouble you. Let’s take a look together.',
+            rating: 'Natural',
+            score: 3,
+            relationship: 14,
+            explanation: 'Natural and warm. It accepts the offer, acknowledges the help, and suggests doing it together.',
+            correction: null,
+            glossary: ['麻烦你了', '一起'],
+          },
+          {
+            id: 'B',
+            zh: '好，你带我看看。',
+            py: 'Hǎo, nǐ dài wǒ kànkan.',
+            en: 'Okay, show me around.',
+            rating: 'Stiff',
+            score: 2,
+            relationship: 3,
+            explanation: 'Understandable, but direct. 麻烦你了 makes the request more considerate.',
+            correction: '好啊，麻烦你了。我们一起看看吧。',
+            correctionPy: 'Hǎo a, máfan nǐ le. Wǒmen yìqǐ kànkan ba.',
+            correctionEn: 'Sure. Sorry to trouble you. Let’s take a look together.',
+            glossary: [],
+          },
+          {
+            id: 'C',
+            zh: '好，我们看一起，麻烦。',
+            py: 'Hǎo, wǒmen kàn yìqǐ, máfan.',
+            en: 'Okay, we look together, trouble.',
+            rating: 'Awkward',
+            score: 1,
+            relationship: -5,
+            explanation: 'The intended meaning is visible, but 一起 and 麻烦 are not placed naturally.',
+            correction: '好啊，麻烦你了。我们一起看看吧。',
+            correctionPy: 'Hǎo a, máfan nǐ le. Wǒmen yìqǐ kànkan ba.',
+            correctionEn: 'Sure. Sorry to trouble you. Let’s take a look together.',
+            glossary: [],
+          },
+          {
+            id: 'D',
+            zh: '不用了，我不住这里。',
+            py: 'Bú yòng le, wǒ bú zhù zhèlǐ.',
+            en: 'No need. I don’t live here.',
+            rating: 'Incorrect',
+            score: 0,
+            relationship: -10,
+            explanation: 'This contradicts the fact that you are the new roommate.',
+            correction: '好啊，麻烦你带我看看吧。',
+            correctionPy: 'Hǎo a, máfan nǐ dài wǒ kànkan ba.',
+            correctionEn: 'Sure, please show me around.',
+            glossary: [],
+          },
+        ],
+      },
+      {
+        id: 6,
+        mission: 'Close the first meeting naturally or repair the interaction.',
+        npc: 'Roommate',
+        npcLineZh: '没问题，我带你看看。欢迎你搬进来！',
+        npcLinePy: 'Méi wèntí, wǒ dài nǐ kànkan. Huānyíng nǐ bān jìnlái!',
+        npcLineEn: 'No problem. I’ll show you around. Welcome to the apartment!',
+        npcGlossary: [],
+        options: CHAPTER1_BRANCH_NODES.decision6.strong.options,
       },
     ],
   },
@@ -3267,30 +4007,57 @@ const highlightTiers = (primaryGlossaryKeys = [], recycledGlossaryKeys = []) => 
 const STORY_HIGHLIGHT_MAP = Object.freeze({
   chapter1: {
     1: {
-      npc: highlightTiers(['新来的']),
+      npc: highlightTiers(['新来的', '室友']),
       options: {
-        A: highlightTiers(['新来的']),
+        A: highlightTiers(['新来的', '室友']),
         B: highlightTiers(),
         C: highlightTiers(),
-        D: highlightTiers(['新来的']),
+        D: highlightTiers(['新来的', '室友']),
       },
     },
     2: {
-      npc: highlightTiers(),
+      npc: highlightTiers(['我叫'], ['室友']),
       options: {
-        A: highlightTiers(),
-        B: highlightTiers(),
+        A: highlightTiers(['我叫', '很高兴认识你']),
+        B: highlightTiers(['我叫']),
         C: highlightTiers(),
         D: highlightTiers(),
       },
     },
     3: {
-      npc: highlightTiers(['中文', '说得怎么样']),
+      npc: highlightTiers(['哪国人', '说得怎么样'], ['中文']),
       options: {
-        A: highlightTiers(['会', '中文']),
-        B: highlightTiers(['会', '中文']),
-        C: highlightTiers(['会', '中文']),
-        D: highlightTiers(['中文']),
+        A: highlightTiers(['会说一点', '说得不太好'], ['中文']),
+        B: highlightTiers([], ['中文']),
+        C: highlightTiers([], ['中文']),
+        D: highlightTiers([], ['中文']),
+      },
+    },
+    4: {
+      npc: highlightTiers(['刚搬来'], ['会说一点', '说得怎么样']),
+      options: {
+        A: highlightTiers(['刚搬来', '不太熟悉']),
+        B: highlightTiers(['刚搬来']),
+        C: highlightTiers(),
+        D: highlightTiers(),
+      },
+    },
+    5: {
+      npc: highlightTiers([], ['刚搬来', '不太熟悉']),
+      options: {
+        A: highlightTiers(['麻烦你了', '一起']),
+        B: highlightTiers(),
+        C: highlightTiers(),
+        D: highlightTiers(),
+      },
+    },
+    6: {
+      npc: highlightTiers(),
+      options: {
+        A: highlightTiers([], ['很高兴认识你', '麻烦你了']),
+        B: highlightTiers(),
+        C: highlightTiers(),
+        D: highlightTiers(),
       },
     },
   },
@@ -3453,6 +4220,32 @@ const TEACHER_NOTE_SUPPORT = Object.freeze({
       { zh: '说得怎么样', py: 'shuō de zěnmeyàng', en: 'how well someone speaks', audioText: '说得怎么样' },
     ],
     example: { zh: '写得很好 / 做得不错 / 跑得很快', py: 'xiě de hěn hǎo / zuò de búcuò / pǎo de hěn kuài', en: 'write well / do well / run fast', audioText: '写得很好，做得不错，跑得很快。' },
+  },
+  'chapter1:introduce-name': {
+    terms: [
+      { zh: '我叫', py: 'wǒ jiào', en: 'my name is; I am called', audioText: '我叫' },
+      { zh: '我是叫', py: 'wǒ shì jiào', en: 'not the normal learner pattern for giving a name', audioText: '我是叫' },
+    ],
+    pattern: { zh: '我叫 + name', py: 'wǒ jiào + name', en: 'My name is + name', audioText: '我叫 Alex。' },
+    example: { zh: '我叫 Alex。', py: 'Wǒ jiào Alex.', en: 'My name is Alex.', audioText: '我叫 Alex。' },
+  },
+  'chapter1:just-moved': {
+    terms: [
+      { zh: '刚 + Verb', py: 'gāng + verb', en: 'the action happened only a short time ago', audioText: '我刚搬来。' },
+      { zh: '不太 + adjective', py: 'bú tài + adjective', en: 'not very + adjective', audioText: '不太熟悉' },
+    ],
+    pattern: { zh: '刚搬来 + 不太熟悉', py: 'gāng bān lái + bú tài shúxī', en: 'just moved in + not very familiar', audioText: '我刚搬来，对这里还不太熟悉。' },
+    example: { zh: '我对这里还不太熟悉。', py: 'Wǒ duì zhèlǐ hái bú tài shúxī.', en: 'I am still not very familiar with this place.', audioText: '我对这里还不太熟悉。' },
+  },
+  'chapter1:polite-trouble': {
+    terms: [{ zh: '麻烦你了', py: 'máfan nǐ le', en: 'sorry to trouble you; thank you for the effort', audioText: '麻烦你了' }],
+    example: { zh: '麻烦你带我看看。', py: 'Máfan nǐ dài wǒ kànkan.', en: 'Please show me around.', audioText: '麻烦你带我看看。' },
+  },
+  'chapter1:first-meeting-recap': {
+    terms: [
+      { zh: '很高兴认识你', py: 'hěn gāoxìng rènshi nǐ', en: 'nice to meet you', audioText: '很高兴认识你' },
+      { zh: '麻烦你了', py: 'máfan nǐ le', en: 'sorry to trouble you; thank you for the effort', audioText: '麻烦你了' },
+    ],
   },
   'chapter2:you-time': {
     terms: [{ zh: '有时间', py: 'yǒu shíjiān', en: 'have time; be available', audioText: '有时间' }],
@@ -3625,7 +4418,48 @@ const DEFAULT_CHAPTER_SUPPORT = Object.freeze({
 // Lesson content stays in the chapter data above. This map only declares which
 // shared support systems have complete, authored data and may safely render.
 const CHAPTER_SUPPORT_CONFIG = Object.freeze({
-  chapter1: Object.freeze({}),
+  chapter1: Object.freeze({
+    teacherNoteSupport: Object.freeze({
+      enabled: true,
+      decisionSupport: CHAPTER1_SUPPORT_MAP,
+      progressiveExamples: true,
+    }),
+    betterVersionSupport: true,
+    endingLanguageSupport: Object.freeze({
+      finalDecision: 6,
+      endings: CHAPTER1_ENDINGS,
+      thresholds: Object.freeze({ strongComfort: 70, strongNaturalness: 65, mixedComfort: 40, mixedNaturalness: 38 }),
+      useIncorrectGuard: false,
+    }),
+    progressiveOptionMeaning: true,
+    memoryMoments: Object.freeze({
+      targets: CHAPTER1_MEMORY_TARGETS,
+      byDecision: CHAPTER1_RETRIEVAL_BY_DECISION,
+    }),
+    sayBeforeReveal: Object.freeze({
+      decision: 6,
+      byBranch: Object.freeze({
+        'warm-close': Object.freeze({ targetId: 'strong-close', prompt: 'Your roommate welcomes you to the apartment. Say one natural closing line.' }),
+        'polite-close': Object.freeze({ targetId: 'mixed-close', prompt: 'Your roommate agrees to show you around. Thank them politely.' }),
+        'repair-close': Object.freeze({ targetId: 'weak-repair', prompt: 'Your roommate thinks you may not need help. Repair the misunderstanding.' }),
+      }),
+    }),
+    memoryReplay: Object.freeze({
+      targets: CHAPTER1_MEMORY_TARGETS,
+      moments: CHAPTER1_MEMORY_REPLAY_MOMENTS,
+    }),
+    stageSupport: Object.freeze({
+      decisionSupport: CHAPTER1_SUPPORT_MAP,
+      transitions: CHAPTER1_STAGE_TRANSITIONS,
+    }),
+    branchingSupport: Object.freeze({
+      mode: 'chapter1-roommate',
+      nodes: CHAPTER1_BRANCH_NODES,
+      finalThresholds: Object.freeze({ strongComfort: 65, strongNaturalness: 60, mixedComfort: 40, mixedNaturalness: 38 }),
+    }),
+    reactiveAvatar: true,
+    alignedLanguageClauses: true,
+  }),
   chapter2: Object.freeze({}),
   chapter3: Object.freeze({}),
   chapter4: Object.freeze({}),
@@ -3787,6 +4621,9 @@ function validateBetterVersionTranslations() {
   Object.entries(CHAPTER6_BRANCH_NODES).forEach(([decisionKey, branches]) => {
     Object.entries(branches).forEach(([branchKey, branch]) => inspect(branch.options, `Chapter 6, ${decisionKey}/${branchKey}`));
   });
+  Object.entries(CHAPTER1_BRANCH_NODES).forEach(([decisionKey, branches]) => {
+    Object.entries(branches).forEach(([branchKey, branch]) => inspect(branch.options, `Chapter 1, ${decisionKey}/${branchKey}`));
+  });
 
   missing.forEach((entry) => console.warn(`[Better version] Missing authored pinyin or English: ${entry}`));
 }
@@ -3826,6 +4663,58 @@ function validateChapter6ContentSupport() {
     const decisionId = Number(decisionKey.replace('decision', ''));
     Object.entries(branches).forEach(([branchKey, branch]) => inspectNode(branch, decisionId, branchKey));
   });
+}
+
+function validateChapter1ContentSupport() {
+  if (!import.meta.env.DEV) return;
+
+  const warnings = [];
+  const chapter1 = chapters.find((chapter) => chapter.id === 'chapter1');
+  if (chapter1?.nodes?.length !== 6 || chapter1.nodes.some((node, index) => node.id !== index + 1)) {
+    warnings.push('Chapter 1 must have exactly six reachable decisions with IDs 1–6.');
+  }
+  if (CHAPTER1_NEW_CORE_LANGUAGE.length !== 11) {
+    warnings.push(`New-core inventory has ${CHAPTER1_NEW_CORE_LANGUAGE.length} items; expected 11.`);
+  }
+
+  const inspectOptions = (options, context) => {
+    if (!Array.isArray(options) || options.length !== 4) {
+      warnings.push(`${context} must have four answer options.`);
+      return;
+    }
+    options.forEach((option) => {
+      const missing = ['zh', 'py', 'en', 'rating', 'score', 'relationship']
+        .find((field) => option?.[field] === undefined || option?.[field] === null || option?.[field] === '');
+      if (missing) warnings.push(`${context} option ${option?.id || '?'} is missing ${missing}.`);
+      if (option?.rating !== 'Natural' && (!option?.correction || !option?.correctionPy || !option?.correctionEn)) {
+        warnings.push(`${context} option ${option?.id || '?'} lacks a complete multilingual correction.`);
+      }
+    });
+  };
+
+  chapter1?.nodes.forEach((node) => inspectOptions(node.options, `Decision ${node.id}`));
+  Object.entries(CHAPTER1_BRANCH_NODES).forEach(([decisionKey, branches]) => {
+    Object.entries(branches).forEach(([branchKey, branch]) => {
+      const missingNpc = ['npcLineZh', 'npcLinePy', 'npcLineEn'].find((field) => !branch?.[field]);
+      if (missingNpc) warnings.push(`${decisionKey}/${branchKey} is missing ${missingNpc}.`);
+      if (branch.options) inspectOptions(branch.options, `${decisionKey}/${branchKey}`);
+    });
+  });
+
+  CHAPTER1_MEMORY_MOMENTS.forEach((moment) => {
+    const normalized = normalizeMemoryMoment(moment);
+    const target = findCompleteMemoryTarget(CHAPTER1_MEMORY_TARGETS, moment.targetId);
+    const missing = ['contextZh', 'contextPy', 'contextEn', 'contextAudioText', 'taskPrompt', 'patternCueZh', 'patternCuePy', 'patternCueEn', 'firstClue']
+      .find((field) => !normalized?.[field]);
+    if (missing || !target) warnings.push(`${moment.id} lacks complete multilingual context or answer data.`);
+  });
+
+  Object.values(CHAPTER1_ENDINGS).forEach((ending) => {
+    if (!hasCompleteLanguageLayers(ending) || !ending.audioText) warnings.push(`${ending.label || 'Ending'} lacks complete language or audio data.`);
+  });
+
+  warnings.forEach((warning) => console.warn(`[Chapter 1 support] ${warning}`));
+  if (warnings.length === 0) console.info('[Chapter 1 support] 0 validation errors.');
 }
 
 function validateChapterMemorySupport() {
@@ -3956,12 +4845,11 @@ function validateStoryHighlightMaps() {
       text,
       decisionSupport,
     });
-    const assignedTiers = authored || tiers;
-    if (assignedTiers.primaryGlossaryKeys.length > 3) {
-      addError(context, `has ${assignedTiers.primaryGlossaryKeys.length} Primary keys; maximum is 3`);
+    if (tiers.primaryGlossaryKeys.length > 3) {
+      addError(context, `has ${tiers.primaryGlossaryKeys.length} Primary keys; maximum is 3`);
     }
 
-    [...assignedTiers.primaryGlossaryKeys, ...assignedTiers.recycledGlossaryKeys].forEach((key) => {
+    [...tiers.primaryGlossaryKeys, ...tiers.recycledGlossaryKeys].forEach((key) => {
       if (!text.includes(key)) addError(context, `key “${key}” does not occur in “${text}”`);
       const entry = glossary[key];
       if (!entry) {
@@ -4062,10 +4950,14 @@ function validateTeacherNoteTermsAndSpeakers() {
 }
 
 chapters.forEach((chapter) => chapter.nodes.forEach((node) => applyBetterVersionTranslations(node.options)));
+Object.values(CHAPTER1_BRANCH_NODES).forEach((branches) => {
+  Object.values(branches).forEach((branch) => applyBetterVersionTranslations(branch.options));
+});
 Object.values(CHAPTER6_BRANCH_NODES).forEach((branches) => {
   Object.values(branches).forEach((branch) => applyBetterVersionTranslations(branch.options));
 });
 validateBetterVersionTranslations();
+validateChapter1ContentSupport();
 validateChapter6ContentSupport();
 validateChapterMemorySupport();
 validateStoryHighlightMaps();
@@ -4867,14 +5759,27 @@ function MobileTabButton({ active, icon: Icon, label, onClick }) {
 
 export default function ChapterUIPrototype() {
   const persisted = useMemo(() => readPilotState(), []);
+  const persistedChapterIndex = clampArrayIndex(persisted?.currentChapterIndex, chapters.length);
+  const persistedNodeSelections = persisted?.nodeSelections && typeof persisted.nodeSelections === 'object'
+    ? persisted.nodeSelections
+    : {};
+  const persistedNodeIndex = normalizeRestoredNodeIndex(
+    persistedChapterIndex,
+    persisted?.currentNodeIndex,
+    persistedNodeSelections
+  );
 
   const [currentView, setCurrentView] = useState(persisted?.currentView || 'home');
-  const [currentChapterIndex, setCurrentChapterIndex] = useState(persisted?.currentChapterIndex || 0);
-  const [currentNodeIndex, setCurrentNodeIndex] = useState(persisted?.currentNodeIndex || 0);
+  const [currentChapterIndex, setCurrentChapterIndex] = useState(persistedChapterIndex);
+  const [currentNodeIndex, setCurrentNodeIndex] = useState(persistedNodeIndex);
   const [selectedOptionId, setSelectedOptionId] = useState(null);
-  const [nodeSelections, setNodeSelections] = useState(persisted?.nodeSelections || {});
+  const [nodeSelections, setNodeSelections] = useState(persistedNodeSelections);
   const [showFeedback, setShowFeedback] = useState(false);
-  const [sceneRun, setSceneRun] = useState({});
+  const [sceneRun, setSceneRun] = useState(() => restoreSceneRunFromSelections(
+    chapters[persistedChapterIndex],
+    persistedChapterIndex,
+    persistedNodeSelections
+  ));
   const [betterVersionOpen, setBetterVersionOpen] = useState(true);
   const [betterVersionShowPinyin, setBetterVersionShowPinyin] = useState(true);
   const [betterVersionShowEnglish, setBetterVersionShowEnglish] = useState(true);
@@ -4960,12 +5865,6 @@ export default function ChapterUIPrototype() {
   const currentMemoryMoment = currentMemory?.moment || null;
   const currentMemoryTarget = currentMemory?.target || null;
   const sayBeforeRevealConfig = currentChapterSupport.sayBeforeReveal;
-  const sayBeforeRevealTarget = sayBeforeRevealConfig?.decision === baseCurrentNode.id
-    ? findCompleteMemoryTarget(
-        currentChapterSupport.memoryMoments?.targets || currentChapterSupport.memoryReplay?.targets,
-        sayBeforeRevealConfig.targetId
-      )
-    : null;
   const replayMemoryItems = useMemo(
     () => getCompleteMemoryReplay(currentChapterSupport.memoryReplay),
     [currentChapterSupport.memoryReplay]
@@ -4980,7 +5879,28 @@ export default function ChapterUIPrototype() {
   }, [supportsBranchingScene, safeCurrentNodeIndex, sceneRun]);
   const activeStoryBranch = useMemo(() => {
     if (!supportsBranchingScene) return null;
-    const branchNodes = currentChapterSupport.branchingSupport.nodes;
+    const branchingSupport = currentChapterSupport.branchingSupport;
+    const branchNodes = branchingSupport.nodes;
+    if (branchingSupport.mode === 'chapter1-roommate') {
+      if (safeCurrentNodeIndex === 1 || safeCurrentNodeIndex === 3 || safeCurrentNodeIndex === 4) {
+        const sourceIndex = safeCurrentNodeIndex === 1 ? 0 : safeCurrentNodeIndex - 1;
+        const rating = sceneRun[sourceIndex]?.rating;
+        const tier = rating === 'Natural' ? 'strong' : rating === 'Stiff' ? 'mixed' : 'weak';
+        return branchNodes[`decision${safeCurrentNodeIndex + 1}`]?.[tier] || null;
+      }
+      if (safeCurrentNodeIndex === 5) {
+        const thresholds = branchingSupport.finalThresholds;
+        const tier = sceneMetricsBeforeCurrent.socialComfort >= thresholds.strongComfort
+          && sceneMetricsBeforeCurrent.naturalness >= thresholds.strongNaturalness
+          ? 'strong'
+          : sceneMetricsBeforeCurrent.socialComfort >= thresholds.mixedComfort
+            && sceneMetricsBeforeCurrent.naturalness >= thresholds.mixedNaturalness
+          ? 'mixed'
+          : 'weak';
+        return branchNodes.decision6?.[tier] || null;
+      }
+      return null;
+    }
     if (safeCurrentNodeIndex === 3) {
       const tier = sceneMetricsBeforeCurrent.naturalness >= 65
         ? 'high'
@@ -4998,7 +5918,7 @@ export default function ChapterUIPrototype() {
       return branchNodes[safeCurrentNodeIndex === 4 ? 'decision5' : 'decision6']?.[tier] || null;
     }
     return null;
-  }, [currentChapterSupport.branchingSupport, safeCurrentNodeIndex, sceneMetricsBeforeCurrent, supportsBranchingScene]);
+  }, [currentChapterSupport.branchingSupport, safeCurrentNodeIndex, sceneMetricsBeforeCurrent, sceneRun, supportsBranchingScene]);
   const currentNode = useMemo(() => {
     if (!activeStoryBranch) return baseCurrentNode;
     return {
@@ -5007,6 +5927,15 @@ export default function ChapterUIPrototype() {
       options: activeStoryBranch.options || baseCurrentNode.options,
     };
   }, [activeStoryBranch, baseCurrentNode]);
+  const activeSayBeforeRevealConfig = sayBeforeRevealConfig?.decision === baseCurrentNode.id
+    ? sayBeforeRevealConfig.byBranch?.[currentNode.branchKey] || sayBeforeRevealConfig
+    : null;
+  const sayBeforeRevealTarget = activeSayBeforeRevealConfig
+    ? findCompleteMemoryTarget(
+        currentChapterSupport.memoryMoments?.targets || currentChapterSupport.memoryReplay?.targets,
+        activeSayBeforeRevealConfig.targetId
+      )
+    : null;
   const currentSpeaker = useMemo(
     () => resolveSpeakerHeader(currentChapter, currentNode),
     [currentChapter, currentNode]
@@ -5117,9 +6046,20 @@ export default function ChapterUIPrototype() {
     const finalNodeIndex = Number(endingSupport?.finalDecision) - 1;
     if (!endingSupport || safeCurrentNodeIndex !== finalNodeIndex || !sceneRun[finalNodeIndex]) return null;
     const incorrectCount = Object.values(sceneRun).filter((choice) => choice.rating === 'Incorrect').length;
-    const ending = sceneMetrics.socialComfort >= 70 && sceneMetrics.naturalness >= 70 && incorrectCount < 2
+    const thresholds = endingSupport.thresholds || {
+      strongComfort: 70,
+      strongNaturalness: 70,
+      mixedComfort: 40,
+      mixedNaturalness: 40,
+    };
+    const passesIncorrectGuard = endingSupport.useIncorrectGuard === false || incorrectCount < 2;
+    const ending = sceneMetrics.socialComfort >= thresholds.strongComfort
+      && sceneMetrics.naturalness >= thresholds.strongNaturalness
+      && passesIncorrectGuard
       ? endingSupport.endings?.smooth
-      : sceneMetrics.socialComfort >= 40 && sceneMetrics.naturalness >= 40 && incorrectCount < 2
+      : sceneMetrics.socialComfort >= thresholds.mixedComfort
+        && sceneMetrics.naturalness >= thresholds.mixedNaturalness
+        && passesIncorrectGuard
       ? endingSupport.endings?.clarified
       : endingSupport.endings?.delayed;
     if (!hasCompleteEnding(ending)) return null;
@@ -5277,12 +6217,14 @@ export default function ChapterUIPrototype() {
     if (!state || typeof state !== 'object') return;
 
     const nextChapterIndex = clampArrayIndex(state.currentChapterIndex, chapters.length);
-    const nextNodeIndex = clampArrayIndex(state.currentNodeIndex, chapters[nextChapterIndex].nodes.length);
+    const nextSelections = state.nodeSelections && typeof state.nodeSelections === 'object' ? state.nodeSelections : {};
+    const nextNodeIndex = normalizeRestoredNodeIndex(nextChapterIndex, state.currentNodeIndex, nextSelections);
 
     setCurrentView(typeof state.currentView === 'string' ? state.currentView : 'home');
     setCurrentChapterIndex(nextChapterIndex);
     setCurrentNodeIndex(nextNodeIndex);
-    setNodeSelections(state.nodeSelections && typeof state.nodeSelections === 'object' ? state.nodeSelections : {});
+    setNodeSelections(nextSelections);
+    setSceneRun(restoreSceneRunFromSelections(chapters[nextChapterIndex], nextChapterIndex, nextSelections));
     setShowPinyin(typeof state.showPinyin === 'boolean' ? state.showPinyin : true);
     setShowEnglish(typeof state.showEnglish === 'boolean' ? state.showEnglish : true);
     setTrust(typeof state.trust === 'number' ? state.trust : 30);
@@ -5489,7 +6431,7 @@ export default function ChapterUIPrototype() {
     setMemoryReplayOpen(false);
     setMemoryReplayIndex(0);
     setMemoryReplayHintState({});
-    setSceneRun({});
+    setSceneRun(restoreSceneRunFromSelections(currentChapter, safeCurrentChapterIndex, nodeSelections));
   }, [currentChapter.id]);
 
   const handleSelectOption = (optionId) => {
@@ -5513,7 +6455,12 @@ export default function ChapterUIPrototype() {
 
   const switchChapter = (index) => {
     const nextChapterIndex = clampArrayIndex(index, chapters.length);
-    setSceneRun({});
+    const nextChapter = chapters[nextChapterIndex];
+    const firstIncompleteChapter1Node = nextChapter.id === 'chapter1'
+      ? nextChapter.nodes.findIndex((_, nodeIndex) => !nodeSelections[makeNodeKey(nextChapterIndex, nodeIndex)])
+      : -1;
+    const nextNodeIndex = firstIncompleteChapter1Node >= 0 ? firstIncompleteChapter1Node : 0;
+    setSceneRun(restoreSceneRunFromSelections(nextChapter, nextChapterIndex, nodeSelections));
     setRevealedOptionMeanings({});
     setOptionAssistanceByDecision({});
     setMemoryMomentState({});
@@ -5522,7 +6469,7 @@ export default function ChapterUIPrototype() {
     setMemoryReplayIndex(0);
     setMemoryReplayHintState({});
     setCurrentChapterIndex(nextChapterIndex);
-    setCurrentNodeIndex(0);
+    setCurrentNodeIndex(nextNodeIndex);
     setShowFeedback(false);
     setSelectedGlossaryKey(null);
     setActiveNoteId(chapters[nextChapterIndex].grammarNotes[0].id);
@@ -6564,7 +7511,7 @@ export default function ChapterUIPrototype() {
               <div className="mt-5">
                 <SayBeforeRevealCard
                   target={sayBeforeRevealTarget}
-                  prompt={sayBeforeRevealConfig.prompt}
+                  prompt={activeSayBeforeRevealConfig.prompt}
                   state={sayBeforeRevealState}
                   onChange={setSayBeforeRevealState}
                   onDismiss={() => setSayBeforeRevealState((prev) => ({ ...prev, dismissed: true }))}
