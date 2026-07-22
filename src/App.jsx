@@ -1078,11 +1078,15 @@ function normalizeRestoredNodeIndex(chapterIndex, nodeIndex, nodeSelections) {
     && safeNodeIndex === 2
     && [0, 1, 2].every((decisionIndex) => Boolean(nodeSelections?.[`0-${decisionIndex}`]))
     && [3, 4, 5].every((decisionIndex) => !nodeSelections?.[`0-${decisionIndex}`]);
-  return completedLegacyChapter1 ? 3 : safeNodeIndex;
+  const restoredNodeIndex = completedLegacyChapter1 ? 3 : safeNodeIndex;
+  for (let decisionIndex = 0; decisionIndex < restoredNodeIndex; decisionIndex += 1) {
+    if (!nodeSelections?.[`${safeChapterIndex}-${decisionIndex}`]) return decisionIndex;
+  }
+  return restoredNodeIndex;
 }
 
 function restoreSceneRunFromSelections(chapter, chapterIndex, nodeSelections) {
-  if (chapter?.id !== 'chapter1' || !nodeSelections || typeof nodeSelections !== 'object') return {};
+  if (!chapter || !nodeSelections || typeof nodeSelections !== 'object') return {};
 
   let metrics = { socialComfort: 50, naturalness: 50 };
   const restoredRun = {};
@@ -5839,6 +5843,11 @@ export default function ChapterUIPrototype() {
   const [cloudSyncReady, setCloudSyncReady] = useState(false);
   const [pendingCloudState, setPendingCloudState] = useState(null);
   const appStateRef = useRef(null);
+  const selectedOptionRestoreRef = useRef({
+    chapterIndex: null,
+    nodeIndex: null,
+    committedOptionId: undefined,
+  });
 
   const makeNodeKey = (chapterIndex, nodeIndex) => `${chapterIndex}-${nodeIndex}`;
 
@@ -5849,6 +5858,13 @@ export default function ChapterUIPrototype() {
   const safeCurrentChapterIndex = clampArrayIndex(currentChapterIndex, chapters.length);
   const currentChapter = chapters[safeCurrentChapterIndex] || chapters[0];
   const safeCurrentNodeIndex = clampArrayIndex(currentNodeIndex, currentChapter?.nodes?.length || 0);
+  const earliestIncompletePriorDecisionIndex = useMemo(() => {
+    for (let decisionIndex = 0; decisionIndex < safeCurrentNodeIndex; decisionIndex += 1) {
+      const optionId = nodeSelections[`${safeCurrentChapterIndex}-${decisionIndex}`];
+      if (!optionId || sceneRun[decisionIndex]?.optionId !== optionId) return decisionIndex;
+    }
+    return -1;
+  }, [nodeSelections, safeCurrentChapterIndex, safeCurrentNodeIndex, sceneRun]);
   const baseCurrentNode = currentChapter?.nodes?.[safeCurrentNodeIndex] || {
     id: 0,
     mission: '',
@@ -5879,12 +5895,14 @@ export default function ChapterUIPrototype() {
   }, [supportsBranchingScene, safeCurrentNodeIndex, sceneRun]);
   const activeStoryBranch = useMemo(() => {
     if (!supportsBranchingScene) return null;
+    if (earliestIncompletePriorDecisionIndex >= 0) return null;
     const branchingSupport = currentChapterSupport.branchingSupport;
     const branchNodes = branchingSupport.nodes;
     if (branchingSupport.mode === 'chapter1-roommate') {
       if (safeCurrentNodeIndex === 1 || safeCurrentNodeIndex === 3 || safeCurrentNodeIndex === 4) {
         const sourceIndex = safeCurrentNodeIndex === 1 ? 0 : safeCurrentNodeIndex - 1;
         const rating = sceneRun[sourceIndex]?.rating;
+        if (!['Natural', 'Stiff', 'Awkward', 'Incorrect'].includes(rating)) return null;
         const tier = rating === 'Natural' ? 'strong' : rating === 'Stiff' ? 'mixed' : 'weak';
         return branchNodes[`decision${safeCurrentNodeIndex + 1}`]?.[tier] || null;
       }
@@ -5918,7 +5936,7 @@ export default function ChapterUIPrototype() {
       return branchNodes[safeCurrentNodeIndex === 4 ? 'decision5' : 'decision6']?.[tier] || null;
     }
     return null;
-  }, [currentChapterSupport.branchingSupport, safeCurrentNodeIndex, sceneMetricsBeforeCurrent, sceneRun, supportsBranchingScene]);
+  }, [currentChapterSupport.branchingSupport, earliestIncompletePriorDecisionIndex, safeCurrentNodeIndex, sceneMetricsBeforeCurrent, sceneRun, supportsBranchingScene]);
   const currentNode = useMemo(() => {
     if (!activeStoryBranch) return baseCurrentNode;
     return {
@@ -5959,6 +5977,25 @@ export default function ChapterUIPrototype() {
     () => (Array.isArray(currentNode.options) ? currentNode.options : []).find((o) => o.id === selectedOptionId) || null,
     [currentNode, selectedOptionId]
   );
+  const currentNodeKey = makeNodeKey(safeCurrentChapterIndex, safeCurrentNodeIndex);
+  const committedChoice = sceneRun[safeCurrentNodeIndex] || null;
+  const committedOptionId = committedChoice?.optionId || null;
+  const committedOption = useMemo(() => {
+    if (!committedOptionId) return null;
+    return (Array.isArray(currentNode.options) ? currentNode.options : [])
+      .find((option) => option.id === committedOptionId) || null;
+  }, [committedOptionId, currentNode]);
+  const hasSelectedDraft = Boolean(selectedOption);
+  const isCurrentReplySubmitted = Boolean(
+    committedChoice
+    && hasSelectedDraft
+    && committedOptionId === selectedOptionId
+  );
+  const hasUnsubmittedDraft = Boolean(
+    hasSelectedDraft
+    && (!committedChoice || committedOptionId !== selectedOptionId)
+  );
+  const isUpdatingSubmittedReply = Boolean(committedChoice && hasUnsubmittedDraft);
   const currentNodeAudioPrefix = `${currentChapter.id}.node${currentNode.id}${currentNode.branchKey ? `.${currentNode.branchKey}` : ''}`;
   const currentAssistanceDecisionKey = `${currentChapter.id}:${safeCurrentNodeIndex}`;
   const optionEnglishRevealCount = Object.values(optionAssistanceByDecision)
@@ -6081,8 +6118,11 @@ export default function ChapterUIPrototype() {
   }, [conversationEnding?.label]);
 
   const chapterDecisionTotal = currentChapter.nodes.length;
+  const currentChapterSubmittedCount = currentChapter.nodes
+    .filter((_, nodeIndex) => nodeSelections[makeNodeKey(safeCurrentChapterIndex, nodeIndex)])
+    .length;
   const chapterProgress = chapterDecisionTotal > 0
-    ? ((safeCurrentNodeIndex + 1) / chapterDecisionTotal) * 100
+    ? (currentChapterSubmittedCount / chapterDecisionTotal) * 100
     : 0;
   const overallProgress = ((safeCurrentChapterIndex + 1) / chapters.length) * 100;
   const isLastNode = chapterDecisionTotal > 0 && safeCurrentNodeIndex === chapterDecisionTotal - 1;
@@ -6186,6 +6226,13 @@ export default function ChapterUIPrototype() {
     nodeSelections,
   ]);
   appStateRef.current = appState;
+
+  useEffect(() => {
+    if (earliestIncompletePriorDecisionIndex < 0) return;
+    setCurrentNodeIndex(earliestIncompletePriorDecisionIndex);
+    setShowFeedback(false);
+    setSelectedGlossaryKey(null);
+  }, [earliestIncompletePriorDecisionIndex]);
 
   useEffect(() => {
     if (currentChapterIndex === safeCurrentChapterIndex && currentNodeIndex === safeCurrentNodeIndex) return;
@@ -6405,9 +6452,19 @@ export default function ChapterUIPrototype() {
   }, [appState, cloudSyncReady, session?.user?.id]);
 
   useEffect(() => {
-    const savedSelection = nodeSelections[makeNodeKey(safeCurrentChapterIndex, safeCurrentNodeIndex)] || null;
-    setSelectedOptionId(savedSelection);
-  }, [nodeSelections, safeCurrentChapterIndex, safeCurrentNodeIndex]);
+    const previousRestore = selectedOptionRestoreRef.current;
+    const locationChanged = previousRestore.chapterIndex !== safeCurrentChapterIndex
+      || previousRestore.nodeIndex !== safeCurrentNodeIndex;
+    const committedOptionChanged = previousRestore.committedOptionId !== committedOptionId;
+    if (!locationChanged && !committedOptionChanged) return;
+
+    selectedOptionRestoreRef.current = {
+      chapterIndex: safeCurrentChapterIndex,
+      nodeIndex: safeCurrentNodeIndex,
+      committedOptionId,
+    };
+    setSelectedOptionId(committedOptionId);
+  }, [committedOptionId, safeCurrentChapterIndex, safeCurrentNodeIndex]);
 
   useEffect(() => {
     if (!showFeedback) return undefined;
@@ -6435,9 +6492,7 @@ export default function ChapterUIPrototype() {
   }, [currentChapter.id]);
 
   const handleSelectOption = (optionId) => {
-    const key = makeNodeKey(safeCurrentChapterIndex, safeCurrentNodeIndex);
     setSelectedOptionId(optionId);
-    setNodeSelections((prev) => ({ ...prev, [key]: optionId }));
   };
 
   const handleOptionMeaningToggle = (optionId, event) => {
@@ -6477,31 +6532,59 @@ export default function ChapterUIPrototype() {
   };
 
   const handleSubmit = () => {
-    if (!selectedOption) return;
-    if (currentView === 'story') {
-      setSceneRun((prev) => {
-        const earlierChoices = Object.fromEntries(Object.entries(prev).filter(([key]) => Number(key) < safeCurrentNodeIndex));
-        const previousMetrics = calculateSceneRunMetrics(earlierChoices);
-        const newMetrics = applySceneMetricChoice(previousMetrics, selectedOption);
-        return {
-          ...earlierChoices,
-          [safeCurrentNodeIndex]: {
-            optionId: selectedOption.id,
-            rating: selectedOption.rating,
-            relationship: selectedOption.relationship,
-            branchKey: currentNode.branchKey || 'base',
-            previousMetrics,
-            newMetrics,
-          },
-        };
-      });
+    if (!selectedOption || isCurrentReplySubmitted) return;
+
+    const earlierChoices = Object.fromEntries(
+      Object.entries(sceneRun).filter(([key]) => Number(key) < safeCurrentNodeIndex)
+    );
+    const previousMetrics = calculateSceneRunMetrics(earlierChoices);
+    const newMetrics = applySceneMetricChoice(previousMetrics, selectedOption);
+    const nextSceneRun = {
+      ...earlierChoices,
+      [safeCurrentNodeIndex]: {
+        optionId: selectedOption.id,
+        rating: selectedOption.rating,
+        relationship: selectedOption.relationship,
+        branchKey: currentNode.branchKey || 'base',
+        previousMetrics,
+        newMetrics,
+      },
+    };
+
+    setSceneRun(nextSceneRun);
+    setNodeSelections((prev) => {
+      const retainedSelections = Object.fromEntries(
+        Object.entries(prev).filter(([key]) => {
+          const [chapterIndex, decisionIndex] = key.split('-').map(Number);
+          return chapterIndex !== safeCurrentChapterIndex || decisionIndex < safeCurrentNodeIndex;
+        })
+      );
+      return { ...retainedSelections, [currentNodeKey]: selectedOption.id };
+    });
+
+    if (isUpdatingSubmittedReply) {
+      setRevealedOptionMeanings({});
+      setMemoryMomentState({});
+      setSayBeforeRevealState({});
+      setMemoryReplayOpen(false);
+      setMemoryReplayIndex(0);
+      setMemoryReplayHintState({});
+      setOptionAssistanceByDecision((prev) => Object.fromEntries(
+        Object.entries(prev).filter(([key]) => {
+          const [chapterId, decisionIndex] = key.split(':');
+          return chapterId !== currentChapter.id || Number(decisionIndex) <= safeCurrentNodeIndex;
+        })
+      ));
     }
+
     setBetterVersionOpen(selectedOption.rating !== 'Natural');
     setBetterVersionShowPinyin(true);
     setBetterVersionShowEnglish(true);
     setShowFeedback(true);
-    setTrust((prev) => Math.max(0, Math.min(100, prev + selectedOption.relationship)));
-    setMastery((prev) => Math.max(0, Math.min(100, prev + selectedOption.score * 8)));
+    const previousRelationship = committedChoice?.relationship || 0;
+    const previousMasteryEffect = (committedOption?.score || 0) * 8;
+    setTrust((prev) => Math.max(0, Math.min(100, prev + selectedOption.relationship - previousRelationship)));
+    setMastery((prev) => Math.max(0, Math.min(100, prev + (selectedOption.score * 8) - previousMasteryEffect)));
 
     const selectedRole = selectedOption.rating.toLowerCase();
     const logItem = {
@@ -6516,10 +6599,17 @@ export default function ChapterUIPrototype() {
       correctionAudioId: selectedOption.correction ? `${currentNodeAudioPrefix}.correction.${selectedRole}` : '',
       timestamp: Date.now(),
     };
-    setPracticeLog((prev) => [...prev, logItem]);
+    const invalidatedMissions = new Set(
+      currentChapter.nodes.slice(safeCurrentNodeIndex).map((node) => node.mission)
+    );
+    setPracticeLog((prev) => [
+      ...prev.filter((item) => item.chapter !== logItem.chapter || !invalidatedMissions.has(item.mission)),
+      logItem,
+    ]);
   };
 
   const handleContinue = () => {
+    if (!isCurrentReplySubmitted) return;
     setShowFeedback(false);
     if (!isLastNode) {
       setCurrentNodeIndex(safeCurrentNodeIndex + 1);
@@ -6537,7 +6627,7 @@ export default function ChapterUIPrototype() {
   };
 
   const handleNextNode = () => {
-    if (isLastNode) return;
+    if (isLastNode || !isCurrentReplySubmitted) return;
     setShowFeedback(false);
     setCurrentNodeIndex(safeCurrentNodeIndex + 1);
   };
@@ -7646,20 +7736,30 @@ export default function ChapterUIPrototype() {
 
                 <Button
                   variant="outline"
-                  className="h-12 w-full rounded-2xl text-base font-semibold"
+                  className="h-12 w-full rounded-2xl text-base font-semibold disabled:bg-neutral-100 disabled:text-neutral-400"
                   onClick={handleNextNode}
-                  disabled={isLastNode || showFeedback}
+                  disabled={isLastNode || showFeedback || !isCurrentReplySubmitted}
+                  aria-disabled={isLastNode || showFeedback || !isCurrentReplySubmitted}
                 >
-                  Next
+                  {isCurrentReplySubmitted ? 'Next' : 'Submit to continue'}
                 </Button>
               </div>
 
+              {selectedOptionId && (
+                <p className={`px-1 text-center text-sm leading-5 ${isCurrentReplySubmitted ? 'text-emerald-700' : 'text-[#6f6257]'}`}>
+                  {isCurrentReplySubmitted
+                    ? 'Reply submitted. Your choice shapes the next response.'
+                    : 'Submit this reply to see how the conversation responds.'}
+                </p>
+              )}
+
               <Button
                 className="h-14 w-full rounded-[22px] bg-[#2b241f] text-base font-semibold shadow-[0_14px_30px_rgba(43,36,31,0.20)]"
-                disabled={!selectedOption}
+                disabled={!selectedOption || isCurrentReplySubmitted || showFeedback}
+                aria-disabled={!selectedOption || isCurrentReplySubmitted || showFeedback}
                 onClick={handleSubmit}
               >
-                Submit
+                {isUpdatingSubmittedReply ? 'Update reply' : 'Submit reply'}
               </Button>
             </div>
           </CardContent>
@@ -8364,11 +8464,11 @@ export default function ChapterUIPrototype() {
                   <Button variant="outline" className="h-11 rounded-2xl md:h-auto" onClick={handlePreviousNode} disabled={safeCurrentNodeIndex === 0}>
                     Previous
                   </Button>
-                  <Button variant="outline" className="h-11 rounded-2xl md:h-auto" onClick={handleNextNode} disabled={isLastNode}>
+                  <Button variant="outline" className="h-11 rounded-2xl md:h-auto" onClick={handleNextNode} disabled={isLastNode || !isCurrentReplySubmitted}>
                     Next
                   </Button>
                 </div>
-                <Button className="h-12 w-full rounded-2xl px-6 text-base font-semibold md:h-auto md:w-auto" onClick={handleContinue}>
+                <Button className="h-12 w-full rounded-2xl px-6 text-base font-semibold md:h-auto md:w-auto" onClick={handleContinue} disabled={!isCurrentReplySubmitted}>
                   {isLastNode ? (isLastChapter ? 'Finish practice' : 'Next chapter') : 'Back to lesson'}
                 </Button>
               </div>
