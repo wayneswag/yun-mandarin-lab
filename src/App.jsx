@@ -5799,6 +5799,8 @@ export default function ChapterUIPrototype() {
   const [glossaryExamplesExpanded, setGlossaryExamplesExpanded] = useState(false);
   const [showPinyin, setShowPinyin] = useState(persisted?.showPinyin ?? true);
   const [showEnglish, setShowEnglish] = useState(persisted?.showEnglish ?? true);
+  const [notesShowPinyin, setNotesShowPinyin] = useState(true);
+  const [notesShowEnglish, setNotesShowEnglish] = useState(true);
   const [reviewShowPinyin, setReviewShowPinyin] = useState(true);
   const [reviewShowEnglish, setReviewShowEnglish] = useState(true);
   const [trust, setTrust] = useState(persisted?.trust || 30);
@@ -7122,12 +7124,18 @@ export default function ChapterUIPrototype() {
       return (
         <div className="space-y-5 pb-8 md:space-y-7 md:pb-0">
           <section className="px-1 md:px-0">
-            <div className="max-w-3xl">
-              <div className="text-sm font-medium text-[#8a6a28]">Phrase notebook</div>
-              <h2 className="mt-1 text-2xl font-semibold leading-tight sm:text-3xl md:text-4xl">Your Mandarin phrase notebook</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">
-                A quiet place for phrases you want to hear again, say aloud, and bring back into real conversation.
-              </p>
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div className="max-w-3xl">
+                <div className="text-sm font-medium text-[#8a6a28]">Phrase notebook</div>
+                <h2 className="mt-1 text-2xl font-semibold leading-tight sm:text-3xl md:text-4xl">Your Mandarin phrase notebook</h2>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">
+                  A quiet place for phrases you want to hear again, say aloud, and bring back into real conversation.
+                </p>
+              </div>
+              <div className="grid w-full grid-cols-2 gap-2 md:w-[260px] md:shrink-0">
+                <DisplayToggleButton active={notesShowPinyin} label="Pinyin" onClick={() => setNotesShowPinyin((v) => !v)} compact />
+                <DisplayToggleButton active={notesShowEnglish} label="English" onClick={() => setNotesShowEnglish((v) => !v)} compact />
+              </div>
             </div>
           </section>
 
@@ -7149,8 +7157,8 @@ export default function ChapterUIPrototype() {
                             <AudioButton audioId={item.audioId} text={item.expression} small />
                           </div>
                         </div>
-                        {item.pinyin && <div className="text-sm leading-6 text-neutral-500 md:text-base">{item.pinyin}</div>}
-                        {item.english && <div className="text-sm leading-6 text-neutral-700">{item.english}</div>}
+                        {notesShowPinyin && item.pinyin && <div className="text-sm leading-6 text-neutral-500 md:text-base">{item.pinyin}</div>}
+                        {notesShowEnglish && item.english && <div className="text-sm leading-6 text-neutral-700">{item.english}</div>}
                       </div>
                       <button
                         type="button"
