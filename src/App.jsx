@@ -116,8 +116,8 @@ const BETTER_VERSION_TRANSLATIONS = {
   '半小时前，我在咖啡馆用过钱包。': { correctionPy: 'Bàn ge xiǎoshí qián, wǒ zài kāfēiguǎn yòng guo qiánbāo.', correctionEn: 'Half an hour ago, I used my wallet at the café.' },
   '不好意思，可以说慢一点吗？': { correctionPy: 'Bù hǎoyìsi, kěyǐ shuō màn yìdiǎn ma?', correctionEn: 'Sorry, could you speak a little more slowly?' },
   '不好意思，我没听清楚。可以再说一遍吗？': { correctionPy: 'Bù hǎoyìsi, wǒ méi tīng qīngchu. Kěyǐ zài shuō yí biàn ma?', correctionEn: 'Sorry, I did not hear clearly. Could you say that again?' },
-  '不好意思，我明天可能会晚一点。要不然我们改时间吧？': { correctionPy: 'Bù hǎoyìsi, wǒ míngtiān kěnéng huì wǎn yìdiǎn. Yàoburan wǒmen gǎi shíjiān ba?', correctionEn: 'Sorry, I may be a little late tomorrow. How about we change the time?' },
-  '不好意思，我明天可能会晚一点到。要不然我们改时间吧？': { correctionPy: 'Bù hǎoyìsi, wǒ míngtiān kěnéng huì wǎn yìdiǎn dào. Yàoburan wǒmen gǎi shíjiān ba?', correctionEn: 'Sorry, I may arrive a little late tomorrow. How about we change the time?' },
+  '不好意思，我明天可能会晚一点。要不然我们改时间吧？': { correctionPy: 'Bù hǎoyìsi, wǒ míngtiān kěnéng huì wǎn yìdiǎn. Yàoburan wǒmen gǎi shíjiān ba?', correctionEn: 'Sorry, I may be a little late tomorrow. How about we change the time instead?' },
+  '不好意思，我明天可能会晚一点到。要不然我们改时间吧？': { correctionPy: 'Bù hǎoyìsi, wǒ míngtiān kěnéng huì wǎn yìdiǎn dào. Yàoburan wǒmen gǎi shíjiān ba?', correctionEn: 'Sorry, I may arrive a little late tomorrow. How about we change the time instead?' },
   '不是手机，是我的钱包丢了。': { correctionPy: 'Bú shì shǒujī, shì wǒ de qiánbāo diū le.', correctionEn: 'It is not my phone; it is my wallet that is lost.' },
   '不是手机丢了，是钱包丢了。': { correctionPy: 'Bú shì shǒujī diū le, shì qiánbāo diū le.', correctionEn: 'It is not that the phone is lost; the wallet is lost.' },
   '大概半小时前，我在那边的咖啡馆买过东西。': { correctionPy: 'Dàgài bàn ge xiǎoshí qián, wǒ zài nàbiān de kāfēiguǎn mǎi guo dōngxi.', correctionEn: 'About half an hour ago, I bought something at the café over there.' },
@@ -550,6 +550,527 @@ const CHAPTER1_ENDINGS = {
     py: 'Shìyǒu dàgài míngbai le nǐ de qíngkuàng, búguò jǐ cì biǎodá ràng jiāoliú yǒuxiē bù shùn.',
     en: 'Your roommate mostly understood your situation, but several replies made the conversation less smooth.',
     audioText: '室友大概明白了你的情况，不过几次表达让交流有些不顺。',
+  },
+};
+
+const CHAPTER2_CORE_LANGUAGE = [
+  '有时间',
+  '几点',
+  '那我们……见面吧',
+  '不好意思',
+  '可能会晚一点',
+  '要不然',
+  '改时间',
+  '改到 + time',
+  '在哪儿见',
+  '在 + place + 见',
+  '那就……见',
+];
+
+const CHAPTER2_SUPPORT_MAP = {
+  1: {
+    stage: 1,
+    stageLabel: 'Make the plan',
+    focus: 'Accept the invitation and ask when your classmate is free.',
+    primaryGlossaryKeys: ['几点', '有时间'],
+    recycledGlossaryKeys: ['一起'],
+    primaryNoteIds: ['you-time'],
+  },
+  2: {
+    stage: 1,
+    stageLabel: 'Make the plan',
+    focus: 'Agree on the original meeting time.',
+    primaryGlossaryKeys: ['见面吧'],
+    recycledGlossaryKeys: ['有时间', '几点'],
+    primaryNoteIds: ['time-before-action'],
+  },
+  3: {
+    stage: 2,
+    stageLabel: 'Handle the change',
+    focus: 'Explain the schedule problem and suggest changing the plan.',
+    primaryGlossaryKeys: ['不好意思', '可能会晚一点', '要不然'],
+    recycledGlossaryKeys: ['改时间', '那就'],
+    primaryNoteIds: ['possible-future'],
+  },
+  4: {
+    stage: 2,
+    stageLabel: 'Handle the change',
+    focus: 'Propose a specific new meeting time.',
+    primaryGlossaryKeys: ['改到'],
+    recycledGlossaryKeys: ['几点', '可能会晚一点', '那就'],
+    primaryNoteIds: ['change-to-time'],
+  },
+  5: {
+    stage: 3,
+    stageLabel: 'Confirm the new plan',
+    focus: 'Confirm the new time and meeting place clearly.',
+    primaryGlossaryKeys: ['在哪儿见', '在学校咖啡馆见'],
+    recycledGlossaryKeys: ['改到'],
+    primaryNoteIds: ['time-place-action'],
+  },
+  6: {
+    stage: 3,
+    stageLabel: 'Confirm the new plan',
+    focus: 'Confirm the final arrangement and close naturally.',
+    primaryGlossaryKeys: [],
+    recycledGlossaryKeys: ['那就', '在学校咖啡馆见'],
+    primaryNoteIds: ['plan-recap'],
+  },
+};
+
+const CHAPTER2_STAGE_TRANSITIONS = {
+  2: {
+    title: 'Plan made',
+    message: 'You have agreed to meet at 3 p.m. Later, your schedule changes.',
+  },
+  4: {
+    title: 'New time suggested',
+    message: 'You have proposed a new time. Now confirm the place and the final plan.',
+  },
+};
+
+const CHAPTER2_MEMORY_TARGETS = [
+  {
+    id: 'accept-and-ask',
+    zh: '可以啊，你明天几点有时间？',
+    py: 'Kěyǐ a, nǐ míngtiān jǐ diǎn yǒu shíjiān?',
+    en: 'Sure. What time are you free tomorrow?',
+    audioText: '可以啊，你明天几点有时间？',
+    firstUseDecision: 1,
+    callbackDecision: 6,
+  },
+  {
+    id: 'original-meeting-time',
+    zh: '那我们明天下午三点见面吧。',
+    py: 'Nà wǒmen míngtiān xiàwǔ sān diǎn jiànmiàn ba.',
+    en: 'Then let’s meet at 3 tomorrow afternoon.',
+    audioText: '那我们明天下午三点见面吧。',
+    firstUseDecision: 2,
+    callbackDecision: 3,
+  },
+  {
+    id: 'explain-schedule-change',
+    zh: '不好意思，我明天可能会晚一点。要不然我们改时间吧？',
+    py: 'Bù hǎoyìsi, wǒ míngtiān kěnéng huì wǎn yìdiǎn. Yàoburán wǒmen gǎi shíjiān ba?',
+    en: 'Sorry, I may be a little late tomorrow. How about we change the time instead?',
+    audioText: '不好意思，我明天可能会晚一点。要不然我们改时间吧？',
+    firstUseDecision: 3,
+    callbackDecision: 6,
+  },
+  {
+    id: 'new-meeting-time',
+    zh: '那我们改到四点吧。',
+    py: 'Nà wǒmen gǎi dào sì diǎn ba.',
+    en: 'Then let’s change it to 4.',
+    audioText: '那我们改到四点吧。',
+    firstUseDecision: 4,
+    callbackDecision: 5,
+  },
+  {
+    id: 'new-time-and-place',
+    zh: '那我们改到四点吧。我们明天下午四点在学校咖啡馆见。',
+    py: 'Nà wǒmen gǎi dào sì diǎn ba. Wǒmen míngtiān xiàwǔ sì diǎn zài xuéxiào kāfēiguǎn jiàn.',
+    en: 'Then let’s change it to 4. We’ll meet at the campus café at 4 tomorrow afternoon.',
+    audioText: '那我们改到四点吧。我们明天下午四点在学校咖啡馆见。',
+    firstUseDecision: 4,
+    callbackDecision: 6,
+  },
+  {
+    id: 'smooth-plan-close',
+    zh: '好的，没问题。明天见！',
+    py: 'Hǎo de, méi wèntí. Míngtiān jiàn!',
+    en: 'Okay, no problem. See you tomorrow!',
+    audioText: '好的，没问题。明天见！',
+    firstUseDecision: 5,
+    callbackDecision: 6,
+  },
+  {
+    id: 'confirmed-plan-close',
+    zh: '对，明天下午四点见。',
+    py: 'Duì, míngtiān xiàwǔ sì diǎn jiàn.',
+    en: 'Yes, see you tomorrow at 4.',
+    audioText: '对，明天下午四点见。',
+    firstUseDecision: 5,
+    callbackDecision: 6,
+  },
+  {
+    id: 'clarification-plan-close',
+    zh: '对，明天下午四点在学校咖啡馆见。',
+    py: 'Duì, míngtiān xiàwǔ sì diǎn zài xuéxiào kāfēiguǎn jiàn.',
+    en: 'Yes, we’re meeting at the campus café at 4 tomorrow afternoon.',
+    audioText: '对，明天下午四点在学校咖啡馆见。',
+    firstUseDecision: 5,
+    callbackDecision: 6,
+  },
+];
+
+const CHAPTER2_MEMORY_MOMENTS = [
+  {
+    id: 'recall-original-meeting-time',
+    decision: 3,
+    targetId: 'original-meeting-time',
+    label: 'Quick memory moment',
+    context: 'Your classmate asks what time you agreed to meet.',
+    npcContext: '我们明天几点见？',
+    npcContextPy: 'Wǒmen míngtiān jǐ diǎn jiàn?',
+    npcContextEn: 'What time are we meeting tomorrow?',
+    contextAudioText: '我们明天几点见？',
+    patternCueZh: '那我们 + 时间 + 见面吧',
+    patternCuePy: 'Nà wǒmen + shíjiān + jiànmiàn ba',
+    patternCueEn: 'Then let’s meet at + time',
+    prompt: 'Recall the complete sentence used to suggest the original meeting time.',
+    firstClue: 'Start with 那我们, then place 明天下午三点 before 见面吧.',
+  },
+  {
+    id: 'recall-new-meeting-time',
+    decision: 5,
+    targetId: 'new-meeting-time',
+    label: 'Quick memory moment',
+    context: 'Your classmate asks for the new meeting time.',
+    npcContext: '那我们几点见？',
+    npcContextPy: 'Nà wǒmen jǐ diǎn jiàn?',
+    npcContextEn: 'Then what time are we meeting?',
+    contextAudioText: '那我们几点见？',
+    patternCueZh: '改到 + 时间',
+    patternCuePy: 'gǎi dào + shíjiān',
+    patternCueEn: 'change it to + time',
+    prompt: 'State the new time using 改到.',
+    firstClue: 'Use 那我们, then 改到, then 四点吧.',
+  },
+];
+
+const CHAPTER2_RETRIEVAL_BY_DECISION = {
+  3: CHAPTER2_MEMORY_MOMENTS[0],
+  5: CHAPTER2_MEMORY_MOMENTS[1],
+};
+
+const CHAPTER2_MEMORY_REPLAY_MOMENTS = [
+  {
+    id: 'replay-accept-and-ask',
+    decision: 1,
+    targetId: 'accept-and-ask',
+    label: 'Language moment 1',
+    npcContext: '明天一起喝咖啡吗？',
+    npcContextPy: 'Míngtiān yìqǐ hē kāfēi ma?',
+    npcContextEn: 'Do you want to get coffee together tomorrow?',
+    contextAudioText: '明天一起喝咖啡吗？',
+    patternCueZh: '可以啊 + 几点有时间',
+    patternCuePy: 'Kěyǐ a + jǐ diǎn yǒu shíjiān',
+    patternCueEn: 'sure + what time are you free',
+    prompt: 'Accept and ask what time your classmate is free.',
+    firstClue: 'Accept with 可以啊, then ask 几点有时间.',
+  },
+  {
+    id: 'replay-original-meeting-time',
+    decision: 2,
+    targetId: 'original-meeting-time',
+    label: 'Language moment 2',
+    npcContext: '我下午有时间。',
+    npcContextPy: 'Wǒ xiàwǔ yǒu shíjiān.',
+    npcContextEn: 'I’m free in the afternoon.',
+    contextAudioText: '我下午有时间。',
+    patternCueZh: '那我们 + 时间 + 见面吧',
+    patternCuePy: 'Nà wǒmen + shíjiān + jiànmiàn ba',
+    patternCueEn: 'Then let’s meet at + time',
+    prompt: 'Suggest the original meeting time.',
+    firstClue: 'Put 明天下午三点 before 见面吧.',
+  },
+  {
+    id: 'replay-explain-schedule-change',
+    decision: 3,
+    targetId: 'explain-schedule-change',
+    label: 'Language moment 3',
+    npcContext: '后来，你的时间有变化。',
+    npcContextPy: 'Hòulái, nǐ de shíjiān yǒu biànhuà.',
+    npcContextEn: 'Later, your schedule changes.',
+    contextAudioText: '后来，你的时间有变化。',
+    patternCueZh: '不好意思 + 可能会晚一点 + 要不然',
+    patternCuePy: 'bù hǎoyìsi + kěnéng huì wǎn yìdiǎn + yàoburán',
+    patternCueEn: 'sorry + may be a little late + how about changing the time instead?',
+    prompt: 'Apologize, explain the likely delay, and suggest changing the time.',
+    firstClue: 'Begin with 不好意思, then explain 可能会晚一点.',
+  },
+  {
+    id: 'replay-new-time-and-place',
+    decision: 5,
+    targetId: 'new-time-and-place',
+    label: 'Language moment 4',
+    npcContext: '那我们几点在哪儿见？',
+    npcContextPy: 'Nà wǒmen jǐ diǎn zài nǎr jiàn?',
+    npcContextEn: 'Then what time and where are we meeting?',
+    contextAudioText: '那我们几点在哪儿见？',
+    patternCueZh: '改到 + 时间；时间 + 在 + 地点 + 见',
+    patternCuePy: 'gǎi dào + shíjiān; shíjiān + zài + dìdiǎn + jiàn',
+    patternCueEn: 'change to + time; time + at + place + meet',
+    prompt: 'Change the meeting to 4 and confirm the campus café.',
+    firstClue: 'Use 改到四点 first, then place 在学校咖啡馆 before 见.',
+  },
+];
+
+const CHAPTER2_OPTION_META = {
+  Natural: { id: 'A', score: 3, relationship: 14 },
+  Stiff: { id: 'B', score: 2, relationship: 3 },
+  Awkward: { id: 'C', score: 1, relationship: -5 },
+  Incorrect: { id: 'D', score: 0, relationship: -10 },
+};
+
+function makeChapter2BranchOptions(entries) {
+  return ['Natural', 'Stiff', 'Awkward', 'Incorrect'].map((rating) => ({
+    ...CHAPTER2_OPTION_META[rating],
+    ...entries[rating],
+    rating,
+    glossary: entries[rating].glossary || [],
+  }));
+}
+
+function getChapter2RatingTier(rating) {
+  if (rating === 'Natural') return 'strong';
+  if (rating === 'Stiff') return 'mixed';
+  if (rating === 'Awkward' || rating === 'Incorrect') return 'weak';
+  return null;
+}
+
+const CHAPTER2_BRANCH_NODES = {
+  decision2: {
+    strong: {
+      branchKey: 'open-time-choice',
+      npcLineZh: '我下午都有时间，你想几点见？',
+      npcLinePy: 'Wǒ xiàwǔ dōu yǒu shíjiān, nǐ xiǎng jǐ diǎn jiàn?',
+      npcLineEn: 'I’m free all afternoon. What time would you like to meet?',
+    },
+    mixed: {
+      branchKey: 'reserved-time-choice',
+      npcLineZh: '我下午有时间。',
+      npcLinePy: 'Wǒ xiàwǔ yǒu shíjiān.',
+      npcLineEn: 'I’m free in the afternoon.',
+    },
+    weak: {
+      branchKey: 'clarified-invitation',
+      npcLineZh: '你的意思是你明天可以喝咖啡，对吗？',
+      npcLinePy: 'Nǐ de yìsi shì nǐ míngtiān kěyǐ hē kāfēi, duì ma?',
+      npcLineEn: 'Do you mean that you can get coffee tomorrow?',
+    },
+  },
+  decision3: {
+    strong: {
+      branchKey: 'clear-original-plan',
+      npcLineZh: '好啊，那就三点见。',
+      npcLinePy: 'Hǎo a, nà jiù sān diǎn jiàn.',
+      npcLineEn: 'Great. See you at 3.',
+    },
+    mixed: {
+      branchKey: 'minimal-original-plan',
+      npcLineZh: '好，三点见。',
+      npcLinePy: 'Hǎo, sān diǎn jiàn.',
+      npcLineEn: 'Okay. See you at 3.',
+    },
+    weak: {
+      branchKey: 'clarified-original-plan',
+      npcLineZh: '你是说明天下午三点见，对吗？',
+      npcLinePy: 'Nǐ shì shuō míngtiān xiàwǔ sān diǎn jiàn, duì ma?',
+      npcLineEn: 'You mean we’re meeting at 3 tomorrow afternoon, right?',
+    },
+  },
+  decision4: {
+    strong: {
+      branchKey: 'cooperative-change',
+      npcLineZh: '没关系。那你想改到几点？',
+      npcLinePy: 'Méi guānxi. Nà nǐ xiǎng gǎi dào jǐ diǎn?',
+      npcLineEn: 'No problem. What time would you like to change it to?',
+    },
+    mixed: {
+      branchKey: 'reserved-change',
+      npcLineZh: '好，你可能会晚一点。那几点比较合适？',
+      npcLinePy: 'Hǎo, nǐ kěnéng huì wǎn yìdiǎn. Nà jǐ diǎn bǐjiào héshì?',
+      npcLineEn: 'Okay, you may be a little late. What time would work better?',
+    },
+    weak: {
+      branchKey: 'unclear-change',
+      npcLineZh: '我没太听明白。三点还可以吗？',
+      npcLinePy: 'Wǒ méi tài tīng míngbai. Sān diǎn hái kěyǐ ma?',
+      npcLineEn: 'I didn’t quite understand. Does 3 p.m. still work?',
+    },
+  },
+  decision5: {
+    strong: {
+      branchKey: 'clear-new-time',
+      npcLineZh: '四点可以。我们还在学校咖啡馆见吗？',
+      npcLinePy: 'Sì diǎn kěyǐ. Wǒmen hái zài xuéxiào kāfēiguǎn jiàn ma?',
+      npcLineEn: 'Four works. Are we still meeting at the campus café?',
+    },
+    mixed: {
+      branchKey: 'minimal-new-time',
+      npcLineZh: '好，四点。我们在哪儿见？',
+      npcLinePy: 'Hǎo, sì diǎn. Wǒmen zài nǎr jiàn?',
+      npcLineEn: 'Okay, 4 o’clock. Where are we meeting?',
+    },
+    weak: {
+      branchKey: 'clarified-new-time',
+      npcLineZh: '所以你想改到四点，对吗？我们在哪儿见？',
+      npcLinePy: 'Suǒyǐ nǐ xiǎng gǎi dào sì diǎn, duì ma? Wǒmen zài nǎr jiàn?',
+      npcLineEn: 'So you want to change it to 4, right? Where are we meeting?',
+    },
+  },
+  decision6: {
+    strong: {
+      branchKey: 'smooth-plan-close',
+      npcLineZh: '好，那就明天下午四点在学校咖啡馆见！',
+      npcLinePy: 'Hǎo, nà jiù míngtiān xiàwǔ sì diǎn zài xuéxiào kāfēiguǎn jiàn!',
+      npcLineEn: 'Great. Then we’ll meet at the campus café at 4 tomorrow afternoon!',
+      options: makeChapter2BranchOptions({
+        Natural: {
+          zh: '好的，没问题。明天见！',
+          py: 'Hǎo de, méi wèntí. Míngtiān jiàn!',
+          en: 'Okay, no problem. See you tomorrow!',
+          explanation: 'Natural and warm. It accepts the confirmed plan and closes the conversation smoothly.',
+          correction: null,
+        },
+        Stiff: {
+          zh: '好，明天见。',
+          py: 'Hǎo, míngtiān jiàn.',
+          en: 'Okay. See you tomorrow.',
+          explanation: 'Correct, but brief after the full plan has been confirmed.',
+          correction: '好的，没问题。明天见！',
+          correctionPy: 'Hǎo de, méi wèntí. Míngtiān jiàn!',
+          correctionEn: 'Okay, no problem. See you tomorrow!',
+          correctionAudioText: '好的，没问题。明天见！',
+        },
+        Awkward: {
+          zh: '好的，没有问题，见明天。',
+          py: 'Hǎo de, méiyǒu wèntí, jiàn míngtiān.',
+          en: 'Okay, no problem, see tomorrow.',
+          explanation: 'The meaning is recoverable, but 明天见 is the natural closing order.',
+          correction: '好的，没问题。明天见！',
+          correctionPy: 'Hǎo de, méi wèntí. Míngtiān jiàn!',
+          correctionEn: 'Okay, no problem. See you tomorrow!',
+          correctionAudioText: '好的，没问题。明天见！',
+        },
+        Incorrect: {
+          zh: '我们几点见？',
+          py: 'Wǒmen jǐ diǎn jiàn?',
+          en: 'What time are we meeting?',
+          explanation: 'The time and place were just clearly confirmed. This unnecessarily reopens settled information.',
+          correction: '好的，没问题。明天见！',
+          correctionPy: 'Hǎo de, méi wèntí. Míngtiān jiàn!',
+          correctionEn: 'Okay, no problem. See you tomorrow!',
+          correctionAudioText: '好的，没问题。明天见！',
+        },
+      }),
+    },
+    mixed: {
+      branchKey: 'confirmed-plan-close',
+      npcLineZh: '好，明天下午四点在学校咖啡馆见，对吧？',
+      npcLinePy: 'Hǎo, míngtiān xiàwǔ sì diǎn zài xuéxiào kāfēiguǎn jiàn, duì ba?',
+      npcLineEn: 'Okay, we’re meeting at the campus café at 4 tomorrow afternoon, right?',
+      options: makeChapter2BranchOptions({
+        Natural: {
+          zh: '对，明天下午四点见。',
+          py: 'Duì, míngtiān xiàwǔ sì diǎn jiàn.',
+          en: 'Yes, see you tomorrow at 4.',
+          explanation: 'Natural and clear. It confirms the corrected time without repeating unnecessary details.',
+          correction: null,
+        },
+        Stiff: {
+          zh: '对，四点。',
+          py: 'Duì, sì diǎn.',
+          en: 'Yes, 4 o’clock.',
+          explanation: 'The time is confirmed, but the response is fragmentary.',
+          correction: '对，明天下午四点见。',
+          correctionPy: 'Duì, míngtiān xiàwǔ sì diǎn jiàn.',
+          correctionEn: 'Yes, see you tomorrow at 4.',
+          correctionAudioText: '对，明天下午四点见。',
+        },
+        Awkward: {
+          zh: '对，明天下午见四点。',
+          py: 'Duì, míngtiān xiàwǔ jiàn sì diǎn.',
+          en: 'Yes, tomorrow afternoon meet 4 o’clock.',
+          explanation: 'The time belongs before 见 in this confirmation.',
+          correction: '对，明天下午四点见。',
+          correctionPy: 'Duì, míngtiān xiàwǔ sì diǎn jiàn.',
+          correctionEn: 'Yes, see you tomorrow at 4.',
+          correctionAudioText: '对，明天下午四点见。',
+        },
+        Incorrect: {
+          zh: '不对，还是三点。',
+          py: 'Bú duì, háishi sān diǎn.',
+          en: 'No, it’s still 3.',
+          explanation: 'This contradicts the new time that was just agreed.',
+          correction: '对，明天下午四点见。',
+          correctionPy: 'Duì, míngtiān xiàwǔ sì diǎn jiàn.',
+          correctionEn: 'Yes, see you tomorrow at 4.',
+          correctionAudioText: '对，明天下午四点见。',
+        },
+      }),
+    },
+    weak: {
+      branchKey: 'clarification-plan-close',
+      npcLineZh: '我再确认一下：你是说明天下午四点在学校咖啡馆见，对吗？',
+      npcLinePy: 'Wǒ zài quèrèn yíxià: nǐ shì shuō míngtiān xiàwǔ sì diǎn zài xuéxiào kāfēiguǎn jiàn, duì ma?',
+      npcLineEn: 'Let me confirm again: you mean we’re meeting at the campus café at 4 tomorrow afternoon, right?',
+      options: makeChapter2BranchOptions({
+        Natural: {
+          zh: '对，明天下午四点在学校咖啡馆见。',
+          py: 'Duì, míngtiān xiàwǔ sì diǎn zài xuéxiào kāfēiguǎn jiàn.',
+          en: 'Yes, we’re meeting at the campus café at 4 tomorrow afternoon.',
+          explanation: 'Natural and complete. It repairs the uncertainty by confirming both time and place.',
+          correction: null,
+        },
+        Stiff: {
+          zh: '对，四点，学校咖啡馆。',
+          py: 'Duì, sì diǎn, xuéxiào kāfēiguǎn.',
+          en: 'Yes, 4 o’clock, the campus café.',
+          explanation: 'The key details are present, but only as fragments.',
+          correction: '对，明天下午四点在学校咖啡馆见。',
+          correctionPy: 'Duì, míngtiān xiàwǔ sì diǎn zài xuéxiào kāfēiguǎn jiàn.',
+          correctionEn: 'Yes, we’re meeting at the campus café at 4 tomorrow afternoon.',
+          correctionAudioText: '对，明天下午四点在学校咖啡馆见。',
+        },
+        Awkward: {
+          zh: '对，我们学校咖啡馆四点见面在。',
+          py: 'Duì, wǒmen xuéxiào kāfēiguǎn sì diǎn jiànmiàn zài.',
+          en: 'Yes, we campus café four o’clock meet at.',
+          explanation: 'The listener can infer the plan, but the time and place order is malformed.',
+          correction: '对，明天下午四点在学校咖啡馆见。',
+          correctionPy: 'Duì, míngtiān xiàwǔ sì diǎn zài xuéxiào kāfēiguǎn jiàn.',
+          correctionEn: 'Yes, we’re meeting at the campus café at 4 tomorrow afternoon.',
+          correctionAudioText: '对，明天下午四点在学校咖啡馆见。',
+        },
+        Incorrect: {
+          zh: '我不知道。',
+          py: 'Wǒ bù zhīdào.',
+          en: 'I don’t know.',
+          explanation: 'This does not confirm the time or place and leaves the plan unresolved.',
+          correction: '对，明天下午四点在学校咖啡馆见。',
+          correctionPy: 'Duì, míngtiān xiàwǔ sì diǎn zài xuéxiào kāfēiguǎn jiàn.',
+          correctionEn: 'Yes, we’re meeting at the campus café at 4 tomorrow afternoon.',
+          correctionAudioText: '对，明天下午四点在学校咖啡馆见。',
+        },
+      }),
+    },
+  },
+};
+
+const CHAPTER2_ENDINGS = {
+  smooth: {
+    label: 'Smooth reschedule',
+    zh: '你及时告诉了同学时间有变化，也确认了新的时间和地点。你们顺利改好了见面计划。',
+    py: 'Nǐ jíshí gàosu le tóngxué shíjiān yǒu biànhuà, yě quèrèn le xīn de shíjiān hé dìdiǎn. Nǐmen shùnlì gǎi hǎo le jiànmiàn jìhuà.',
+    en: 'You explained the schedule change in time and confirmed the new time and place. The meeting was successfully rescheduled.',
+    audioText: '你及时告诉了同学时间有变化，也确认了新的时间和地点。你们顺利改好了见面计划。',
+  },
+  clarified: {
+    label: 'Clear after clarification',
+    zh: '经过几次确认，你们最后确定了新的时间和地点。见面计划可以继续。',
+    py: 'Jīngguò jǐ cì quèrèn, nǐmen zuìhòu quèdìng le xīn de shíjiān hé dìdiǎn. Jiànmiàn jìhuà kěyǐ jìxù.',
+    en: 'After several clarifications, you finally confirmed the new time and place. The meeting can still go ahead.',
+    audioText: '经过几次确认，你们最后确定了新的时间和地点。见面计划可以继续。',
+  },
+  delayed: {
+    label: 'Needs another confirmation',
+    zh: '时间变化没有说明得很清楚。你们还需要再确认一次见面的时间或地点。',
+    py: 'Shíjiān biànhuà méiyǒu shuō de hěn qīngchu. Nǐmen hái xūyào zài quèrèn yí cì jiànmiàn de shíjiān huò dìdiǎn.',
+    en: 'The schedule change was not explained clearly. You still need to confirm the meeting time or place again.',
+    audioText: '时间变化没有说明得很清楚。你们还需要再确认一次见面的时间或地点。',
   },
 };
 
@@ -1074,11 +1595,11 @@ function clampArrayIndex(index, length) {
 function normalizeRestoredNodeIndex(chapterIndex, nodeIndex, nodeSelections) {
   const safeChapterIndex = clampArrayIndex(chapterIndex, chapters.length);
   const safeNodeIndex = clampArrayIndex(nodeIndex, chapters[safeChapterIndex].nodes.length);
-  const completedLegacyChapter1 = safeChapterIndex === 0
+  const completedLegacyThreeDecisionChapter = [0, 1].includes(safeChapterIndex)
     && safeNodeIndex === 2
-    && [0, 1, 2].every((decisionIndex) => Boolean(nodeSelections?.[`0-${decisionIndex}`]))
-    && [3, 4, 5].every((decisionIndex) => !nodeSelections?.[`0-${decisionIndex}`]);
-  const restoredNodeIndex = completedLegacyChapter1 ? 3 : safeNodeIndex;
+    && [0, 1, 2].every((decisionIndex) => Boolean(nodeSelections?.[`${safeChapterIndex}-${decisionIndex}`]))
+    && [3, 4, 5].every((decisionIndex) => !nodeSelections?.[`${safeChapterIndex}-${decisionIndex}`]);
+  const restoredNodeIndex = completedLegacyThreeDecisionChapter ? 3 : safeNodeIndex;
   for (let decisionIndex = 0; decisionIndex < restoredNodeIndex; decisionIndex += 1) {
     if (!nodeSelections?.[`${safeChapterIndex}-${decisionIndex}`]) return decisionIndex;
   }
@@ -1090,10 +1611,11 @@ function restoreSceneRunFromSelections(chapter, chapterIndex, nodeSelections) {
 
   let metrics = { socialComfort: 50, naturalness: 50 };
   const restoredRun = {};
-  chapter.nodes.forEach((node, nodeIndex) => {
+  for (let nodeIndex = 0; nodeIndex < chapter.nodes.length; nodeIndex += 1) {
+    const node = chapter.nodes[nodeIndex];
     const optionId = nodeSelections[`${chapterIndex}-${nodeIndex}`];
     const option = node.options.find((candidate) => candidate.id === optionId);
-    if (!option) return;
+    if (!option) break;
     const previousMetrics = metrics;
     const newMetrics = applySceneMetricChoice(previousMetrics, option);
     restoredRun[nodeIndex] = {
@@ -1105,7 +1627,7 @@ function restoreSceneRunFromSelections(chapter, chapterIndex, nodeSelections) {
       newMetrics,
     };
     metrics = newMetrics;
-  });
+  }
   return restoredRun;
 }
 
@@ -1466,6 +1988,110 @@ const glossary = {
       { zh: '老师今天有时间见你。', py: 'Lǎoshī jīntiān yǒu shíjiān jiàn nǐ.', en: 'The teacher has time to meet you today.' },
     ],
   },
+  '几点': {
+    title: '几点',
+    pinyin: 'jǐ diǎn',
+    translation: 'what time',
+    explanation: '几点 asks for a specific clock time. It is useful when general availability has already been established.',
+    examples: [
+      { zh: '你明天几点有时间？', py: 'Nǐ míngtiān jǐ diǎn yǒu shíjiān?', en: 'What time are you free tomorrow?' },
+      { zh: '我们几点见？', py: 'Wǒmen jǐ diǎn jiàn?', en: 'What time are we meeting?' },
+      { zh: '你几点下课？', py: 'Nǐ jǐ diǎn xiàkè?', en: 'What time does your class end?' },
+      { zh: '咖啡馆几点关门？', py: 'Kāfēiguǎn jǐ diǎn guānmén?', en: 'What time does the café close?' },
+      { zh: '你想改到几点？', py: 'Nǐ xiǎng gǎi dào jǐ diǎn?', en: 'What time would you like to change it to?' },
+    ],
+  },
+  '见面吧': {
+    title: '见面吧',
+    pinyin: 'jiànmiàn ba',
+    translation: 'let’s meet',
+    explanation: '见面 means to meet, and 吧 makes the sentence a friendly suggestion rather than a blunt statement.',
+    examples: [
+      { zh: '那我们明天下午三点见面吧。', py: 'Nà wǒmen míngtiān xiàwǔ sān diǎn jiànmiàn ba.', en: 'Then let’s meet at 3 tomorrow afternoon.' },
+      { zh: '我们星期五见面吧。', py: 'Wǒmen Xīngqīwǔ jiànmiàn ba.', en: 'Let’s meet on Friday.' },
+      { zh: '下课以后见面吧。', py: 'Xiàkè yǐhòu jiànmiàn ba.', en: 'Let’s meet after class.' },
+      { zh: '在学校门口见面吧。', py: 'Zài xuéxiào ménkǒu jiànmiàn ba.', en: 'Let’s meet at the school entrance.' },
+      { zh: '有时间我们再见面吧。', py: 'Yǒu shíjiān wǒmen zài jiànmiàn ba.', en: 'Let’s meet again when we have time.' },
+    ],
+  },
+  '可能会晚一点': {
+    title: '可能会晚一点',
+    pinyin: 'kěnéng huì wǎn yìdiǎn',
+    translation: 'may be a little late',
+    explanation: '可能 marks possibility, while 会 presents the predicted result. Here 会 does not describe learned ability.',
+    examples: [
+      { zh: '我明天可能会晚一点。', py: 'Wǒ míngtiān kěnéng huì wǎn yìdiǎn.', en: 'I may be a little late tomorrow.' },
+      { zh: '他今天可能会晚一点到。', py: 'Tā jīntiān kěnéng huì wǎn yìdiǎn dào.', en: 'He may arrive a little late today.' },
+      { zh: '下雨的话，我们可能会晚一点。', py: 'Xiàyǔ de huà, wǒmen kěnéng huì wǎn yìdiǎn.', en: 'If it rains, we may be a little late.' },
+      { zh: '不好意思，我可能会晚一点来。', py: 'Bù hǎoyìsi, wǒ kěnéng huì wǎn yìdiǎn lái.', en: 'Sorry, I may come a little late.' },
+      { zh: '地铁很慢，她可能会晚一点。', py: 'Dìtiě hěn màn, tā kěnéng huì wǎn yìdiǎn.', en: 'The subway is slow, so she may be a little late.' },
+    ],
+  },
+  '改时间': {
+    title: '改时间',
+    pinyin: 'gǎi shíjiān',
+    translation: 'change the time',
+    explanation: '改时间 describes changing the schedule generally. Use 改到 when you want to name the new time.',
+    examples: [
+      { zh: '要不然我们改时间吧？', py: 'Yàoburán wǒmen gǎi shíjiān ba?', en: 'How about we change the time instead?' },
+      { zh: '我想改时间。', py: 'Wǒ xiǎng gǎi shíjiān.', en: 'I want to change the time.' },
+      { zh: '现在改时间还来得及吗？', py: 'Xiànzài gǎi shíjiān hái lái de jí ma?', en: 'Is there still time to change the schedule now?' },
+      { zh: '如果你不方便，我们可以改时间。', py: 'Rúguǒ nǐ bù fāngbiàn, wǒmen kěyǐ gǎi shíjiān.', en: 'If it is inconvenient for you, we can change the time.' },
+      { zh: '她打电话来改时间。', py: 'Tā dǎ diànhuà lái gǎi shíjiān.', en: 'She called to change the time.' },
+    ],
+  },
+  '改到': {
+    title: '改到',
+    pinyin: 'gǎi dào',
+    translation: 'change it to',
+    explanation: '改到 introduces the new destination in time: 改到 + the new time or day.',
+    examples: [
+      { zh: '那我们改到四点吧。', py: 'Nà wǒmen gǎi dào sì diǎn ba.', en: 'Then let’s change it to 4.' },
+      { zh: '可以改到明天吗？', py: 'Kěyǐ gǎi dào míngtiān ma?', en: 'Can we move it to tomorrow?' },
+      { zh: '会议改到星期五了。', py: 'Huìyì gǎi dào Xīngqīwǔ le.', en: 'The meeting has been moved to Friday.' },
+      { zh: '我们把时间改到晚上。', py: 'Wǒmen bǎ shíjiān gǎi dào wǎnshang.', en: 'Let’s change the time to the evening.' },
+      { zh: '你想改到几点？', py: 'Nǐ xiǎng gǎi dào jǐ diǎn?', en: 'What time would you like to change it to?' },
+    ],
+  },
+  '在哪儿见': {
+    title: '在哪儿见',
+    pinyin: 'zài nǎr jiàn',
+    translation: 'where to meet',
+    explanation: 'Use 在哪儿见 to ask for a meeting place. 在 introduces the location before 见.',
+    examples: [
+      { zh: '我们在哪儿见？', py: 'Wǒmen zài nǎr jiàn?', en: 'Where are we meeting?' },
+      { zh: '明天在哪儿见？', py: 'Míngtiān zài nǎr jiàn?', en: 'Where are we meeting tomorrow?' },
+      { zh: '你想在哪儿见？', py: 'Nǐ xiǎng zài nǎr jiàn?', en: 'Where would you like to meet?' },
+      { zh: '下课以后在哪儿见？', py: 'Xiàkè yǐhòu zài nǎr jiàn?', en: 'Where should we meet after class?' },
+      { zh: '我们几点在哪儿见？', py: 'Wǒmen jǐ diǎn zài nǎr jiàn?', en: 'What time and where are we meeting?' },
+    ],
+  },
+  '在学校咖啡馆见': {
+    title: '在学校咖啡馆见',
+    pinyin: 'zài xuéxiào kāfēiguǎn jiàn',
+    translation: 'meet at the campus café',
+    explanation: 'The place phrase with 在 comes before the action 见.',
+    examples: [
+      { zh: '我们在学校咖啡馆见。', py: 'Wǒmen zài xuéxiào kāfēiguǎn jiàn.', en: 'We’ll meet at the campus café.' },
+      { zh: '明天下午在学校咖啡馆见吧。', py: 'Míngtiān xiàwǔ zài xuéxiào kāfēiguǎn jiàn ba.', en: 'Let’s meet at the campus café tomorrow afternoon.' },
+      { zh: '我想四点在学校咖啡馆见。', py: 'Wǒ xiǎng sì diǎn zài xuéxiào kāfēiguǎn jiàn.', en: 'I would like to meet at the campus café at 4.' },
+      { zh: '我们还是在学校咖啡馆见吗？', py: 'Wǒmen háishi zài xuéxiào kāfēiguǎn jiàn ma?', en: 'Are we still meeting at the campus café?' },
+      { zh: '对，明天下午四点在学校咖啡馆见。', py: 'Duì, míngtiān xiàwǔ sì diǎn zài xuéxiào kāfēiguǎn jiàn.', en: 'Yes, we’re meeting at the campus café at 4 tomorrow afternoon.' },
+    ],
+  },
+  '那就': {
+    title: '那就',
+    pinyin: 'nà jiù',
+    translation: 'then; in that case',
+    explanation: '那就 accepts the situation and moves directly to the resulting plan or decision.',
+    examples: [
+      { zh: '好啊，那就三点见。', py: 'Hǎo a, nà jiù sān diǎn jiàn.', en: 'Great. Then see you at 3.' },
+      { zh: '那就四点吧。', py: 'Nà jiù sì diǎn ba.', en: 'Then let’s make it 4.' },
+      { zh: '你下午有时间，那就下午见。', py: 'Nǐ xiàwǔ yǒu shíjiān, nà jiù xiàwǔ jiàn.', en: 'You are free in the afternoon, so let’s meet then.' },
+      { zh: '今天不方便，那就明天吧。', py: 'Jīntiān bù fāngbiàn, nà jiù míngtiān ba.', en: 'Today is inconvenient, so let’s make it tomorrow.' },
+      { zh: '好，那就在学校见。', py: 'Hǎo, nà jiù zài xuéxiào jiàn.', en: 'Okay, then let’s meet at school.' },
+    ],
+  },
   '可能': {
     title: '可能',
     pinyin: 'kěnéng',
@@ -1511,15 +2137,15 @@ const glossary = {
   '要不然': {
     title: '要不然',
     pinyin: 'yàoburán',
-    translation: 'otherwise / if not / how about instead',
+    translation: 'otherwise / or else / how about ... instead?',
     explanation:
-      'In spoken Chinese, 要不然 often introduces an alternative after a problem appears. In this context it works like “if that does not work, then…” or “otherwise, shall we…”',
+      '要不然 has two common uses. It can introduce a consequence if advice or a condition is not followed: “otherwise” or “or else.” In conversation, it can introduce an alternative after the first plan does not work: “How about ... instead?” or “Why don’t we ... instead?” In Chapter 2: 不好意思，我明天可能会晚一点。要不然我们改时间吧？ = “Sorry, I may be a little late tomorrow. How about we change the time instead?”',
     examples: [
-      { zh: '要不然我们明天见吧。', py: 'Yàoburán wǒmen míngtiān jiàn ba.', en: 'Otherwise, let’s meet tomorrow.' },
-      { zh: '你坐地铁吧，要不然会迟到。', py: 'Nǐ zuò dìtiě ba, yàoburán huì chídào.', en: 'Take the subway, otherwise you will be late.' },
-      { zh: '要不然我们先吃饭吧。', py: 'Yàoburán wǒmen xiān chīfàn ba.', en: 'Otherwise, let’s eat first.' },
-      { zh: '要不然你问老师一下？', py: 'Yàoburán nǐ wèn lǎoshī yíxià?', en: 'Otherwise, how about asking the teacher?' },
-      { zh: '今天不行，要不然改到周五吧。', py: 'Jīntiān bù xíng, yàoburán gǎi dào Zhōuwǔ ba.', en: 'Today does not work. Otherwise, let’s move it to Friday.' },
+      { zh: '要不然我们明天见吧。', py: 'Yàoburán wǒmen míngtiān jiàn ba.', en: 'How about we meet tomorrow instead?' },
+      { zh: '你坐地铁吧，要不然会迟到。', py: 'Nǐ zuò dìtiě ba, yàoburán huì chídào.', en: 'Take the subway, otherwise you’ll be late.' },
+      { zh: '要不然我们先吃饭吧。', py: 'Yàoburán wǒmen xiān chīfàn ba.', en: 'How about we eat first instead?' },
+      { zh: '要不然你问老师一下？', py: 'Yàoburán nǐ wèn lǎoshī yíxià?', en: 'Why don’t you ask the teacher?' },
+      { zh: '今天不行，要不然改到周五吧。', py: 'Jīntiān bù xíng, yàoburán gǎi dào Zhōuwǔ ba.', en: 'Today doesn’t work. How about moving it to Friday instead?' },
     ],
   },
   '不好意思': {
@@ -2653,16 +3279,28 @@ const chapters = [
     grammarNotes: [
       {
         id: 'you-time',
-        title: 'Why 你明天有时间吗 sounds natural',
-        short: '有时间 is the normal way to ask if someone is available.',
+        title: 'Why 有时间 asks about availability',
+        short: '有时间 is the normal way to ask if someone is available, while 几点 asks for a clock time.',
         body: [
-          'Chinese usually asks availability with 有时间, not with a direct translation of “are you free” in every case.',
-          '你明天有时间吗？ literally means “Do you have time tomorrow?”',
-          'For learners, treat it as a high-frequency chunk for making plans.',
+          'Chinese commonly asks availability with 有时间. 你明天有时间吗？ literally means “Do you have time tomorrow?” and naturally means “Are you free tomorrow?”',
+          'Use 几点 when you want a specific clock time.',
         ],
         examples: [
           { zh: '你晚上有时间吗？', py: 'Nǐ wǎnshang yǒu shíjiān ma?', en: 'Are you free tonight?' },
-          { zh: '你周末有时间吗？', py: 'Nǐ zhōumò yǒu shíjiān ma?', en: 'Are you free this weekend?' },
+          { zh: '你明天几点有时间？', py: 'Nǐ míngtiān jǐ diǎn yǒu shíjiān?', en: 'What time are you free tomorrow?' },
+        ],
+      },
+      {
+        id: 'time-before-action',
+        title: 'Time comes before the action',
+        short: 'Put 明天下午三点 before 见面, then use 吧 to make a friendly suggestion.',
+        body: [
+          'Use Subject + Time + Action: 我们 + 明天下午三点 + 见面.',
+          '吧 makes 那我们明天下午三点见面吧 sound like a friendly suggestion.',
+        ],
+        examples: [
+          { zh: '那我们明天下午三点见面吧。', py: 'Nà wǒmen míngtiān xiàwǔ sān diǎn jiànmiàn ba.', en: 'Then let’s meet at 3 tomorrow afternoon.' },
+          { zh: '我们星期五见面吧。', py: 'Wǒmen Xīngqīwǔ jiànmiàn ba.', en: 'Let’s meet on Friday.' },
         ],
       },
       {
@@ -2680,17 +3318,56 @@ const chapters = [
         ],
       },
       {
+        id: 'change-to-time',
+        title: '改到 + new time',
+        short: '改时间 is general; 改到 introduces the specific new time.',
+        body: [
+          '改时间 means “change the time” generally. 改到四点 means “change it specifically to 4.”',
+          'Use the pattern 改到 + time.',
+        ],
+        examples: [
+          { zh: '改到四点。', py: 'Gǎi dào sì diǎn.', en: 'Change it to 4.' },
+          { zh: '改到明天。', py: 'Gǎi dào míngtiān.', en: 'Move it to tomorrow.' },
+          { zh: '改到星期五。', py: 'Gǎi dào Xīngqīwǔ.', en: 'Move it to Friday.' },
+        ],
+      },
+      {
+        id: 'time-place-action',
+        title: 'Subject + Time + Place + Action',
+        short: 'Put the time first, then 在 + place, then the action.',
+        body: [
+          'Build the confirmation as 我们 + 明天下午四点 + 在学校咖啡馆 + 见.',
+          'The meeting place uses 在: 在学校咖啡馆见.',
+        ],
+        examples: [
+          { zh: '我们明天下午四点在学校咖啡馆见。', py: 'Wǒmen míngtiān xiàwǔ sì diǎn zài xuéxiào kāfēiguǎn jiàn.', en: 'We’ll meet at the campus café at 4 tomorrow afternoon.' },
+          { zh: '我们星期五在学校见。', py: 'Wǒmen Xīngqīwǔ zài xuéxiào jiàn.', en: 'We’ll meet at school on Friday.' },
+        ],
+      },
+      {
+        id: 'plan-recap',
+        title: 'Confirm the final plan',
+        short: 'A clear closing confirms the time, place, and final phrase without introducing new grammar.',
+        body: [
+          'At the end, confirm the settled time and place, then close with a familiar phrase such as 明天见.',
+        ],
+        examples: [
+          { zh: '对，明天下午四点在学校咖啡馆见。', py: 'Duì, míngtiān xiàwǔ sì diǎn zài xuéxiào kāfēiguǎn jiàn.', en: 'Yes, we’re meeting at the campus café at 4 tomorrow afternoon.' },
+          { zh: '好的，没问题。明天见！', py: 'Hǎo de, méi wèntí. Míngtiān jiàn!', en: 'Okay, no problem. See you tomorrow!' },
+        ],
+      },
+      {
         id: 'yaoburan',
         title: 'What does 要不然 mean here?',
         short: 'Here it introduces an alternative after a problem appears.',
         body: [
-          'In spoken Chinese, 要不然 often means “otherwise / if not / then how about this instead?”',
-          'In this chapter, it helps the speaker move from a problem to a solution.',
-          'So 要不然我们改时间吧？ feels like: “If that does not work, shall we change the time?”',
+          'Here, 要不然 introduces an alternative after a problem appears.',
+          'Use the pattern: Problem + 要不然 + alternative suggestion.',
+          '要不然 can also mean “otherwise” when it introduces a consequence, but that is not its role in this chapter.',
         ],
         examples: [
-          { zh: '要不然我们明天见吧。', py: 'Yàoburán wǒmen míngtiān jiàn ba.', en: 'Otherwise, let’s meet tomorrow.' },
-          { zh: '要不然你先回家吧。', py: 'Yàoburán nǐ xiān huí jiā ba.', en: 'Otherwise, you should go home first.' },
+          { zh: '要不然我们明天见吧。', py: 'Yàoburán wǒmen míngtiān jiàn ba.', en: 'How about we meet tomorrow instead?' },
+          { zh: '要不然你先回家吧。', py: 'Yàoburán nǐ xiān huí jiā ba.', en: 'How about you go home first instead?' },
         ],
       },
       {
@@ -2740,6 +3417,9 @@ const chapters = [
             relationship: 3,
             explanation: 'It works, but it repeats the idea of tomorrow a bit stiffly after already accepting.',
             correction: '可以啊，你明天几点有时间？',
+            correctionPy: 'Kěyǐ a, nǐ míngtiān jǐ diǎn yǒu shíjiān?',
+            correctionEn: 'Sure. What time are you free tomorrow?',
+            correctionAudioText: '可以啊，你明天几点有时间？',
             glossary: ['有时间'],
           },
           {
@@ -2752,6 +3432,9 @@ const chapters = [
             relationship: -5,
             explanation: 'The learner is trying to build the sentence from English pieces. Chinese does not arrange it this way.',
             correction: '你明天有时间吗？',
+            correctionPy: 'Nǐ míngtiān yǒu shíjiān ma?',
+            correctionEn: 'Are you free tomorrow?',
+            correctionAudioText: '你明天有时间吗？',
             glossary: ['有时间'],
           },
           {
@@ -2764,17 +3447,21 @@ const chapters = [
             relationship: -10,
             explanation: 'You repeated the invitation instead of responding to it.',
             correction: '可以啊，你明天几点有时间？',
+            correctionPy: 'Kěyǐ a, nǐ míngtiān jǐ diǎn yǒu shíjiān?',
+            correctionEn: 'Sure. What time are you free tomorrow?',
+            correctionAudioText: '可以啊，你明天几点有时间？',
             glossary: [],
           },
         ],
       },
       {
         id: 2,
-        mission: 'Suggest a meeting time naturally.',
+        mission: 'Suggest the original meeting time naturally.',
+        legacyMissions: ['Suggest a meeting time naturally.'],
         npc: 'Classmate',
-        npcLineZh: '我下午有时间。',
-        npcLinePy: 'Wǒ xiàwǔ yǒu shíjiān.',
-        npcLineEn: 'I’m free in the afternoon.',
+        npcLineZh: '我下午都有时间，你想几点见？',
+        npcLinePy: 'Wǒ xiàwǔ dōu yǒu shíjiān, nǐ xiǎng jǐ diǎn jiàn?',
+        npcLineEn: 'I’m free all afternoon. What time would you like to meet?',
         npcGlossary: ['有时间'],
         options: [
           {
@@ -2799,6 +3486,9 @@ const chapters = [
             relationship: -4,
             explanation: 'English learners often put the action first, but Chinese usually puts the time before the verb.',
             correction: '我们明天下午三点见面吧。',
+            correctionPy: 'Wǒmen míngtiān xiàwǔ sān diǎn jiànmiàn ba.',
+            correctionEn: 'Let’s meet at 3 tomorrow afternoon.',
+            correctionAudioText: '我们明天下午三点见面吧。',
             glossary: [],
           },
           {
@@ -2811,6 +3501,9 @@ const chapters = [
             relationship: 2,
             explanation: 'It is understandable, but too thin. The learner is not building a full useful planning sentence.',
             correction: '那我们明天下午三点见面吧。',
+            correctionPy: 'Nà wǒmen míngtiān xiàwǔ sān diǎn jiànmiàn ba.',
+            correctionEn: 'Then let’s meet at 3 tomorrow afternoon.',
+            correctionAudioText: '那我们明天下午三点见面吧。',
             glossary: [],
           },
           {
@@ -2823,24 +3516,28 @@ const chapters = [
             relationship: -8,
             explanation: 'This is not fully wrong in another context, but here the other person already said they are free in the afternoon. The better next step is to suggest a time.',
             correction: '那我们明天下午三点见面吧。',
+            correctionPy: 'Nà wǒmen míngtiān xiàwǔ sān diǎn jiànmiàn ba.',
+            correctionEn: 'Then let’s meet at 3 tomorrow afternoon.',
+            correctionAudioText: '那我们明天下午三点见面吧。',
             glossary: ['有时间'],
           },
         ],
       },
       {
         id: 3,
-        mission: 'Say that you may be a little late and reschedule politely if needed.',
+        mission: 'Explain that you may be late and suggest changing the plan politely.',
+        legacyMissions: ['Say that you may be a little late and reschedule politely if needed.'],
         npc: 'Classmate',
         npcLineZh: '好啊，那就三点见。',
         npcLinePy: 'Hǎo a, nà jiù sān diǎn jiàn.',
-        npcLineEn: 'Sounds good, see you at 3.',
+        npcLineEn: 'Great. See you at 3.',
         npcGlossary: [],
         options: [
           {
             id: 'A',
             zh: '不好意思，我明天可能会晚一点。要不然我们改时间吧？',
             py: 'Bù hǎoyìsi, wǒ míngtiān kěnéng huì wǎn yìdiǎn. Yàoburán wǒmen gǎi shíjiān ba?',
-            en: 'Sorry, I may be a little late tomorrow. Otherwise, shall we reschedule?',
+            en: 'Sorry, I may be a little late tomorrow. How about we change the time instead?',
             rating: 'Natural',
             score: 3,
             relationship: 14,
@@ -2858,6 +3555,9 @@ const chapters = [
             relationship: -5,
             explanation: 'The learner knows 晚一点 but is not building a complete sentence. Chinese needs a clearer structure here.',
             correction: '我明天可能会晚一点到。',
+            correctionPy: 'Wǒ míngtiān kěnéng huì wǎn yìdiǎn dào.',
+            correctionEn: 'I may arrive a little late tomorrow.',
+            correctionAudioText: '我明天可能会晚一点到。',
             glossary: ['晚一点'],
           },
           {
@@ -2870,6 +3570,9 @@ const chapters = [
             relationship: 3,
             explanation: 'Good and useful, but it stops one step early. Offering a solution would be even better.',
             correction: '不好意思，我明天可能会晚一点到。要不然我们改时间吧？',
+            correctionPy: 'Bù hǎoyìsi, wǒ míngtiān kěnéng huì wǎn yìdiǎn dào. Yàoburán wǒmen gǎi shíjiān ba?',
+            correctionEn: 'Sorry, I may arrive a little late tomorrow. How about we change the time instead?',
+            correctionAudioText: '不好意思，我明天可能会晚一点到。要不然我们改时间吧？',
             glossary: ['不好意思', '可能', '会', '晚一点'],
           },
           {
@@ -2882,9 +3585,158 @@ const chapters = [
             relationship: -10,
             explanation: 'This ignores the new problem. Once your schedule changes, you need to signal it clearly.',
             correction: '不好意思，我明天可能会晚一点。要不然我们改时间吧？',
+            correctionPy: 'Bù hǎoyìsi, wǒ míngtiān kěnéng huì wǎn yìdiǎn. Yàoburán wǒmen gǎi shíjiān ba?',
+            correctionEn: 'Sorry, I may be a little late tomorrow. How about we change the time instead?',
+            correctionAudioText: '不好意思，我明天可能会晚一点。要不然我们改时间吧？',
             glossary: [],
           },
         ],
+      },
+      {
+        id: 4,
+        mission: 'Propose a specific new meeting time.',
+        npc: 'Classmate',
+        npcLineZh: '没关系。那你想改到几点？',
+        npcLinePy: 'Méi guānxi. Nà nǐ xiǎng gǎi dào jǐ diǎn?',
+        npcLineEn: 'No problem. What time would you like to change it to?',
+        npcGlossary: [],
+        options: [
+          {
+            id: 'A',
+            zh: '那我们改到四点吧。',
+            py: 'Nà wǒmen gǎi dào sì diǎn ba.',
+            en: 'Then let’s change it to 4.',
+            rating: 'Natural',
+            score: 3,
+            relationship: 12,
+            explanation: 'Natural and specific. 改到 directly introduces the new time.',
+            correction: null,
+            glossary: [],
+          },
+          {
+            id: 'B',
+            zh: '那就四点。',
+            py: 'Nà jiù sì diǎn.',
+            en: 'Then 4 o’clock.',
+            rating: 'Stiff',
+            score: 2,
+            relationship: 3,
+            explanation: 'Understandable and contextually possible, but it does not clearly state that the original plan is being changed.',
+            correction: '那我们改到四点吧。',
+            correctionPy: 'Nà wǒmen gǎi dào sì diǎn ba.',
+            correctionEn: 'Then let’s change it to 4.',
+            correctionAudioText: '那我们改到四点吧。',
+            glossary: [],
+          },
+          {
+            id: 'C',
+            zh: '我们时间改四点。',
+            py: 'Wǒmen shíjiān gǎi sì diǎn.',
+            en: 'We time change four o’clock.',
+            rating: 'Awkward',
+            score: 1,
+            relationship: -5,
+            explanation: 'The intended time is clear, but Chinese normally uses 改到 before the new time.',
+            correction: '我们改到四点吧。',
+            correctionPy: 'Wǒmen gǎi dào sì diǎn ba.',
+            correctionEn: 'Let’s change it to 4.',
+            correctionAudioText: '我们改到四点吧。',
+            glossary: [],
+          },
+          {
+            id: 'D',
+            zh: '还是三点见。',
+            py: 'Háishi sān diǎn jiàn.',
+            en: 'Let’s still meet at 3.',
+            rating: 'Incorrect',
+            score: 0,
+            relationship: -10,
+            explanation: 'This ignores the schedule problem and does not propose a workable new time.',
+            correction: '那我们改到四点吧。',
+            correctionPy: 'Nà wǒmen gǎi dào sì diǎn ba.',
+            correctionEn: 'Then let’s change it to 4.',
+            correctionAudioText: '那我们改到四点吧。',
+            glossary: [],
+          },
+        ],
+      },
+      {
+        id: 5,
+        mission: 'Confirm the meeting place and restate the new plan clearly.',
+        npc: 'Classmate',
+        npcLineZh: '四点可以。我们还在学校咖啡馆见吗？',
+        npcLinePy: 'Sì diǎn kěyǐ. Wǒmen hái zài xuéxiào kāfēiguǎn jiàn ma?',
+        npcLineEn: 'Four works. Are we still meeting at the campus café?',
+        npcGlossary: [],
+        options: [
+          {
+            id: 'A',
+            zh: '对，我们明天下午四点在学校咖啡馆见吧。',
+            py: 'Duì, wǒmen míngtiān xiàwǔ sì diǎn zài xuéxiào kāfēiguǎn jiàn ba.',
+            en: 'Yes, let’s meet at the campus café at 4 tomorrow afternoon.',
+            rating: 'Natural',
+            score: 3,
+            relationship: 12,
+            explanation: 'Natural and complete. It confirms the new time and the meeting place in normal Chinese order.',
+            correction: null,
+            glossary: [],
+          },
+          {
+            id: 'B',
+            zh: '学校咖啡馆，四点。',
+            py: 'Xuéxiào kāfēiguǎn, sì diǎn.',
+            en: 'The campus café, 4 o’clock.',
+            rating: 'Stiff',
+            score: 2,
+            relationship: 3,
+            explanation: 'The essential information is present, but it is fragmentary rather than a full confirmation.',
+            correction: '我们明天下午四点在学校咖啡馆见吧。',
+            correctionPy: 'Wǒmen míngtiān xiàwǔ sì diǎn zài xuéxiào kāfēiguǎn jiàn ba.',
+            correctionEn: 'Let’s meet at the campus café at 4 tomorrow afternoon.',
+            correctionAudioText: '我们明天下午四点在学校咖啡馆见吧。',
+            glossary: [],
+          },
+          {
+            id: 'C',
+            zh: '四点我们见学校咖啡馆。',
+            py: 'Sì diǎn wǒmen jiàn xuéxiào kāfēiguǎn.',
+            en: 'At 4 we meet campus café.',
+            rating: 'Awkward',
+            score: 1,
+            relationship: -5,
+            explanation: 'The listener can identify the time and place, but the place needs 在 and normally comes before 见.',
+            correction: '我们明天下午四点在学校咖啡馆见吧。',
+            correctionPy: 'Wǒmen míngtiān xiàwǔ sì diǎn zài xuéxiào kāfēiguǎn jiàn ba.',
+            correctionEn: 'Let’s meet at the campus café at 4 tomorrow afternoon.',
+            correctionAudioText: '我们明天下午四点在学校咖啡馆见吧。',
+            glossary: [],
+          },
+          {
+            id: 'D',
+            zh: '我明天没有时间。',
+            py: 'Wǒ míngtiān méiyǒu shíjiān.',
+            en: 'I’m not free tomorrow.',
+            rating: 'Incorrect',
+            score: 0,
+            relationship: -10,
+            explanation: 'This rejects the entire meeting after a new time has already been proposed instead of confirming the location.',
+            correction: '对，我们明天下午四点在学校咖啡馆见吧。',
+            correctionPy: 'Duì, wǒmen míngtiān xiàwǔ sì diǎn zài xuéxiào kāfēiguǎn jiàn ba.',
+            correctionEn: 'Yes, let’s meet at the campus café at 4 tomorrow afternoon.',
+            correctionAudioText: '对，我们明天下午四点在学校咖啡馆见吧。',
+            glossary: [],
+          },
+        ],
+      },
+      {
+        id: 6,
+        mission: 'Confirm the final plan clearly and close the conversation naturally.',
+        npc: 'Classmate',
+        npcLineZh: CHAPTER2_BRANCH_NODES.decision6.strong.npcLineZh,
+        npcLinePy: CHAPTER2_BRANCH_NODES.decision6.strong.npcLinePy,
+        npcLineEn: CHAPTER2_BRANCH_NODES.decision6.strong.npcLineEn,
+        npcGlossary: [],
+        options: CHAPTER2_BRANCH_NODES.decision6.strong.options,
       },
     ],
   },
@@ -4004,8 +4856,8 @@ const highlightTiers = (primaryGlossaryKeys = [], recycledGlossaryKeys = []) => 
   recycledGlossaryKeys,
 });
 
-// Chapters 1–5 keep their existing three-decision stories, but every rendered
-// NPC line and option now has an explicit curriculum-authored highlight map.
+// Every rendered Story NPC line and option has an explicit curriculum-authored
+// highlight map.
 // An empty map is intentional: legacy glossary metadata must not create a
 // highlight unless the language is a teaching or review target in that line.
 const STORY_HIGHLIGHT_MAP = Object.freeze({
@@ -4067,29 +4919,56 @@ const STORY_HIGHLIGHT_MAP = Object.freeze({
   },
   chapter2: {
     1: {
-      npc: highlightTiers(),
+      npc: highlightTiers([], ['一起']),
       options: {
-        A: highlightTiers(['有时间']),
+        A: highlightTiers(['几点', '有时间']),
         B: highlightTiers(['有时间']),
         C: highlightTiers(),
-        D: highlightTiers(),
+        D: highlightTiers([], ['一起']),
       },
     },
     2: {
-      npc: highlightTiers([], ['有时间']),
+      npc: highlightTiers([], ['有时间', '几点']),
       options: {
-        A: highlightTiers(),
+        A: highlightTiers(['见面吧']),
         B: highlightTiers(),
         C: highlightTiers(),
         D: highlightTiers([], ['有时间']),
       },
     },
     3: {
-      npc: highlightTiers(),
+      npc: highlightTiers([], ['那就']),
       options: {
-        A: highlightTiers(['可能', '会', '要不然']),
-        B: highlightTiers(['晚一点']),
-        C: highlightTiers(['可能', '会', '晚一点']),
+        A: highlightTiers(['不好意思', '可能会晚一点', '要不然'], ['改时间']),
+        B: highlightTiers(),
+        C: highlightTiers(['不好意思', '可能会晚一点']),
+        D: highlightTiers(),
+      },
+    },
+    4: {
+      npc: highlightTiers(['改到'], ['几点', '可能会晚一点']),
+      options: {
+        A: highlightTiers(['改到']),
+        B: highlightTiers([], ['那就']),
+        C: highlightTiers(),
+        D: highlightTiers(),
+      },
+    },
+    5: {
+      npc: highlightTiers(['在哪儿见'], ['在学校咖啡馆见', '改到']),
+      options: {
+        A: highlightTiers(['在学校咖啡馆见']),
+        B: highlightTiers(),
+        C: highlightTiers(),
+        D: highlightTiers(),
+      },
+    },
+    6: {
+      npc: highlightTiers([], ['那就', '在学校咖啡馆见']),
+      options: {
+        A: highlightTiers([], ['在学校咖啡馆见']),
+        B: highlightTiers(),
+        C: highlightTiers(),
         D: highlightTiers(),
       },
     },
@@ -4252,8 +5131,16 @@ const TEACHER_NOTE_SUPPORT = Object.freeze({
     ],
   },
   'chapter2:you-time': {
-    terms: [{ zh: '有时间', py: 'yǒu shíjiān', en: 'have time; be available', audioText: '有时间' }],
+    terms: [
+      { zh: '有时间', py: 'yǒu shíjiān', en: 'have time; be available', audioText: '有时间' },
+      { zh: '几点', py: 'jǐ diǎn', en: 'what time', audioText: '几点' },
+    ],
     example: { zh: '你明天有时间吗？', py: 'Nǐ míngtiān yǒu shíjiān ma?', en: 'Are you free tomorrow?', audioText: '你明天有时间吗？' },
+  },
+  'chapter2:time-before-action': {
+    terms: [{ zh: '见面吧', py: 'jiànmiàn ba', en: 'let’s meet; a friendly suggestion', audioText: '见面吧' }],
+    pattern: { zh: '我们 + 明天下午三点 + 见面', py: 'wǒmen + míngtiān xiàwǔ sān diǎn + jiànmiàn', en: 'subject + time + action', audioText: '我们明天下午三点见面。' },
+    example: { zh: '那我们明天下午三点见面吧。', py: 'Nà wǒmen míngtiān xiàwǔ sān diǎn jiànmiàn ba.', en: 'Then let’s meet at 3 tomorrow afternoon.', audioText: '那我们明天下午三点见面吧。' },
   },
   'chapter2:possible-future': {
     terms: [
@@ -4262,9 +5149,29 @@ const TEACHER_NOTE_SUPPORT = Object.freeze({
     ],
     example: { zh: '我明天可能会晚一点', py: 'Wǒ míngtiān kěnéng huì wǎn yìdiǎn', en: 'I may be a little late tomorrow', audioText: '我明天可能会晚一点。' },
   },
+  'chapter2:change-to-time': {
+    terms: [
+      { zh: '改时间', py: 'gǎi shíjiān', en: 'change the time generally', audioText: '改时间' },
+      { zh: '改到', py: 'gǎi dào', en: 'change it to a specific time', audioText: '改到' },
+    ],
+    pattern: { zh: '改到 + 时间', py: 'gǎi dào + shíjiān', en: 'change it to + time', audioText: '改到四点。' },
+    example: { zh: '那我们改到四点吧。', py: 'Nà wǒmen gǎi dào sì diǎn ba.', en: 'Then let’s change it to 4.', audioText: '那我们改到四点吧。' },
+  },
+  'chapter2:time-place-action': {
+    terms: [{ zh: '在学校咖啡馆见', py: 'zài xuéxiào kāfēiguǎn jiàn', en: 'meet at the campus café', audioText: '在学校咖啡馆见' }],
+    pattern: { zh: '我们 + 明天下午四点 + 在学校咖啡馆 + 见', py: 'wǒmen + míngtiān xiàwǔ sì diǎn + zài xuéxiào kāfēiguǎn + jiàn', en: 'subject + time + place + action', audioText: '我们明天下午四点在学校咖啡馆见。' },
+    example: { zh: '我们明天下午四点在学校咖啡馆见。', py: 'Wǒmen míngtiān xiàwǔ sì diǎn zài xuéxiào kāfēiguǎn jiàn.', en: 'We’ll meet at the campus café at 4 tomorrow afternoon.', audioText: '我们明天下午四点在学校咖啡馆见。' },
+  },
+  'chapter2:plan-recap': {
+    terms: [
+      { zh: '明天下午四点', py: 'míngtiān xiàwǔ sì diǎn', en: '4 tomorrow afternoon', audioText: '明天下午四点' },
+      { zh: '明天见', py: 'míngtiān jiàn', en: 'see you tomorrow', audioText: '明天见' },
+    ],
+    example: { zh: '好的，没问题。明天见！', py: 'Hǎo de, méi wèntí. Míngtiān jiàn!', en: 'Okay, no problem. See you tomorrow!', audioText: '好的，没问题。明天见！' },
+  },
   'chapter2:yaoburan': {
-    terms: [{ zh: '要不然', py: 'yàoburán', en: 'otherwise; how about this instead', audioText: '要不然' }],
-    example: { zh: '要不然我们改时间吧？', py: 'Yàoburán wǒmen gǎi shíjiān ba?', en: 'Otherwise, shall we change the time?', audioText: '要不然我们改时间吧？' },
+    terms: [{ zh: '要不然', py: 'yàoburán', en: 'otherwise / or else / how about ... instead?', audioText: '要不然' }],
+    example: { zh: '要不然我们改时间吧？', py: 'Yàoburán wǒmen gǎi shíjiān ba?', en: 'How about we change the time instead?', audioText: '要不然我们改时间吧？' },
   },
   'chapter2:buhaoyisi': {
     terms: [
@@ -4464,7 +5371,57 @@ const CHAPTER_SUPPORT_CONFIG = Object.freeze({
     reactiveAvatar: true,
     alignedLanguageClauses: true,
   }),
-  chapter2: Object.freeze({}),
+  chapter2: Object.freeze({
+    teacherNoteSupport: Object.freeze({
+      enabled: true,
+      decisionSupport: CHAPTER2_SUPPORT_MAP,
+      progressiveExamples: true,
+    }),
+    betterVersionSupport: true,
+    endingLanguageSupport: Object.freeze({
+      finalDecision: 6,
+      endings: CHAPTER2_ENDINGS,
+      thresholds: Object.freeze({ strongComfort: 70, strongNaturalness: 65, mixedComfort: 40, mixedNaturalness: 38 }),
+      useIncorrectGuard: false,
+    }),
+    progressiveOptionMeaning: true,
+    memoryMoments: Object.freeze({
+      targets: CHAPTER2_MEMORY_TARGETS,
+      byDecision: CHAPTER2_RETRIEVAL_BY_DECISION,
+    }),
+    sayBeforeReveal: Object.freeze({
+      decision: 6,
+      byBranch: Object.freeze({
+        'smooth-plan-close': Object.freeze({
+          targetId: 'smooth-plan-close',
+          prompt: 'The new time and place are confirmed. Close the conversation naturally.',
+        }),
+        'confirmed-plan-close': Object.freeze({
+          targetId: 'confirmed-plan-close',
+          prompt: 'Your classmate asks whether the new plan is correct. Confirm the new time.',
+        }),
+        'clarification-plan-close': Object.freeze({
+          targetId: 'clarification-plan-close',
+          prompt: 'Your classmate is still unsure. Clearly confirm both the time and place.',
+        }),
+      }),
+    }),
+    memoryReplay: Object.freeze({
+      targets: CHAPTER2_MEMORY_TARGETS,
+      moments: CHAPTER2_MEMORY_REPLAY_MOMENTS,
+    }),
+    stageSupport: Object.freeze({
+      decisionSupport: CHAPTER2_SUPPORT_MAP,
+      transitions: CHAPTER2_STAGE_TRANSITIONS,
+    }),
+    branchingSupport: Object.freeze({
+      mode: 'chapter2-plan-reschedule',
+      nodes: CHAPTER2_BRANCH_NODES,
+      finalThresholds: Object.freeze({ strongComfort: 65, strongNaturalness: 65, mixedComfort: 40, mixedNaturalness: 40 }),
+    }),
+    reactiveAvatar: true,
+    alignedLanguageClauses: true,
+  }),
   chapter3: Object.freeze({}),
   chapter4: Object.freeze({}),
   chapter5: Object.freeze({}),
@@ -4628,6 +5585,9 @@ function validateBetterVersionTranslations() {
   Object.entries(CHAPTER1_BRANCH_NODES).forEach(([decisionKey, branches]) => {
     Object.entries(branches).forEach(([branchKey, branch]) => inspect(branch.options, `Chapter 1, ${decisionKey}/${branchKey}`));
   });
+  Object.entries(CHAPTER2_BRANCH_NODES).forEach(([decisionKey, branches]) => {
+    Object.entries(branches).forEach(([branchKey, branch]) => inspect(branch.options, `Chapter 2, ${decisionKey}/${branchKey}`));
+  });
 
   missing.forEach((entry) => console.warn(`[Better version] Missing authored pinyin or English: ${entry}`));
 }
@@ -4719,6 +5679,96 @@ function validateChapter1ContentSupport() {
 
   warnings.forEach((warning) => console.warn(`[Chapter 1 support] ${warning}`));
   if (warnings.length === 0) console.info('[Chapter 1 support] 0 validation errors.');
+}
+
+function validateChapter2ContentSupport() {
+  if (!import.meta.env.DEV) return;
+
+  const warnings = [];
+  const chapter2 = chapters.find((chapter) => chapter.id === 'chapter2');
+  const inspectOptions = (options, context) => {
+    if (!Array.isArray(options) || options.length !== 4) {
+      warnings.push(`${context} must have four answer options.`);
+      return;
+    }
+    options.forEach((option) => {
+      const missing = ['zh', 'py', 'en', 'rating', 'score', 'relationship']
+        .find((field) => option?.[field] === undefined || option?.[field] === null || option?.[field] === '');
+      if (missing) warnings.push(`${context} option ${option?.id || '?'} is missing ${missing}.`);
+      if (option?.rating !== 'Natural') {
+        const missingCorrection = ['correction', 'correctionPy', 'correctionEn', 'correctionAudioText']
+          .find((field) => !option?.[field]);
+        if (missingCorrection) {
+          warnings.push(`${context} option ${option?.id || '?'} is missing ${missingCorrection}.`);
+        }
+      }
+    });
+  };
+
+  if (chapter2?.nodes?.length !== 6 || chapter2.nodes.some((node, index) => node.id !== index + 1)) {
+    warnings.push('Chapter 2 must have exactly six reachable decisions with IDs 1–6.');
+  }
+  if (CHAPTER2_CORE_LANGUAGE.length !== 11) {
+    warnings.push(`Core-language inventory has ${CHAPTER2_CORE_LANGUAGE.length} items; expected 11.`);
+  }
+  Object.entries(CHAPTER2_SUPPORT_MAP).forEach(([decisionId, support]) => {
+    if (support.primaryNoteIds.length > 1) {
+      warnings.push(`Decision ${decisionId} has more than one primary Teacher note.`);
+    }
+  });
+
+  chapter2?.nodes.forEach((node) => inspectOptions(node.options, `Decision ${node.id}`));
+  ['decision2', 'decision3', 'decision4', 'decision5', 'decision6'].forEach((decisionKey) => {
+    const branches = CHAPTER2_BRANCH_NODES[decisionKey];
+    ['strong', 'mixed', 'weak'].forEach((tier) => {
+      const branch = branches?.[tier];
+      if (!branch) {
+        warnings.push(`${decisionKey}/${tier} is missing.`);
+        return;
+      }
+      const missingNpc = ['npcLineZh', 'npcLinePy', 'npcLineEn'].find((field) => !branch[field]);
+      if (missingNpc) warnings.push(`${decisionKey}/${tier} is missing ${missingNpc}.`);
+      if (branch.options) inspectOptions(branch.options, `${decisionKey}/${tier}`);
+    });
+  });
+
+  CHAPTER2_MEMORY_MOMENTS.forEach((moment) => {
+    const normalized = normalizeMemoryMoment(moment);
+    const target = findCompleteMemoryTarget(CHAPTER2_MEMORY_TARGETS, moment.targetId);
+    const missing = ['contextZh', 'contextPy', 'contextEn', 'contextAudioText', 'taskPrompt', 'patternCueZh', 'patternCuePy', 'patternCueEn', 'firstClue']
+      .find((field) => !normalized?.[field]);
+    if (missing || !target) {
+      warnings.push(`Memory Moment ${moment.id} lacks complete context or target language.`);
+    }
+  });
+
+  CHAPTER2_MEMORY_REPLAY_MOMENTS.forEach((moment) => {
+    const normalized = normalizeMemoryMoment(moment);
+    const target = findCompleteMemoryTarget(CHAPTER2_MEMORY_TARGETS, moment.targetId);
+    const missing = ['contextZh', 'contextPy', 'contextEn', 'contextAudioText', 'taskPrompt', 'patternCueZh', 'patternCuePy', 'patternCueEn', 'firstClue']
+      .find((field) => !normalized?.[field]);
+    if (missing || !target) {
+      warnings.push(`Replay moment ${moment.id} lacks complete context or target language.`);
+    }
+  });
+
+  const chapter2SaySupport = CHAPTER_SUPPORT_CONFIG.chapter2.sayBeforeReveal;
+  Object.entries(chapter2SaySupport.byBranch).forEach(([branchKey, config]) => {
+    if (!config.prompt || !findCompleteMemoryTarget(CHAPTER2_MEMORY_TARGETS, config.targetId)) {
+      warnings.push(`Say-before-reveal branch ${branchKey} lacks a complete prompt or model reply.`);
+    }
+  });
+  Object.values(CHAPTER2_ENDINGS).forEach((ending) => {
+    if (!hasCompleteLanguageLayers(ending) || !ending.audioText) {
+      warnings.push(`${ending.label || 'Ending'} lacks Chinese, pinyin, English, or audio text.`);
+    }
+  });
+  if (getChapter2RatingTier(undefined) !== null) {
+    warnings.push('A missing branch prerequisite is silently classified instead of remaining unresolved.');
+  }
+
+  warnings.forEach((warning) => console.warn(`[Chapter 2 support] ${warning}`));
+  if (warnings.length === 0) console.info('[Chapter 2 support] 0 validation errors.');
 }
 
 function validateChapterMemorySupport() {
@@ -4957,11 +6007,15 @@ chapters.forEach((chapter) => chapter.nodes.forEach((node) => applyBetterVersion
 Object.values(CHAPTER1_BRANCH_NODES).forEach((branches) => {
   Object.values(branches).forEach((branch) => applyBetterVersionTranslations(branch.options));
 });
+Object.values(CHAPTER2_BRANCH_NODES).forEach((branches) => {
+  Object.values(branches).forEach((branch) => applyBetterVersionTranslations(branch.options));
+});
 Object.values(CHAPTER6_BRANCH_NODES).forEach((branches) => {
   Object.values(branches).forEach((branch) => applyBetterVersionTranslations(branch.options));
 });
 validateBetterVersionTranslations();
 validateChapter1ContentSupport();
+validateChapter2ContentSupport();
 validateChapter6ContentSupport();
 validateChapterMemorySupport();
 validateStoryHighlightMaps();
@@ -5161,7 +6215,7 @@ function resolveBetterVersion({ selectedOption, currentNode, currentNodeAudioPre
       sourceOption?.en,
       legacyDetails.en
     ),
-    audioText: zh,
+    audioText: firstAvailableText(selectedOption?.correctionAudioText, zh),
     audioId: firstAvailableText(
       selectedOption?.correctionAudioId,
       selectedOption?.betterVersionAudioId,
@@ -5921,6 +6975,26 @@ export default function ChapterUIPrototype() {
       }
       return null;
     }
+    if (branchingSupport.mode === 'chapter2-plan-reschedule') {
+      if (safeCurrentNodeIndex >= 1 && safeCurrentNodeIndex <= 4) {
+        const rating = sceneRun[safeCurrentNodeIndex - 1]?.rating;
+        const tier = getChapter2RatingTier(rating);
+        if (!tier) return null;
+        return branchNodes[`decision${safeCurrentNodeIndex + 1}`]?.[tier] || null;
+      }
+      if (safeCurrentNodeIndex === 5) {
+        const thresholds = branchingSupport.finalThresholds;
+        const tier = sceneMetricsBeforeCurrent.socialComfort >= thresholds.strongComfort
+          && sceneMetricsBeforeCurrent.naturalness >= thresholds.strongNaturalness
+          ? 'strong'
+          : sceneMetricsBeforeCurrent.socialComfort >= thresholds.mixedComfort
+            && sceneMetricsBeforeCurrent.naturalness >= thresholds.mixedNaturalness
+          ? 'mixed'
+          : 'weak';
+        return branchNodes.decision6?.[tier] || null;
+      }
+      return null;
+    }
     if (safeCurrentNodeIndex === 3) {
       const tier = sceneMetricsBeforeCurrent.naturalness >= 65
         ? 'high'
@@ -6469,6 +7543,22 @@ export default function ChapterUIPrototype() {
   }, [committedOptionId, safeCurrentChapterIndex, safeCurrentNodeIndex]);
 
   useEffect(() => {
+    if (!import.meta.env.DEV || currentChapter.id !== 'chapter2' || !hasUnsubmittedDraft) return;
+    const storedOptionId = nodeSelections[currentNodeKey] || null;
+    const committedSceneOptionId = committedChoice?.optionId || null;
+    if (storedOptionId !== committedSceneOptionId) {
+      console.warn(`[Chapter 2 support] Decision ${baseCurrentNode.id} draft selection changed submitted progress before Submit.`);
+    }
+  }, [
+    baseCurrentNode.id,
+    committedChoice?.optionId,
+    currentChapter.id,
+    currentNodeKey,
+    hasUnsubmittedDraft,
+    nodeSelections,
+  ]);
+
+  useEffect(() => {
     if (!showFeedback) return undefined;
 
     const closeOnEscape = (event) => {
@@ -6513,10 +7603,10 @@ export default function ChapterUIPrototype() {
   const switchChapter = (index) => {
     const nextChapterIndex = clampArrayIndex(index, chapters.length);
     const nextChapter = chapters[nextChapterIndex];
-    const firstIncompleteChapter1Node = nextChapter.id === 'chapter1'
+    const firstIncompleteExpandedNode = ['chapter1', 'chapter2'].includes(nextChapter.id)
       ? nextChapter.nodes.findIndex((_, nodeIndex) => !nodeSelections[makeNodeKey(nextChapterIndex, nodeIndex)])
       : -1;
-    const nextNodeIndex = firstIncompleteChapter1Node >= 0 ? firstIncompleteChapter1Node : 0;
+    const nextNodeIndex = firstIncompleteExpandedNode >= 0 ? firstIncompleteExpandedNode : 0;
     setSceneRun(restoreSceneRunFromSelections(nextChapter, nextChapterIndex, nodeSelections));
     setRevealedOptionMeanings({});
     setOptionAssistanceByDecision({});
@@ -6602,7 +7692,8 @@ export default function ChapterUIPrototype() {
       timestamp: Date.now(),
     };
     const invalidatedMissions = new Set(
-      currentChapter.nodes.slice(safeCurrentNodeIndex).map((node) => node.mission)
+      currentChapter.nodes.slice(safeCurrentNodeIndex)
+        .flatMap((node) => [node.mission, ...(node.legacyMissions || [])])
     );
     setPracticeLog((prev) => [
       ...prev.filter((item) => item.chapter !== logItem.chapter || !invalidatedMissions.has(item.mission)),
